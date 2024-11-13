@@ -12,6 +12,7 @@ RUN npm install -g pm2
 
 # Copy the rest of the app and build it
 COPY . .
+COPY ../playground.env ./.env
 RUN npm run build
 
 CMD ["pm2-runtime", "start", "./build/index.js"]
