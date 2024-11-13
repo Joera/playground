@@ -115,6 +115,8 @@ export const displayAddress = (chain: string,address: string) => {
     return chain + ":" + address.substring(0, 6) + "..." + address.substring(38, 42);
 }
 
+
+
 export const displaySafeAddress = (chain: string,address: string) => {
     return `<a href="https://app.safe.global/apps?safe=${chain}:${address}" target="_blank">${displayAddress(chain, address)}</a>`
 }

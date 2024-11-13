@@ -24,9 +24,10 @@ export const addSafe = async () : Promise<void> => {
         if (safe_addresses) {
             safe_addresses.update((addresses) => {
                 if (!addresses.includes(srv.safe_address)) {
-                    addresses.push(srv.safe_address);
-                    return addresses;
+                    addresses = [...addresses, srv.safe_address];
                 }
+                return addresses;
+
             });
         }
     }
@@ -42,9 +43,9 @@ export const addSafeAddress = async (address: string) : Promise<void> => {
     if (safe_addresses) {
         safe_addresses.update((addresses) => {
             if (!addresses.includes(address)) {
-                addresses.push(address);
-                return addresses;
+                addresses = [...addresses, address]; 
             }
+            return addresses;
         });
     }
 }

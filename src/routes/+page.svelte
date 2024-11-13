@@ -17,7 +17,7 @@
         justify-content: flex-start;
         align-items: center;
         width: calc(100vw - 1rem);
-        min-height: calc(100vh - 6rem);
+        min-height: calc(100vh - 16rem);
         overflow: auto;
         margin: 0 .5rem;
     }
@@ -25,14 +25,17 @@
 
 </style>
 
-{#if $safe_store && Object.keys($safe_store).length > 0}
+
     <section id="safes">
-        {#each safeEntries as [safe_address, safeSrv]}        
-            <SafeOverview {safe_address} {safeSrv} />
-        {/each}
+
+        {#if $safe_store && Object.keys($safe_store).length > 0}
+            {#each safeEntries as [safe_address, safeSrv]}        
+                <SafeOverview {safe_address} {safeSrv} />
+            {/each}
+        {/if}
         <article class="safe_container">
             <button on:click={handleAddSafe}>+</button>
         </article>
     </section>
   
-{/if}
+

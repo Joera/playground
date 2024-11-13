@@ -12,6 +12,8 @@
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
+    const profile: any = false;
+
     const handleInvite = async () => {
         
         goto('/avatar/scan');
@@ -55,8 +57,14 @@
 
         if (safesWithAvatars.length == 0) {
 
+          
+            if(safe_addresses != undefined) {
+                console.log("hello " + $safe_addresses[0]);
+                owner_address = $safe_addresses[0];
+                srv = $safe_store[$safe_addresses[0]]; 
+            }
             // new 
-            console.log(1);
+            
 
         } else {
 
@@ -83,19 +91,48 @@
         flex-direction: column;
         justify-content: space-around;
         align-items: center;
+
+        div {
+
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        svg > rect {
+            fill: transparent;
+        }
     }
+
+
 </style>
 
 
 
 <article>
 
-    <h1>Avatar</h1>
-    {#if owner_address != ""}
-        <QRCode data="{owner_address}" />
+    <h2>circles avatar</h2>
+
+    {#if profile}
+
+        <label>Name</label>
+        <div>{profile.name }</div>
+
+        <label>description</label>
+        <div>{profile.desription }</div>
+
     {/if}
 
+    {#if owner_address != ""}
+        <p>Find a human to scan this ... </p>
+        <QRCode data="{owner_address}" backgroundColor="transparent"  />
+    {/if}
 
-    <button on:click="{handleInvite}">invite</button>
+    <div>
+        <p>Invite newbies</p>
+        <button on:click="{handleInvite}">scanner</button>
+    </div>
 
 </article>

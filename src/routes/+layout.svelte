@@ -1,6 +1,8 @@
 <script>
 
 	import Entry from '$lib/components/Entry.svelte';
+    import Nav from '$lib/components/Nav.svelte';
+    import Signer from '$lib/components/Signer.svelte';
     import { setContext } from 'svelte';
 	export let data;
 
@@ -8,23 +10,23 @@
 
 <style global lang="scss">
 	@use '../global' as *;
+
+	aside {
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		z-index: 1000;
+	}
  </style>
 
 <svelte:head>
     <link rel="stylesheet" type="text/css" href="https://cloud.typography.com/7060374/6692032/css/fonts.css" />
 </svelte:head>
 
-<aside>
-	<nav class="container">
-		<a href="/">Home</a>
-		<a href="/signer">Signer</a>
-		<a href="/avatar">Avatar</a>
-		<a href="/commons">Commons</a>
-		<a href="/governance">Governance</a>
-	</nav>
-</aside>
+
 
 <main>
+	<h1>Playground</h1>
 	
 	<Entry {data} />
 
@@ -32,4 +34,10 @@
 		<slot />
 	</section>
 </main>
+
+<aside>
+	<Signer />	
+	<Nav />
+</aside>
+
 

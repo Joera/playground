@@ -45,6 +45,56 @@
 
 </script>
 
+<article>
+    <div class="safe_container">
+        <label>Safe: <span>{$version}</span></label>
+
+        <div class="address">
+            <span>{ @html displaySafeAddress("gno", safe_address)}</span>
+        </div>
+
+        <div class="tokens">
+            {#each $tokens.entries() as [address,token]}
+                <div class="token">
+                    <span>{token.symbol}</span>
+                    <span>{roundBalance(token.balance)}</span>
+                </div>
+            {/each}
+            {#each $circles.entries() as [id,balance]}
+                <div class="token">
+                    <span>crc</span>
+                    <span>{roundBalance(balance)}</span>
+                </div>
+            {/each}
+        </div>
+        {#if $deployed}
+            {#if !$signers.includes($signer_address)}
+                <div>read only</div>
+            {/if}
+        {:else}
+            <div>not yet deployed</div>
+        {/if}
+        
+        <!-- <div class="signers">
+             {#each $signers as signer}
+                <div>
+                {displayAddress("gno",signer)}
+                </div>
+            {/each}
+        </div> -->
+        
+    </div>
+    <div class="actions">
+       
+        {#if $version == "1.3.0"} 
+            <button on:click={handleUpgrade}>upgrade</button>
+        {/if}
+        {#if !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
+            <button on:click={handleEnableModule}>enable AA</button>
+        {/if}
+    </div>
+</article>
+
 <style>
     article {
             display: flex;
@@ -101,56 +151,3 @@
         }      
 
 </style>
-
-<article>
-    <div class="safe_container">
-        <label>Safe: <span>{$version}</span></label>
-
-        <div class="address">
-            <span>{ @html displaySafeAddress("gno", safe_address)}</span>
-            {#if $deployed}
-                <span>v</span>
-            {:else}
-                <span>x</span>
-            {/if}
-        </div>
-
-        <div class="tokens">
-            {#each $tokens.entries() as [address,token]}
-                <div class="token">
-                    <span>{token.symbol}</span>
-                    <span>{roundBalance(token.balance)}</span>
-                </div>
-            {/each}
-            {#each $circles.entries() as [id,balance]}
-                <div class="token">
-                    <span>crc</span>
-                    <span>{roundBalance(balance)}</span>
-                </div>
-            {/each}
-        </div>
-        {#if !$signers.includes($signer_address)}
-            <div>read only</div>
-        {/if}
-        <!-- <div class="signers">
-             {#each $signers as signer}
-                <div>
-                {displayAddress("gno",signer)}
-                </div>
-            {/each}
-        </div> -->
-        
-    </div>
-    <div class="actions">
-     
-        <!-- <button on:click={handleAccessRequest}>request access</button> -->
-
-       
-        {#if $version == "1.3.0"} 
-            <button on:click={handleUpgrade}>upgrade</button>
-        {/if}
-        {#if !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
-            <button on:click={handleEnableModule}>enable AA</button>
-        {/if}
-    </div>
-</article>

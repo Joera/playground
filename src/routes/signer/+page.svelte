@@ -2,16 +2,26 @@
 
     import { displayAddress } from '$lib/eth.factory.js';
     import { Wallet } from 'ethers';
+    import { signer_key } from '$lib/key.store.js';
     
 
-    export let data;
-    const { keyExists } = data; 
+    // export let data;
+    // const { keyExists } = data; 
+    // console.log(1);
+    // let signer_address = "";
+    // if (typeof keyExists == "string") {
+    //     console.log(2);
+    //     const w = new Wallet(keyExists);
+    //     signer_address = w.address;
+    //     console.log(3);
+    // } 
 
-    let signer_address = "";
-    if (typeof keyExists == "string") {
-        const w = new Wallet(keyExists);
-        signer_address = w.address;
-    } 
+    function addressFromKey(privateKey: string) {
+        const wallet = new Wallet(privateKey);
+        return wallet.address;
+    }
+
+     $: key =  signer_key;
 
 
 </script>
@@ -54,20 +64,20 @@
 
 <article>
 
-        <label>signers</label>
+        <label>local signer</label>
 
         <div class="signer">
            
             <div class="option">
-                <label>local</label>
+                <!-- <label>local</label> -->
                 <div class="address">
-                    {signer_address}
+                    {displayAddress("gno",addressFromKey($key))}
                 </div>
             </div>
 
-            <div class="option">
+            <!-- <div class="option">
                 <button>add remote</button>
-            </div>
+            </div> -->
 
         </div>
 

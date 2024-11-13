@@ -1,4 +1,6 @@
 import type {CirclesConfig} from "@circles-sdk/sdk";
+import { safe_store } from "./safe.store";
+import type { SafeService } from "./safe.service";
 
 
 export const GnosisChainConfig: CirclesConfig = {
@@ -12,6 +14,24 @@ export const GnosisChainConfig: CirclesConfig = {
 };
 
 
+// export const hasSafeWithAvatar = async (address: string) => {
+
+//     let safesWithAvatars: string[] = [];
+    
+//     console.log("len: " + Object.keys(safe_store).length);
+//         for (const safe of Object.keys(safe_store)) {
+//             let b = await new Promise(resolve => {
+//                 safe_store[safe].subscribe(async (safeService: SafeService) => {
+//                     const hasAvatar = await safeService.hasAvatar();
+//                     resolve(hasAvatar);
+//                 });
+//             });
+//             console.log(b)
+//             if (b) {
+//                 safesWithAvatars.push(safe);
+//             }
+//         }
+// }
 
 // export const acceptInvite =  async (inviterAddress: string) => {
 

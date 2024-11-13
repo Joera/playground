@@ -39,7 +39,7 @@ export interface ISafeService {
     getBalances: () => Promise<void>;
     getSigners: () => Promise<void>;
     getVersion(safe_address: string) : Promise<void>;
-    isDeployed(safe_address: string) : Promise<void>;
+    isDeployed(safe_address: string) : Promise<boolean>;
     requestAccess() : Promise<void>;
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
     genericTx(address: string, abi: string, method: string, args: string[], includesDeploy: boolean) : Promise<string>;
@@ -85,8 +85,6 @@ export class SafeService implements ISafeService {
             await instance.new();
         }
 
-        
-
         return instance;
     }
 
@@ -97,28 +95,33 @@ export class SafeService implements ISafeService {
         let signer = new ethers.Wallet(signer_key);
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));
-      
     }
-
    
     async setup () {
 
-        await this.getVersion();
-        await this.getSigners();
-        await this.isDeployed();
-        await this.getCircles();
-        await this.getModules();
-        this.getBalances();
+        const d = await this.isDeployed();
 
-        const hasEIP4337Module = (await fromStore(this.modules)).includes(eip4337ModuleAddress);
+        if (d) {
+            await this.getVersion();
+            await this.getSigners();
+            
+            await this.getCircles();
+            await this.getModules();
+            this.getBalances();
 
-        // version without paymaster
-        if (await fromStore(this.version) == "1.3.0" || !hasEIP4337Module) {
-            console.log("harry does not pay")
-            await this.initSafe();
-        }
-        // version with paymaster
-        if (await fromStore(this.version) == "1.4.1") {
+            const hasEIP4337Module = (await fromStore(this.modules)).includes(eip4337ModuleAddress);
+
+            // version without paymaster
+            if (await fromStore(this.version) == "1.3.0" || !hasEIP4337Module) {
+                console.log("harry does not pay")
+                await this.initSafe();
+            }
+            // version with paymaster
+            if (await fromStore(this.version) == "1.4.1") {
+                await this.initSafeWithRelay();
+            }
+
+        } else {
             await this.initSafeWithRelay();
         }
     }
@@ -190,7 +193,7 @@ export class SafeService implements ISafeService {
         const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v1_' + this.signer_address)));
         let options: any = {};
         
-        if (isValidEthereumAddress(this.safe_address) && this.deployed) {
+        if (isValidEthereumAddress(this.safe_address) && await fromStore(this.deployed)) {
             console.log("init with existing safe");
             options = {
                 safeAddress: this.safe_address
@@ -289,11 +292,14 @@ export class SafeService implements ISafeService {
         return await contract[method](...args);
     }
 
-    async isDeployed() : Promise<void> {
+    async isDeployed() : Promise<boolean> {
 
         const code = await this.provider.getCode(this.safe_address);
+        console.log(code)
         const b = (code !== '0x') ? true : false;
         this.deployed.set(b);
+
+        return b;
     }
 
     async requestAccess() {
