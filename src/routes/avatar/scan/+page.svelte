@@ -8,6 +8,8 @@
     const newby = writable({});
   
     function onQRScan(event: CustomEvent) {
+
+      alert(JSON.stringify(event));
       
       newby.update((n) => {
         n = event.detail;
@@ -20,10 +22,9 @@
 
   <div>{JSON.stringify($newby)}</div>
 
-
   {#if Object.keys($newby).length == 0}
   <div class="barcode-scanner">
-    <BarcodeScanner />
+    <BarcodeScanner type="qr" on:scan={event => alert(event.detail)} on:error={event => alert(event.detail)} />
   </div>
   {/if}
 
