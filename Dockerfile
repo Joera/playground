@@ -8,7 +8,7 @@ WORKDIR /app
 # Copy package.json and package-lock.json to install dependencies
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
-RUN npm install -g nodemon
+RUN npm install -g pm2
 
 # Copy the rest of the app and build it
 COPY . .
