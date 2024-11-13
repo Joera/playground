@@ -127,7 +127,7 @@
 
     {#if owner_address != ""}
         <p>Find a human to scan this ... </p>
-        <QRCode data="{owner_address}" backgroundColor="transparent"  />
+        <QRCode data="{owner_address}"   /> <!-- backgroundColor="transparent" -->
     {/if}
 
     <div>
