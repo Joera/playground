@@ -1,0 +1,40 @@
+@use './colours.scss' as *;
+
+:global(button) {
+    all: unset; /* Resets all inherited properties */
+    display: inline-block; /* Make sure the button is displayed as an inline block */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    border: none; /* Remove borders */
+    background: none; /* Remove background */
+    font: inherit; /* Use the same font as the surrounding text */
+    text-align: center; /* Center text */
+    color: inherit; /* Inherit text color */
+    cursor: pointer; /* Ensure it shows the pointer cursor */
+    line-height: normal; /* Fix for different default line heights */
+    font-family: "Gotham A", "Gotham B";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    border: 1px solid #000;
+    padding: .75rem .75rem;
+
+    &:hover {
+      background: black;
+      color: $lime;
+    }
+    &:focus {
+      outline: none; /* Remove default focus outline */
+    }
+    &::-moz-focus-inner {
+      border: 0; /* Remove inner focus border in Firefox */
+    }
+}
+
+.button {
+    padding: .5rem 1rem;
+}
+  

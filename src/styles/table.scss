@@ -1,0 +1,47 @@
+table {
+    border-collapse: collapse; /* Remove default cell spacing */
+    border-spacing: 0; /* Ensure no extra space between cells */
+    width: 100%; /* Optional, make the table take up the full width */
+  }
+  
+  th, td {
+    padding: 0; /* Remove padding inside cells */
+    border: none; /* Remove cell borders */
+    text-align: left; /* Default text alignment */
+    font-weight: normal; /* Reset bold text in <th> */
+    vertical-align: top; /* Align content to the top */
+  }
+  
+  th {
+    background-color: transparent; /* Remove default background color from <th> */
+  }
+  
+  caption {
+    margin: 0; /* Reset default margin for table captions */
+    padding: 0;
+  }
+
+table {
+
+    margin: 3rem 0;
+    @include mono;
+    font-size: 1.15rem;
+
+}
+
+th {
+    border-top: 1px solid black;
+}
+
+
+
+td, th {
+    padding: .75rem 1.5rem; /* This replaces cellpadding */
+    border-right: 1px solid black; /* Optional, to add borders */
+    border-bottom: 1px solid black;
+
+    &:first-child {
+        border-left: 1px solid black;
+    }
+  }
+

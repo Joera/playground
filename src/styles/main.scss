@@ -1,0 +1,18 @@
+@use "./styleguide/typography.scss" as *;
+@use "./styleguide/colours.scss" as *;
+
+:global(body) {
+    
+    @include mono;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    background: $lime;
+    transition: opacity 1s;
+
+    p {
+      margin: 0 0 1.5rem 0;
+    }
+  }
+  
+
+ 
