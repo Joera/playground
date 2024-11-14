@@ -33,7 +33,6 @@
 
     const inviteHandler = async () => {
 
-      alert($avatar_store);
       const avatar = await $avatar_store.inviteHuman($newby_address);
       alert(avatar);
     }
@@ -41,9 +40,6 @@
 </script>
  
 <article>
-
-
-  
 
   {#if $newby_address == ""}
     <video bind:this={videoElement} autoplay></video>
@@ -57,22 +53,21 @@
 </article>
 
 <style>
-	.barcode-scanner {
-		width: 100%;
-		max-width: 384px;
-		aspect-ratio: 1;
-	}
 
   video {
     width: 100%;
     max-width: 600px;
   }
 
-  article {
+  article, article div {
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;  
+  }
+
+  button {
+    margin-top: 3rem;
   }
 </style>
