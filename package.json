@@ -38,6 +38,7 @@
 		"@safe-global/relay-kit": "^3.2.4",
 		"@safe-global/safe-core-sdk-types": "^5.1.0",
 		"@sveltejs/adapter-node": "^5.2.9",
+		"@zxing/library": "^0.21.3",
 		"bip32": "^5.0.0-rc.0",
 		"bip39": "^3.1.0",
 		"dotenv": "^16.4.5",
