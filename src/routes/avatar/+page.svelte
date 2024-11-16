@@ -20,6 +20,9 @@
     let profile : Writable<any> = writable(null);
     let owner_address: Writable<string> = writable("");
     let friend_address: Writable<string> = writable("");
+
+        
+
     
 
     const handleProfile = async () => {
@@ -78,6 +81,7 @@
     }
 
     onMount(async () => {
+
 
         await waitForSafeStoreToBePopulated();
         await waitForSubscriptions();

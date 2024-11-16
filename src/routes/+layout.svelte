@@ -6,6 +6,9 @@
     import { setContext } from 'svelte';
 	export let data;
 
+	const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+
 </script>
 
 <style global lang="scss">
@@ -21,7 +24,7 @@
 	section {
 		position: relative;
 
-		height: calc(100vh - 3rem - 2.6rem - 3rem - 3rem - 1rem);
+		height: calc((var(--vh, 1vh) * 100) - 3rem - 2.6rem - 3rem - 3rem - 1rem);
 
 		@media screen and (min-width: 860px) {
 			height: calc(100vh - 3rem - 4.8rem - 3rem - 3rem - 1rem);
