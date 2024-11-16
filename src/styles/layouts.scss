@@ -24,6 +24,14 @@ main {
     // padding-top: 6rem;
 }
 
+:global(.centered) {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .container {
 
     width: 100%;
@@ -61,6 +69,8 @@ nav.container {
         margin: 3rem 0 0 0;
     }
 }
+
+
 
 
 

@@ -34,9 +34,9 @@ export const load = async () => {
         }
 
         if (circles_addresses.length > 0) {
-            setAvatar(circles_addresses[0])
+            await setAvatar(circles_addresses[0])
         } else {
-            setAvatar(safe_array[0])
+            await setAvatar(safe_array[0])
         }
     } 
    

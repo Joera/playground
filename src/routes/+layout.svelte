@@ -17,6 +17,18 @@
 		bottom: 0;
 		z-index: 1000;
 	}
+
+	section {
+		position: relative;
+
+		height: calc(100vh - 3rem - 2.6rem - 3rem - 3rem - 1rem);
+
+		@media screen and (min-width: 860px) {
+			height: calc(100vh - 3rem - 4.8rem - 3rem - 3rem - 1rem);
+		}
+		
+	}
+
  </style>
 
 <svelte:head>
@@ -39,5 +51,7 @@
 	<Signer />	
 	<Nav />
 </aside>
+
+
 
 

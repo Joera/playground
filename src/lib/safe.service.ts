@@ -35,6 +35,7 @@ export interface ISafeService {
     circles: Writable<Map<string, any>>;
     modules: Writable<string[]>;
     hasAvatar: () => Promise<boolean>;
+
     upgrade: () => Promise<void>;
     getBalances: () => Promise<void>;
     getSigners: () => Promise<void>;
@@ -42,7 +43,7 @@ export interface ISafeService {
     isDeployed(safe_address: string) : Promise<boolean>;
     requestAccess() : Promise<void>;
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
-    genericTx(address: string, abi: string, method: string, args: string[], includesDeploy: boolean) : Promise<string>;
+    genericTx(address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string>;
 }
 
 console.log(import.meta.env);
@@ -54,6 +55,7 @@ const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;
 
 export class SafeService implements ISafeService {
 
+    avatar?: any;
     safe_address: string = "";
     signer_key: string = "";
     
@@ -149,6 +151,7 @@ export class SafeService implements ISafeService {
         }
     }
 
+    
     async initCirclesSDK() {
         
         const adapter = new PrivateKeyContractRunner(this.provider, this.signer_key);
@@ -190,7 +193,7 @@ export class SafeService implements ISafeService {
     async initSafeWithRelay () {
 
         const rpc = getRPC(CHAIN, alchemy_key);
-        const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v1_' + this.signer_address)));
+        const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v001_' + this.signer_address)));
         let options: any = {};
         
         if (isValidEthereumAddress(this.safe_address) && await fromStore(this.deployed)) {
@@ -222,7 +225,7 @@ export class SafeService implements ISafeService {
         return this.kit.protocolKit.getAddress();
     }
 
-    async genericTx (contract_address: string, abi: string, method: string, args: string[], includesDeploy: boolean) : Promise<string> {
+    async genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string> {
 
         return new Promise( async (resolve, reject) => {
     
@@ -270,12 +273,16 @@ export class SafeService implements ISafeService {
                 const userOperationPayload = await this.kit.getUserOperationByHash(
                     userOperationHash
                 );
+
+                console.log("receipt",userOperationReceipt);
+                console.log("payload",userOperationPayload);
         
-                console.log("txHash: " + userOperationPayload.transactionHash);
+                console.log("txHash",userOperationPayload);
+
+                const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
+                console.log(txs)
         
                 if (includesDeploy) {
-                    const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
-                    console.log(txs)
                     const tx = txs.find( (tx) => tx.contractAddress != "");
                     console.log(tx);
                     resolve(tx.contractAddress);

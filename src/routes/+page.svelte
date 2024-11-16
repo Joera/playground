@@ -15,11 +15,21 @@
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
-        align-items: center;
+        align-items: flex-start;
         width: calc(100vw - 1rem);
         min-height: calc(100vh - 16rem);
         overflow: auto;
         margin: 0 .5rem;
+
+        @media screen  and (min-width: 860px) {
+            justify-content: center;
+        }
+    }
+
+    button {
+        border: none;
+        font-size: 6rem;
+        font-weight: 400;
     }
 
 

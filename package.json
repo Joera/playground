@@ -19,6 +19,7 @@
 		"@types/dotenv": "^6.1.1",
 		"browserify-sign": "^4.2.3",
 		"crypto-browserify": "^3.12.1",
+		"multiformats": "^13.3.1",
 		"readable-stream": "^4.5.2",
 		"sass": "^1.80.5",
 		"svelte": "^5.0.0",

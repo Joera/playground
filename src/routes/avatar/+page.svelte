@@ -7,16 +7,45 @@
     import { on } from 'svelte/events';
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import ProfileDisplay from '$lib/components/ProfileDisplay.svelte';
+    import ProfileForm from '$lib/components/ProfileForm.svelte';
+    import ProfileScanner from '$lib/components/ProfileScanner.svelte';
+    import ProfileContacts from '$lib/components/ProfileContacts.svelte';
 
-    let owner_address = '';
+
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
-    const profile: any = false;
+    let state = writable("profile");
+    let profile : Writable<any> = writable(null);
+    let owner_address: Writable<string> = writable("");
+    let friend_address: Writable<string> = writable("");
+    
 
-    const handleInvite = async () => {
+    const handleProfile = async () => {
         
-        goto('/avatar/scan');
+        state.set('profile');
+    }
+
+    const handleEdit = async () => {
+        
+        state.set('edit');
+    }
+
+    const handleScanner = async () => {
+        
+        state.set('scanner');
+    }
+
+    const handleContacts = async () => {
+        
+        state.set('contacts');
+    }
+
+    const handleInvite = async (event: any) => {
+        console.log(event);
+        friend_address.set(event.detail);
+        state.set('edit');
     }
 
     async function waitForSubscriptions() {
@@ -53,43 +82,68 @@
         await waitForSafeStoreToBePopulated();
         await waitForSubscriptions();
 
-        console.log(safesWithAvatars);
-
         if (safesWithAvatars.length == 0) {
 
           
             if(safe_addresses != undefined) {
                 console.log("hello " + $safe_addresses[0]);
-                owner_address = $safe_addresses[0];
+                owner_address.set($safe_addresses[0]);
                 srv = $safe_store[$safe_addresses[0]]; 
             }
-            // new 
-            
 
         } else {
 
-            console.log(2);
             srv = $safe_store[safesWithAvatars[0]];
             if ($srv) {
-                owner_address = $srv.safe_address;
+                owner_address.set($srv.safe_address);
             }
         }
         
     })
 
+
+</script>
+
+<article>
+
+    <h2>circles avatar</h2>
+
+    {#if $state == 'profile'}
+
+        <ProfileDisplay profile={$profile} owner_address={$owner_address}></ProfileDisplay>
+
+    {:else if $state == 'edit'}
+
+        <ProfileForm profile={$profile} friend_address={$friend_address}></ProfileForm>
+
+    {:else if $state == 'scanner'}
+
+        <ProfileScanner></ProfileScanner>
+
+    {:else if $state == 'contacts'}
+
+        <ProfileContacts on:friend_address_event={handleInvite}></ProfileContacts>
+
+    {/if}
     
 
-// check if is attached to safe 
-// usable safes? 
-// select safe 
-</script>
+    <nav>
+        <button on:click="{handleProfile}">profile</button>
+        <button on:click="{handleEdit}">edit</button>
+        <button on:click="{handleScanner}">scanner</button>
+        <button on:click="{handleContacts}">contacts</button>
+    </nav>
+
+</article>
 
 <style>
     article {
+        position: relative;
         display: flex;
+        height: 100%;
         width: 100%;
         flex-direction: column;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
 
         div {
@@ -101,38 +155,12 @@
             align-items: center;
         }
 
-        svg > rect {
-            fill: transparent;
+        nav {
+            /* align-self: flex-end; */
+            /* margin: auto 0 0 0; */
         }
+        
     }
 
 
 </style>
-
-
-
-<article>
-
-    <h2>circles avatar</h2>
-
-    {#if profile}
-
-        <label>Name</label>
-        <div>{profile.name }</div>
-
-        <label>description</label>
-        <div>{profile.desription }</div>
-
-    {/if}
-
-    {#if owner_address != ""}
-        <p>Find a human to scan this ... </p>
-        <QRCode data="{owner_address}"   /> <!-- backgroundColor="transparent" -->
-    {/if}
-
-    <div>
-        <p>Invite newbies</p>
-        <button on:click="{handleInvite}">scanner</button>
-    </div>
-
-</article>

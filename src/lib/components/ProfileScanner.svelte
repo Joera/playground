@@ -2,7 +2,6 @@
     import { avatar_store } from '$lib/avatar.store';
     import { displayAddress } from '$lib/eth.factory';
 
-    // import { BarcodeScanner } from 'svelte-barcode-scanner';
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
