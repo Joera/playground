@@ -213,11 +213,11 @@ export class SafeService implements ISafeService {
         this.kit = await Safe4337Pack.init({
             provider: rpc,
             signer: this.signer_key,
-            bundlerUrl: `https://api.pimlico.io/v2/84532/rpc?apikey=${pimlico_key}`,
+            bundlerUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
             options: options,
             paymasterOptions: { 
                isSponsored: true,
-               paymasterUrl: `https://api.pimlico.io/v2/84532/rpc?apikey=${pimlico_key}`,
+               paymasterUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
             }
         }); 
 
