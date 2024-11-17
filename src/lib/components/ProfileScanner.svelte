@@ -37,6 +37,7 @@
     const inviteHandler = async () => {
 
       const sdk = Object.values(await avatar_store)[0];
+      console.log(sdk);
       spinner.set(true);
       const avatar = await sdk.inviteHuman($newby_address);
       dispatch('invite_success_event');
@@ -74,7 +75,7 @@
   video {
     width: 100%;
     max-width: 600px;
-    max-height: 100vw;
+    max-height: calc(100vw - 4rem);
   }
 
   article, article div {
