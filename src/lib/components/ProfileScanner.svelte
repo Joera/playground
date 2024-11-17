@@ -52,6 +52,9 @@
             safe_store.subscribe(async (store) => {
 
                 const safeService = (await store)[address];
+
+                console.log(hubv2Address);
+                console.log(newby_address);
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
