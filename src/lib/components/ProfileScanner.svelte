@@ -10,7 +10,7 @@
 
     let videoElement: any;
     let logMessage = '';
-    const newby_address = writable("xxx");
+    const newby_address = writable("");
     const spinner = writable(false);
     const dispatch = createEventDispatcher();
 
