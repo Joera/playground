@@ -38,10 +38,14 @@
 
       avatar_store.subscribe(async (store) => {
         
+        console.log(1);
         const sdk = Object.values(await store)[0];
+        console.log(2);
         console.log(sdk);
         spinner.set(true);
-        const avatar = await sdk.inviteHuman($newby_address);
+        const r = await sdk.inviteHuman($newby_address);
+        console.log(r);
+        console.log(3);
         dispatch('invite_success_event');
         spinner.set(false);
       })
