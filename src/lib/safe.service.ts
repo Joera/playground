@@ -124,7 +124,8 @@ export class SafeService implements ISafeService {
             }
 
         } else {
-            await this.initSafeWithRelay();
+            this.safe_address = await this.initSafeWithRelay();
+            console.log("predictedAddress",this.safe_address);
         }
     }
 
@@ -193,7 +194,7 @@ export class SafeService implements ISafeService {
     async initSafeWithRelay () {
 
         const rpc = getRPC(CHAIN, alchemy_key);
-        const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v001_' + this.signer_address)));
+        const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v002_' + this.signer_address)));
         let options: any = {};
         
         if (isValidEthereumAddress(this.safe_address) && await fromStore(this.deployed)) {
@@ -209,19 +210,22 @@ export class SafeService implements ISafeService {
                 saltNonce
             }
         }
+
+        console.log(options);
     
-        this.kit = await Safe4337Pack.init({
+        this.kit = await Safe4337Pack.init({    
             provider: rpc,
             signer: this.signer_key,
             bundlerUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
             options: options,
             paymasterOptions: { 
-               isSponsored: true,
-               paymasterUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
+               paymasterAddress: "0x7B3f21F0284b4dc08E01Fa7e16b9b47249985F88",
+               paymasterTokenAddress: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+            //    isSponsored: true,
+               // paymasterUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
             }
         }); 
 
-        // always predicted ????? 
         return this.kit.protocolKit.getAddress();
     }
 
@@ -241,56 +245,84 @@ export class SafeService implements ISafeService {
             const transactions = [transaction1];
 
             if (this.kit instanceof Safe4337Pack) {
-    
-                const safeOperation = await this.kit.createTransaction({ transactions });
-                const identifier = ethers.keccak256(ethers.toUtf8Bytes("plg_safe_tx" + this.signer_address));
-        
-                safeOperation.data.callData = ethers.concat([
-                    safeOperation?.data.callData as `0x{string}`,
-                    identifier
-                ]).toString()
-                    
-                const identifiedSafeOperation = await this.kit.getEstimateFee({
-                    safeOperation
-                });
+                const r = await this._4337tx(transactions, includesDeploy);
+                resolve(r);
 
-                const signedSafeOperation = await this.kit.signSafeOperation(identifiedSafeOperation)
-        
-                const userOperationHash = await this.kit.executeTransaction({
-                    executable: signedSafeOperation
-                })
-        
-                let userOperationReceipt = null
-        
-                while (!userOperationReceipt) {
-                    // Wait 2 seconds before checking the status again
-                    await new Promise((resolve) => setTimeout(resolve, 2000))
-                    userOperationReceipt = await this.kit.getUserOperationReceipt(
-                        userOperationHash
-                    )
-                }
-                
-                const userOperationPayload = await this.kit.getUserOperationByHash(
-                    userOperationHash
-                );
-
-                console.log("receipt",userOperationReceipt);
-                console.log("payload",userOperationPayload);
-        
-                console.log("txHash",userOperationPayload);
-
-                const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
-                console.log(txs)
-        
-                if (includesDeploy) {
-                    const tx = txs.find( (tx) => tx.contractAddress != "");
-                    console.log(tx);
-                    resolve(tx.contractAddress);
-                } else {
-                    resolve("finished");
-                }
-            }   
+            } else {        
+                const r = await this._tx(transactions, includesDeploy);
+                resolve("ok");
+            }  
         });
+    }
+
+    async _tx(transactions: any, includesDeploy: boolean) {
+
+        if (this.kit instanceof Safe) {
+
+            const safeTransaction = await this.kit.createTransaction({ transactions :[txData] });
+
+            try {
+                const txHash = await this.kit.executeTransaction(safeTransaction);
+                console.log('Transaction executed with hash:', txHash);
+            } catch (error) {
+                console.error('Transaction failed:', error);
+            }
+        }
+
+    }
+
+    async _4337tx(transactions: any, includesDeploy: boolean) { 
+
+        if (this.kit instanceof Safe4337Pack) {
+
+            const safeOperation = await this.kit.createTransaction({ transactions });
+            const identifier = ethers.keccak256(ethers.toUtf8Bytes("plg_safe_tx"));
+
+            safeOperation.data.callData = ethers.concat([
+                safeOperation?.data.callData as `0x{string}`,
+                identifier
+            ]).toString()
+                
+            const identifiedSafeOperation = await this.kit.getEstimateFee({
+                safeOperation
+            });
+
+            const signedSafeOperation = await this.kit.signSafeOperation(identifiedSafeOperation)
+
+            const userOperationHash = await this.kit.executeTransaction({
+                executable: signedSafeOperation
+            })
+            
+            let userOperationReceipt = null
+
+            while (!userOperationReceipt) {
+                // Wait 2 seconds before checking the status again
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+                userOperationReceipt = await this.kit.getUserOperationReceipt(
+                    userOperationHash
+                )
+            }
+                
+            const userOperationPayload = await this.kit.getUserOperationByHash(
+                userOperationHash
+            );
+
+            console.log("receipt",userOperationReceipt);
+            // console.log("payload",userOperationPayload);
+            console.log("txHash",userOperationPayload);
+
+            const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
+            console.log(txs)
+    
+            if (includesDeploy) {
+                const tx = txs.find( (tx) => tx.contractAddress != "");
+                console.log(tx);
+                return tx.contractAddress;
+            } else {
+                return "finished";
+            }
+        }
+
     }
 
     async genericRead(address: string, abi: string, method: string, args: string[]) : Promise<any> {
@@ -490,6 +522,27 @@ export class SafeService implements ISafeService {
                     console.error('Transaction failed:', error);
                 }
             }
+        }
+    }
+
+    async enableModule(moduleAddress: string) {
+
+        console.log("safe",this.safe_address);
+
+        const safeAbi = ["function enableModule(address module) external"];
+        const safeContract = new ethers.Contract(this.safe_address, safeAbi, this.signer);
+        const data = safeContract.interface.encodeFunctionData("enableModule", [moduleAddress]);
+
+        const txData = { 
+            to: this.safe_address,
+            data: data,
+            value: '0'  
+        };
+
+        if (this.kit instanceof Safe) {
+            this._tx([txData], false);
+        } else  {
+            this._4337tx([txData], false);
         }
     }
 

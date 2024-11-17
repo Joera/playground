@@ -3,6 +3,7 @@
     import { avatar_store, circles_sdk_store } from "$lib/avatar.store";
     import { GnosisChainConfig } from "$lib/circles.factory";
     import { cidToBytes32, ipfs_add } from "$lib/ipfs.factory";
+    import {cidV0ToUint8Array} from '@circles-sdk/utils';
     import { safe_store } from "$lib/safe.store";
     import type { Profile } from "@circles-sdk/profiles";
 
@@ -51,8 +52,10 @@
                 
                 safeService.subscribe(async (srv) => {
 
-                    const r = await srv.genericTx(hubv2Address, abi, "registerHuman", [friend_address, cidToBytes32(cid)], false);
-                    console.log(r);
+                  //  const r = await srv.enableModule("0xa581c4A4DB7175302464fF3C06380BC3270b4037");
+                    const _metadataDigest: Uint8Array = cidV0ToUint8Array(cid);
+                    const r = await srv.genericTx(hubv2Address, abi, "registerHuman", [friend_address, _metadataDigest], false);
+                    console.log(r);  
                 })
             })
 

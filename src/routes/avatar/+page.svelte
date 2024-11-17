@@ -88,9 +88,7 @@
 
         if (safesWithAvatars.length == 0) {
 
-          
             if(safe_addresses != undefined) {
-                console.log("hello " + $safe_addresses[0]);
                 owner_address.set($safe_addresses[0]);
                 srv = $safe_store[$safe_addresses[0]]; 
             }
