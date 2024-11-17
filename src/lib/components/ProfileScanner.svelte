@@ -5,10 +5,13 @@
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
+    import Spinner from './Spinner.svelte';
+    import { goto } from '$app/navigation';
 
     let videoElement: any;
     let logMessage = '';
     const newby_address = writable("");
+    const spinner = writable(false);
 
     let codeReader = new BrowserMultiFormatReader();
 
@@ -32,21 +35,33 @@
 
     const inviteHandler = async () => {
 
-      const avatar = await $avatar_store.inviteHuman($newby_address);
-      alert(avatar);
+      const sdk = Object.values(await avatar_store)[0];
+      spinner.set(true);
+      const avatar = await sdk.inviteHuman($newby_address);
+      spinner.set(false);
+      goto('/avatar/contacts')
     }
 
 </script>
  
 <article>
 
-  {#if $newby_address == ""}
-    <video bind:this={videoElement} autoplay></video>
+
+  {#if $spinner}
+
+    <Spinner></Spinner>
+
   {:else}
-    <div>
-      <h2>Will you invite ... </h2>
-      { displayAddress("gno", $newby_address)}</div>
-      <button on:click={inviteHandler}>yes!</button>
+
+    {#if $newby_address == ""}
+      <video bind:this={videoElement} autoplay></video>
+    {:else}
+      <div>
+        <h3>Will you invite ... </h3>
+        { displayAddress("gno", $newby_address)}</div>
+        <button on:click={inviteHandler}>yes!</button>
+    {/if}
+
   {/if}
 
 </article>
