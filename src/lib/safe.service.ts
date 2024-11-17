@@ -210,9 +210,7 @@ export class SafeService implements ISafeService {
                 saltNonce
             }
         }
-
-        console.log(options);
-    
+        
         this.kit = await Safe4337Pack.init({    
             provider: rpc,
             signer: this.signer_key,
@@ -259,7 +257,7 @@ export class SafeService implements ISafeService {
 
         if (this.kit instanceof Safe) {
 
-            const safeTransaction = await this.kit.createTransaction({ transactions :[txData] });
+            const safeTransaction = await this.kit.createTransaction(transactions);
 
             try {
                 const txHash = await this.kit.executeTransaction(safeTransaction);

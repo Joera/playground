@@ -40,8 +40,6 @@ export const load = async () => {
         }
     } 
    
-    
-
     return {
         safe_array,
         keyExists, 

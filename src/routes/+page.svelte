@@ -15,11 +15,12 @@
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
-        align-items: flex-start;
+        align-items: center;
         width: calc(100vw - 1rem);
-        min-height: calc(100vh - 16rem);
+        /* min-height: calc(100vh - 16rem); */
         overflow: auto;
         margin: 0 .5rem;
+        height: 100%;
 
         @media screen  and (min-width: 860px) {
             justify-content: center;

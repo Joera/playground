@@ -6,9 +6,14 @@
     import {cidV0ToUint8Array} from '@circles-sdk/utils';
     import { safe_store } from "$lib/safe.store";
     import type { Profile } from "@circles-sdk/profiles";
+    import { goto } from "$app/navigation";
+    import Spinner from "./Spinner.svelte";
+    import { writable } from "svelte/store";
 
     export let profile: any;
     export let friend_address: string;
+
+    const spinner = writable(false);
 
     const handleProfile = async (event: any) => {
 
@@ -16,6 +21,7 @@
         event.preventDefault(); 
         const data = new FormData(event.target);
         formData = Object.fromEntries(data.entries());
+        
 
         const newProfile: Profile = {
             name: formData.name,
@@ -40,8 +46,6 @@
             }
         ];
 
-        console.log('friend: ' +friend_address);
-
         avatar_store.subscribe(async (_astore) => {
            
             const address = Object.keys(await _astore)[0];
@@ -52,46 +56,41 @@
                 
                 safeService.subscribe(async (srv) => {
 
-                  //  const r = await srv.enableModule("0xa581c4A4DB7175302464fF3C06380BC3270b4037");
-                    const _metadataDigest: Uint8Array = cidV0ToUint8Array(cid);
+                    spinner.set(true);
+                    const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
                     const r = await srv.genericTx(hubv2Address, abi, "registerHuman", [friend_address, _metadataDigest], false);
                     console.log(r);  
+                    goto('/')
                 })
             })
-
-            // circles_sdk_store.subscribe(async (store) => {
-            //     console.log(address);
-
-            //     const sdk = (await store)[address];
-            //     console.log(sdk);
-            //     const r = await sdk.acceptInvitation(cid);
-            //     console.log(r)
-            // })  
-
         });
     }
 
 </script>
 
 
-<form id="profile" on:submit={handleProfile}>
+{#if $spinner} 
+    <Spinner></Spinner>
+{:else}
 
-    <label>
-        What is your name?
-        <input type="text" name="name" id="name" placeholder="Name">
-    </label>
-    <label>
-        What do you do?
-        <input type="text" name="description" id="name" placeholder="Description">
-    </label>
-    <label>
-        Image
-        <input type="text" name="image" id="name" placeholder="Image">
-    </label>
+    <form id="profile" on:submit={handleProfile}>
 
-    <button type="submit">submit</button>
-</form>
+        <label>
+            What is your name?
+            <input type="text" name="name" id="name" placeholder="Name">
+        </label>
+        <label>
+            What do you do?
+            <input type="text" name="description" id="name" placeholder="Description">
+        </label>
+        <label>
+            Image
+            <input type="text" name="image" id="name" placeholder="Image">
+        </label>
 
+        <button type="submit">submit</button>
+    </form>
+{/if}
 
 <style>
 

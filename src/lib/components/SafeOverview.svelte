@@ -102,6 +102,7 @@
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
+            margin: 1.5rem 0;
 
             > div  {
                 display: flex;
@@ -138,11 +139,13 @@
                 align-items: center;
             }  
 
-            .actions{
-                margin: 1.5rem 0;
+            .actions:not(:empty) {
+              /*  margin: 1.5rem 0; */
                 display: flex;
                 flex-direction: column;
                 align-items: center;
+
+
 
                 button {
                     margin: .75rem 0;

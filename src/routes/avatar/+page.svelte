@@ -11,6 +11,7 @@
     import ProfileForm from '$lib/components/ProfileForm.svelte';
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
+    import Spinner from '$lib/components/Spinner.svelte';
 
 
     let safesWithAvatars: string[] = [];
@@ -20,10 +21,6 @@
     let profile : Writable<any> = writable(null);
     let owner_address: Writable<string> = writable("");
     let friend_address: Writable<string> = writable("");
-
-        
-
-    
 
     const handleProfile = async () => {
         
@@ -125,6 +122,10 @@
     {:else if $state == 'contacts'}
 
         <ProfileContacts on:friend_address_event={handleInvite}></ProfileContacts>
+
+    {:else if $state == 'spinner'}
+
+        <Spinner></Spinner>
 
     {/if}
     
