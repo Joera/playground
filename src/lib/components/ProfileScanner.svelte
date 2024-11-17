@@ -7,6 +7,10 @@
     import { writable } from 'svelte/store';
     import Spinner from './Spinner.svelte';
     import { goto } from '$app/navigation';
+    import { safe_store } from '$lib/safe.store';
+    import { hubv2_abi } from '$lib/circles_hub_v2';
+    import { cidV0ToUint8Array } from '@circles-sdk/utils';
+    import { GnosisChainConfig } from '$lib/circles.factory';
 
     let videoElement: any;
     let logMessage = '';
@@ -37,17 +41,37 @@
     const inviteHandler = async () => {
 
       avatar_store.subscribe(async (store) => {
+
+        const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
+        const twenty_four_hours = "0x0000000000000000000000000000000000000000000000000000000000000E10";
+
+        avatar_store.subscribe(async (_astore) => {
+           
+            const address = Object.keys(await _astore)[0];
+
+            safe_store.subscribe(async (store) => {
+
+                const safeService = (await store)[address];
+                
+                safeService.subscribe(async (srv) => {
+                    spinner.set(true);
+                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [newby_address, twenty_four_hours], false);
+                    console.log(r);  
+                    dispatch('invite_success_event');
+                    spinner.set(false);
+                })
+            })
+        });
         
-        console.log(1);
-        const sdk = Object.values(await store)[0];
-        console.log(2);
-        console.log(sdk);
-        spinner.set(true);
-        const r = await sdk.inviteHuman($newby_address);
-        console.log(r);
-        console.log(3);
-        dispatch('invite_success_event');
-        spinner.set(false);
+        // console.log(1);
+        // const sdk = Object.values(await store)[0];
+        // console.log(2);
+        // console.log(sdk);
+        // spinner.set(true);
+        // const r = await sdk.inviteHuman($newby_address);
+        // console.log(r);
+        // console.log(3);
+        // 
       })
       
 
