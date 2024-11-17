@@ -74,6 +74,7 @@
   video {
     width: 100%;
     max-width: 600px;
+    max-height: 100vw;
   }
 
   article, article div {
