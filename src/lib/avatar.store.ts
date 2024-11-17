@@ -26,6 +26,7 @@ export const setAvatar = async (safe_address: string) : Promise<void> => {
         let avatar = null 
         try {
             avatar = await circles_sdk.getAvatar(safe_address);
+            console.log("avatar", avatar)
         } catch (error) {
             console.log(error)
         }

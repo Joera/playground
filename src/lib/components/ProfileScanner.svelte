@@ -10,7 +10,7 @@
 
     let videoElement: any;
     let logMessage = '';
-    const newby_address = writable("");
+    const newby_address = writable("xxx");
     const spinner = writable(false);
     const dispatch = createEventDispatcher();
 
@@ -36,12 +36,16 @@
 
     const inviteHandler = async () => {
 
-      const sdk = Object.values(await avatar_store)[0];
-      console.log(sdk);
-      spinner.set(true);
-      const avatar = await sdk.inviteHuman($newby_address);
-      dispatch('invite_success_event');
-      spinner.set(false);
+      avatar_store.subscribe(async (store) => {
+        
+        const sdk = Object.values(await store)[0];
+        console.log(sdk);
+        spinner.set(true);
+        const avatar = await sdk.inviteHuman($newby_address);
+        dispatch('invite_success_event');
+        spinner.set(false);
+      })
+      
 
       
     }
