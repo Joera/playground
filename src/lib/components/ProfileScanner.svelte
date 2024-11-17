@@ -3,7 +3,7 @@
     import { displayAddress } from '$lib/eth.factory';
 
     import { BrowserMultiFormatReader } from '@zxing/library';
-    import { onMount } from 'svelte';
+    import { createEventDispatcher, onMount } from 'svelte';
     import { writable } from 'svelte/store';
     import Spinner from './Spinner.svelte';
     import { goto } from '$app/navigation';
@@ -12,6 +12,7 @@
     let logMessage = '';
     const newby_address = writable("");
     const spinner = writable(false);
+    const dispatch = createEventDispatcher();
 
     let codeReader = new BrowserMultiFormatReader();
 
@@ -38,8 +39,10 @@
       const sdk = Object.values(await avatar_store)[0];
       spinner.set(true);
       const avatar = await sdk.inviteHuman($newby_address);
+      dispatch('invite_success_event');
       spinner.set(false);
-      goto('/avatar/contacts')
+
+      
     }
 
 </script>

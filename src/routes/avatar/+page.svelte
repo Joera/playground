@@ -42,10 +42,14 @@
         state.set('contacts');
     }
 
-    const handleInvite = async (event: any) => {
+    const handleInviteRequested = async (event: any) => {
         console.log(event);
         friend_address.set(event.detail);
         state.set('edit');
+    }
+
+    const handleInviteApproved = async (event: any) => {
+        state.set('contacts');
     }
 
     async function waitForSubscriptions() {
@@ -117,11 +121,11 @@
 
     {:else if $state == 'scanner'}
 
-        <ProfileScanner></ProfileScanner>
+        <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner>
 
     {:else if $state == 'contacts'}
 
-        <ProfileContacts on:friend_address_event={handleInvite}></ProfileContacts>
+        <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
 
     {:else if $state == 'spinner'}
 
