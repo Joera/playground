@@ -58,7 +58,7 @@
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
-                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [newby_address, twenty_four_hours], false);
+                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [$newby_address, twenty_four_hours], false);
                     console.log(r);  
                     dispatch('invite_success_event');
                     spinner.set(false);
