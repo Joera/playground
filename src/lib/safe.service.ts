@@ -14,6 +14,7 @@ import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types';
 import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
 import {BrowserProviderContractRunner, PrivateKeyContractRunner} from "@circles-sdk/adapter-ethers"
 import { GnosisChainConfig } from './circles.factory';
+import { hubv2_abi } from './circles_hub_v2';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
@@ -166,12 +167,38 @@ export class SafeService implements ISafeService {
 
             const avatar = await this.circles_sdk?.getAvatar(this.safe_address);
             const balances = await avatar?.getBalances();
+            const mintable = await avatar?.getMintableAmount();
+
+            function addressToUint256(address: string): string {
+                const addressHex = address.startsWith("0x") ? address.slice(2) : address;
+                const paddedHex = addressHex.padStart(64, '0');
+                return BigInt("0x" + paddedHex).toString();
+            }
+
+
+            // improve on type
             
             if(balances) {
-                console.log(balances);
+                // console.log(balances);
                 this.circles.update((circles) => {
                     for (let b of balances) {
-                        circles.set(b.tokenId, b.circles);
+
+                        let t: IToken = {
+                            name: this.safe_address,
+                            symbol: "crc",
+                            decimals: 18,
+                            address: b.tokenId,
+                            balance: b.circles.toString(),
+                            mintable: "0"
+                        }
+
+                        if (mintable != undefined && b.tokenId === addressToUint256(this.safe_address)) {
+                            t.mintable = mintable.toString();
+                        }
+
+                        console.log(t)
+
+                        circles.set(b.tokenId, t);
                     }
                     return circles
                 });
@@ -180,6 +207,16 @@ export class SafeService implements ISafeService {
         } catch (error) {
             console.log("no avatar")
         }
+    }
+
+    async mintCircles() {
+
+        const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
+
+        await this.genericTx(hubv2Address, hubv2_abi, "personalMint",[], false);
+
+        return
+
     }
 
     async initSafe() {
@@ -311,6 +348,8 @@ export class SafeService implements ISafeService {
 
             const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
             console.log(txs)
+
+            // check for succes or failure and pass up ??? 
     
             if (includesDeploy) {
                 const tx = txs.find( (tx) => tx.contractAddress != "");

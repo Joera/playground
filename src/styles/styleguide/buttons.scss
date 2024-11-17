@@ -12,14 +12,6 @@
     color: inherit; /* Inherit text color */
     cursor: pointer; /* Ensure it shows the pointer cursor */
     line-height: normal; /* Fix for different default line heights */
-    font-family: "Gotham A", "Gotham B";
-    font-style: normal;
-    font-weight: 700;
-    font-size: .875rem;
-    line-height: 1;
-    text-transform: uppercase;
-    border: 2px solid #000;
-    padding: 0.75rem 0.5rem;
 
     &:hover {
       background: black;
@@ -31,6 +23,19 @@
     &::-moz-focus-inner {
       border: 0; /* Remove inner focus border in Firefox */
     }
+}
+
+
+:global(.button) {
+
+  font-family: "Gotham A", "Gotham B";
+  font-style: normal;
+  font-weight: 700;
+  font-size: .875rem;
+  line-height: 1;
+  text-transform: uppercase;
+  border: 2px solid #000;
+  padding: 0.75rem 0.5rem;
 }
 
 .button {

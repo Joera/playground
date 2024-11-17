@@ -6,6 +6,9 @@
     import { CirclesData, CirclesRpc } from "@circles-sdk/data";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher } from 'svelte';
+    import { safe_addresses } from "$lib/safe.store";
+
+    
 
     const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
     const data = new CirclesData(circlesRpc);
@@ -39,7 +42,7 @@
     {#each $avatar_events as event}
             <div class="event">
               
-                {#if event.$event == "CrcV2_Trust"}
+                {#if event.$event == "CrcV2_Trust" &&  $safe_addresses.includes(event.trustee) && event.truster != event.trustee}
                     <div>
                         { displayAddress("gno", event.truster) } trusts you
                     </div>

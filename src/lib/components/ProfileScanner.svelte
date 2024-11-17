@@ -52,9 +52,6 @@
             safe_store.subscribe(async (store) => {
 
                 const safeService = (await store)[address];
-
-                console.log(hubv2Address);
-                console.log(newby_address);
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
@@ -65,20 +62,7 @@
                 })
             })
         });
-        
-        // console.log(1);
-        // const sdk = Object.values(await store)[0];
-        // console.log(2);
-        // console.log(sdk);
-        // spinner.set(true);
-        // const r = await sdk.inviteHuman($newby_address);
-        // console.log(r);
-        // console.log(3);
-        // 
       })
-      
-
-      
     }
 
 </script>
@@ -98,6 +82,8 @@
       <div>
         <h3>Will you invite ... </h3>
         { displayAddress("gno", $newby_address)}</div>
+
+        <!--check crc balance - shoud be > 96 --> 
         <button on:click={inviteHandler}>yes!</button>
     {/if}
 

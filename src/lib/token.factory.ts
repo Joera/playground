@@ -8,6 +8,7 @@ export interface IToken {
     decimals: number;
     address: string;
     balance: string;
+    mintable?: string
 }
 
 export interface ITokenService {

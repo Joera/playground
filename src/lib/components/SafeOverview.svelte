@@ -3,7 +3,8 @@
     import { displayAddress, displaySafeAddress, roundBalance } from '$lib/eth.factory.js';
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
-    import type { Writable } from 'svelte/store';
+    import { writable, type Writable } from 'svelte/store';
+    import type { IToken } from '$lib/token.factory';
 
     export let safe_address: string;
     export let safeSrv: Writable<SafeService>;
@@ -16,6 +17,11 @@
     $: circles = $safeSrv.circles;
     $: signers = $safeSrv.signers;
     $: modules = $safeSrv.modules;
+
+    const state = writable("");
+    const tokenId = writable("");
+    const tokenBalance = writable(0);
+    const mintable = writable(0);
 
     // Optionally, fetch initial data on mount if needed
     onMount(async () => {
@@ -43,36 +49,91 @@
         })
     }
 
+    const handleMint = async () => {
+        safeSrv.subscribe( async (srv: SafeService) => {
+            await srv.mintCircles();
+            srv.getCircles();
+        })
+    }
+
+    const handleTansfer = async () => {
+        safeSrv.subscribe( async (srv: SafeService) => {
+            await srv.mintCircles();
+            srv.transferCircles();
+        })
+    }
+
+    const handleCirclesInfo = async (id: string, token: IToken) => {
+        tokenId.set(id);
+        tokenBalance.set(parseFloat(token.balance));
+        if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
+            mintable.set(parseFloat(token.mintable));
+        }
+        state.set("token");
+    }
+
+    const handleTokenInfo = async (address: string, token: IToken) => {
+        tokenId.set(address);
+        tokenBalance.set(parseFloat(token.balance));
+       
+        state.set("token");
+    }
+
+    const handleBack = async () => {
+        
+        state.set("");
+    }
+
 </script>
 
 <article>
     <div class="safe_container">
-        <label>Safe: <span>{$version}</span></label>
 
-        <div class="address">
-            <span>{ @html displaySafeAddress("gno", safe_address)}</span>
-        </div>
 
-        <div class="tokens">
-            {#each $tokens.entries() as [address,token]}
-                <div class="token">
-                    <span>{token.symbol}</span>
-                    <span>{roundBalance(token.balance)}</span>
-                </div>
-            {/each}
-            {#each $circles.entries() as [id,balance]}
-                <div class="token">
-                    <span>crc</span>
-                    <span>{roundBalance(balance)}</span>
-                </div>
-            {/each}
-        </div>
-        {#if $deployed}
-            {#if !$signers.includes($signer_address)}
-                <div>read only</div>
+        {#if $state == "token"} 
+
+            <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
+            
+            <button class="button">send</button>
+            {#if $mintable > 0}
+                <label>Mintable: <span>{$mintable.toFixed(2)}</span></label>   
+                  
+                <button class="button" on:click={handleMint}>mint</button>
             {/if}
+            
+            <button class="button" on:click={handleBack}>back</button>
+
         {:else}
-            <div>not yet deployed</div>
+            <label>Safe: <span>{$version}</span></label>
+
+            <div class="address">
+                <span>{ @html displaySafeAddress("gno", safe_address)}</span>
+            </div>
+
+            <div class="tokens">
+                {#each $tokens.entries() as [address,token]}
+                    <button class="token" on:click={() => handleTokenInfo(address, token)}>
+                        <span>{token.symbol}</span>
+                        <span>{roundBalance(token.balance)}</span>
+                    </button>
+                {/each}
+                {#each $circles.entries() as [address,token]}
+                    <button class="token" on:click={() => handleCirclesInfo(address, token)}>
+                    
+                            <span>crc</span>
+                            <span>{parseFloat(token.balance).toFixed(0)}{#if token.mintable > 1}+{parseFloat(token.mintable).toFixed(0)}{/if}
+                        </span>
+                       
+                    </button>
+                {/each}
+            </div>
+            {#if $deployed}
+                {#if !$signers.includes($signer_address)}
+                    <div>read only</div>
+                {/if}
+            {:else}
+                <div>not yet deployed</div>
+            {/if}
         {/if}
         
         <!-- <div class="signers">
