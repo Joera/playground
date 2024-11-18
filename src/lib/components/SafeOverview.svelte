@@ -5,6 +5,7 @@
     import type { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
     import type { IToken } from '$lib/token.factory';
+    import Spinner from './Spinner.svelte';
 
     export let safe_address: string;
     export let safeSrv: Writable<SafeService>;
@@ -51,15 +52,23 @@
 
     const handleMint = async () => {
         safeSrv.subscribe( async (srv: SafeService) => {
+            state.set("spinner");
             await srv.mintCircles();
-            srv.getCircles();
+            // display link to tx on scan? (txs page?? )
+            await srv.getCircles();
+            state.set("token");
+            
         })
     }
 
     const handleTansfer = async () => {
         safeSrv.subscribe( async (srv: SafeService) => {
             await srv.mintCircles();
-            srv.transferCircles();
+
+            const to = "0x0000000000000000000000000000000000000000";
+            const id = "0x0000000000000000000000000000000000000000";
+            const value = 1;
+            srv.transferCircles(to,id,value);
         })
     }
 
@@ -90,11 +99,15 @@
     <div class="safe_container">
 
 
-        {#if $state == "token"} 
+        {#if $state == "spinner"} 
+
+            <Spinner></Spinner>
+
+        {:else if $state == "token"} 
 
             <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
             
-            <button class="button">send</button>
+            <button class="button">transfer</button>
             {#if $mintable > 0}
                 <label>Mintable: <span>{$mintable.toFixed(2)}</span></label>   
                   
@@ -120,7 +133,7 @@
                 {#each $circles.entries() as [address,token]}
                     <button class="token" on:click={() => handleCirclesInfo(address, token)}>
                     
-                            <span>crc</span>
+                            <span>CRC</span>
                             <span>{parseFloat(token.balance).toFixed(0)}{#if token.mintable > 1}+{parseFloat(token.mintable).toFixed(0)}{/if}
                         </span>
                        

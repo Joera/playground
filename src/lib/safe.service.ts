@@ -219,6 +219,19 @@ export class SafeService implements ISafeService {
 
     }
 
+    async transferCircles(to: string, id: string, value: number) {
+
+        const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
+
+        const from = this.safe_address;
+        const data = "";
+
+        await this.genericTx(hubv2Address, hubv2_abi, "safeTransferFrom",[from, to, id, value, data], false);
+
+        return
+
+    }
+
     async initSafe() {
 
         this.kit = await Safe.init({
