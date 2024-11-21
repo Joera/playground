@@ -7,7 +7,7 @@
 
 <nav class="container">
     <a href="/">Home</a>
-    <a href="/avatar">Avatar</a>
-    <a href="/commons">Commons</a>
-    <a href="/governance">Governance</a>
+    <a href="/avatar">Circles</a>
+    <a href="/regenton">Regenton</a>
+    <a href="/governance">DAO</a>
 </nav>

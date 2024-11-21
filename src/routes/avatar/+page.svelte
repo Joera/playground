@@ -1,12 +1,9 @@
 <script lang="ts">
-    import QRCode from '@castlenine/svelte-qrcode';
 
-    import { safe_addresses, safe_store } from '$lib/safe.store';
+    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated, waitForSubscriptions } from '$lib/safe.store';
     import { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
-    import { on } from 'svelte/events';
     import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
     import ProfileDisplay from '$lib/components/ProfileDisplay.svelte';
     import ProfileForm from '$lib/components/ProfileForm.svelte';
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
@@ -52,44 +49,16 @@
         state.set('contacts');
     }
 
-    async function waitForSubscriptions() {
-
-        console.log("len: " + Object.keys($safe_store).length);
-        for (const safe of Object.keys($safe_store)) {
-            let b = await new Promise(resolve => {
-                $safe_store[safe].subscribe(async (safeService) => {
-                    const hasAvatar = await safeService.hasAvatar();
-                    resolve(hasAvatar);
-                });
-            });
-            console.log(b)
-            if (b) {
-                safesWithAvatars.push(safe);
-            }
-        }
-    }
-
-    function waitForSafeStoreToBePopulated() : Promise<void> {
-        return new Promise(resolve => {
-            const intervalId = setInterval(() => {
-                const safes = Object.keys($safe_store);
-                if (safes.length === $safe_addresses.length) {
-                    clearInterval(intervalId);
-                    resolve();
-                }
-            }, 100);
-        });
-    }
+ 
 
     onMount(async () => {
 
-
-        await waitForSafeStoreToBePopulated();
-        await waitForSubscriptions();
+        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
+        await waitForSubscriptions($safe_store, safesWithAvatars);
 
         if (safesWithAvatars.length == 0) {
 
-            if(safe_addresses != undefined) {
+            if (safe_addresses != undefined) {
                 owner_address.set($safe_addresses[0]);
                 srv = $safe_store[$safe_addresses[0]]; 
             }

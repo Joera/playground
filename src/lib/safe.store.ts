@@ -60,3 +60,33 @@ export const hasSafeAddresses = (): Promise<string[]> => {
         }
     })
 }
+
+export const waitForSubscriptions = async (safe_store: Record<string, Writable<SafeService>>, safesWithAvatars: string[])  => {
+
+    for (const safe of Object.keys(safe_store)) {
+        let b = await new Promise(resolve => {
+            safe_store[safe].subscribe(async (safeService) => {
+                const hasAvatar = await safeService.hasAvatar();
+                resolve(hasAvatar);
+            });
+        });
+        console.log(b)
+        if (b) {
+            safesWithAvatars.push(safe);
+        }
+    }
+
+    return safesWithAvatars;
+}
+
+export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, Writable<SafeService>>, safe_addresses: string[]) : Promise<void> => {
+    return new Promise(resolve => {
+        const intervalId = setInterval(() => {
+            const safes = Object.keys(safe_store);
+            if (safes.length === safe_addresses.length) {
+                clearInterval(intervalId);
+                resolve();
+            }
+        }, 100);
+    });
+}

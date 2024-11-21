@@ -45,6 +45,8 @@ export interface ISafeService {
     requestAccess() : Promise<void>;
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
     genericTx(address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string>;
+    genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string>;
+
 }
 
 console.log(import.meta.env);
@@ -196,8 +198,6 @@ export class SafeService implements ISafeService {
                             t.mintable = mintable.toString();
                         }
 
-                        console.log(t)
-
                         circles.set(b.tokenId, t);
                     }
                     return circles
@@ -205,7 +205,7 @@ export class SafeService implements ISafeService {
             }
 
         } catch (error) {
-            console.log("no avatar")
+            // console.log("no avatar")
         }
     }
 
@@ -231,6 +231,8 @@ export class SafeService implements ISafeService {
         return
 
     }
+
+ 
 
     async initSafe() {
 
@@ -303,6 +305,15 @@ export class SafeService implements ISafeService {
         });
     }
 
+    async genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string> {
+
+        const contract = new ethers.Contract(contract_address, abi, this.provider);
+
+        const response = await contract[method](...args);
+
+        return response.toString();
+    }
+
     async _tx(transactions: any, includesDeploy: boolean) {
 
         if (this.kit instanceof Safe) {
@@ -356,8 +367,9 @@ export class SafeService implements ISafeService {
             );
 
             console.log("receipt",userOperationReceipt);
-            // console.log("payload",userOperationPayload);
-            console.log("txHash",userOperationPayload);
+            console.log("txHash",userOperationPayload.transactionHash);
+
+            this.provider.waitForTransaction(userOperationPayload.transactionHash);
 
             const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
             console.log(txs)
@@ -384,7 +396,6 @@ export class SafeService implements ISafeService {
     async isDeployed() : Promise<boolean> {
 
         const code = await this.provider.getCode(this.safe_address);
-        console.log(code)
         const b = (code !== '0x') ? true : false;
         this.deployed.set(b);
 
@@ -471,7 +482,7 @@ export class SafeService implements ISafeService {
                 return tokens;
             });
         }
-        console.log(this.safe_address, this.tokens);
+        // console.log(this.safe_address, this.tokens);
        
     }
 

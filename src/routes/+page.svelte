@@ -5,7 +5,7 @@
     $: safeEntries = Object.entries($safe_store);
 
     const handleAddSafe = async () => {
-            addSafe();
+        addSafe();
     }
 
 </script>
