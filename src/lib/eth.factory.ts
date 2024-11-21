@@ -1,4 +1,5 @@
 import { ethers, type Provider } from "ethers";
+import { writable, type Writable } from "svelte/store";
 
 export const getRPC = (chain: string, alchemy_key: string) => {
 
@@ -133,4 +134,28 @@ export const isValidEthereumAddress = (address: string) => {
 export const roundBalance = (balance: string) => {
 
     return parseFloat(balance).toFixed(3);
+}
+
+export const fixSafeAddress = (address: string) => {
+    
+    return ethers.getAddress(address);
+}
+
+export function fixAddressArray<T extends Iterable<any>>(store: Writable<T> | undefined): Writable<T> {
+    if (store != undefined) {
+        store.update((arr) => {
+            console.log(arr)
+
+            for (let a of arr) {
+                if (typeof a == "string") {
+                    a = fixSafeAddress(a)
+                }
+            }
+            console.log(arr)
+            return arr; 
+        });
+        return store; 
+    } else {
+        return writable<T>({} as T);
+    }
 }

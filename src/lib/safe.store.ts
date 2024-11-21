@@ -2,6 +2,7 @@ import { localStorageStore } from './localstorage.store';
 import { writable, type Writable } from 'svelte/store';
 import { SafeService } from './safe.service';
 import { hasKey } from './key.store';
+import { fixSafeAddress, fixAddressArray } from './eth.factory';
 
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});

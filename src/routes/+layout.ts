@@ -7,6 +7,7 @@ import { SafeService, type ISafeService } from '$lib/safe.service';
 import { writable } from 'svelte/store';
 import { safe_store, hasSafeAddresses } from '../lib/safe.store';
 import { setAvatar } from '$lib/avatar.store';
+import { fixSafeAddress } from '$lib/eth.factory';
 
 
 /** @type {import('./$types').PageLoad} */
@@ -20,6 +21,8 @@ export const load = async () => {
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
         for (let safe of safe_array) {
+
+            safe = fixSafeAddress(safe);
             
             SafeService.create(keyExists, safe).then( async (safeService) => {
                 safe_store.update((safes) => { 

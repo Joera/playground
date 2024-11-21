@@ -7,7 +7,7 @@ import Safe from "@safe-global/protocol-kit";
 import SafeFactory from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
-import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress } from "./eth.factory";
+import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress } from "./eth.factory";
 import { tokenList, type IToken } from './token.factory';
 import { fromStore } from './store.factory';
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types';
@@ -103,7 +103,7 @@ export class SafeService implements ISafeService {
     }
    
     async setup () {
-
+        await this.initSafeWithRelay();
         const d = await this.isDeployed();
 
         if (d) {
@@ -127,14 +127,14 @@ export class SafeService implements ISafeService {
             }
 
         } else {
-            this.safe_address = await this.initSafeWithRelay();
+            this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
             console.log("predictedAddress",this.safe_address);
         }
     }
 
     async new() {
 
-        this.safe_address = await this.initSafeWithRelay();
+        this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
 
     }
 

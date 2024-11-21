@@ -29,7 +29,7 @@
         {#if !isTrusted}
             <p>You are not yet trusted by circles to be a human. Ask a (new) friend to scan this and invite you. </p>
         {/if}
-        <QRCode data="{owner_address}"   backgroundColor="transparent" />
+        <QRCode data="{owner_address}" backgroundColor="transparent" />
     </div>
 {/if}
 

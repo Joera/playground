@@ -84,6 +84,10 @@
         state.set("token");
     }
 
+    const handleBack = async () => {
+        state.set("");
+    }
+
 
     const handleRemoteSigner = async () => {
         state.set("remotesigner")
