@@ -43,7 +43,9 @@
       avatar_store.subscribe(async (store) => {
 
         const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
-        const twenty_four_hours = "0x0000000000000000000000000000000000000000000000000000000000000E10";
+        const expiryTimeMs = Date.now() + 24 * 60 * 60 * 1000;
+        const expiryTimeSeconds = Math.floor(expiryTimeMs / 1000);
+        const expiryTimeHex = "0x" + expiryTimeSeconds.toString(16).padStart(64, '0');
 
         avatar_store.subscribe(async (_astore) => {
            
@@ -55,7 +57,7 @@
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
-                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [$newby_address, twenty_four_hours], false);
+                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [$newby_address, expiryTimeHex], false);
                     console.log(r);  
                     dispatch('invite_success_event');
                     spinner.set(false);

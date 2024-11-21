@@ -2,13 +2,11 @@
     import { goto } from "$app/navigation";
     import { avatar_store, circles_sdk_store } from "$lib/avatar.store";
     import { displayAddress } from "$lib/eth.factory";
-    import { hasKey } from "$lib/key.store";
     import { CirclesData, CirclesRpc } from "@circles-sdk/data";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher } from 'svelte';
     import { safe_addresses } from "$lib/safe.store";
 
-    
 
     const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
     const data = new CirclesData(circlesRpc);

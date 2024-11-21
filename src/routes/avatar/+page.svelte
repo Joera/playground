@@ -14,6 +14,7 @@
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
+    let isTrusted = writable(false);
     let state = writable("profile");
     let profile : Writable<any> = writable(null);
     let owner_address: Writable<string> = writable("");
@@ -70,7 +71,6 @@
                 owner_address.set($srv.safe_address);
             }
         }
-        
     })
 
 
@@ -104,10 +104,10 @@
     
 
     <nav>
-        <button on:click="{handleProfile}">profile</button>
-        <button on:click="{handleEdit}">edit</button>
-        <button on:click="{handleScanner}">scanner</button>
-        <button on:click="{handleContacts}">contacts</button>
+        <button class="button" on:click="{handleProfile}">profile</button>
+        <button class="button" on:click="{handleEdit}">edit</button>
+        <button class="button" on:click="{handleScanner}">scanner</button>
+        <button class="button" on:click="{handleContacts}">contacts</button>
     </nav>
 
 </article>

@@ -6,6 +6,7 @@
     import { writable, type Writable } from 'svelte/store';
     import type { IToken } from '$lib/token.factory';
     import Spinner from './Spinner.svelte';
+    import SignerForm from './SignerForm.svelte';
 
     export let safe_address: string;
     export let safeSrv: Writable<SafeService>;
@@ -38,11 +39,6 @@
         })
     };
 
-    const handleAccessRequest  = async () => {
-        safeSrv.subscribe((srv: SafeService) => {
-            srv.requestAccess();
-        })
-    };
 
     const handleEnableModule = async () => {
         safeSrv.subscribe((srv: SafeService) => {
@@ -88,9 +84,22 @@
         state.set("token");
     }
 
-    const handleBack = async () => {
-        
-        state.set("");
+
+    const handleRemoteSigner = async () => {
+        state.set("remotesigner")
+        // popup
+    }
+
+    const handleAddSigner = async (event: any) => {
+    
+        const address = event.detail;
+        state.set("spinner")
+        console.log(address);
+        safeSrv.subscribe((srv: SafeService) => {
+            // srv.addSigner(address);
+        })
+
+        state.set("")
     }
 
 </script>
@@ -102,6 +111,10 @@
         {#if $state == "spinner"} 
 
             <Spinner></Spinner>
+
+        {:else if $state == "remotesigner"}
+
+            <SignerForm on:signer_address_event={() => handleAddSigner(event)}></SignerForm>
 
         {:else if $state == "token"} 
 
@@ -160,12 +173,14 @@
     </div>
     <div class="actions">
        
-        {#if $version == "1.3.0"} 
+        {#if $deployed && $version == "1.3.0"} 
             <button on:click={handleUpgrade}>upgrade</button>
         {/if}
-        {#if !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
+        {#if  $deployed && !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
             <button on:click={handleEnableModule}>enable AA</button>
         {/if}
+        <button class="button"on:click={handleRemoteSigner}>add remote signer</button>
+
     </div>
 </article>
 

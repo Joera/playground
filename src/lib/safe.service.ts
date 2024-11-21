@@ -42,7 +42,7 @@ export interface ISafeService {
     getSigners: () => Promise<void>;
     getVersion(safe_address: string) : Promise<void>;
     isDeployed(safe_address: string) : Promise<boolean>;
-    requestAccess() : Promise<void>;
+    addSigner(adress: string) : Promise<void>;
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
     genericTx(address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string>;
     genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string>;
@@ -402,44 +402,6 @@ export class SafeService implements ISafeService {
         return b;
     }
 
-    async requestAccess() {
-
-        const apiKit = new SafeApiKit({
-            chainId: 100n
-        });
-
-        const newThreshold = 1;
-        const method = "addOwnerWithThreshold";
-        const args = [await fromStore(this.signer_address), newThreshold];
-        const abi = ["function addOwnerWithThreshold(address, uint256)"];
-        const contract = new ethers.Contract(this.safe_address, abi, this.signer);
-        const txData = contract.interface.encodeFunctionData(method, args);
-
-        const transactions: MetaTransactionData[] = [{
-            to: this.safe_address,
-            data: txData,
-            value: "0",
-            operation: 0
-          }]
-          
-        if (this.kit instanceof Safe) {
-
-            const txData = await this.kit.createTransaction({transactions});
-
-            const safeTxHash = await this.kit.getTransactionHash(txData)
-            const signature = await this.kit.signHash(safeTxHash)
-
-            const response = await apiKit.proposeTransaction({
-                safeAddress: this.safe_address,
-                safeTransactionData: txData.data,
-                safeTxHash,
-                senderAddress: await fromStore(this.signer_address),
-                senderSignature: signature.data
-            });
-        
-        }
-
-    }
 
     async getModules() {
 
@@ -588,7 +550,7 @@ export class SafeService implements ISafeService {
 
     async enableModule(moduleAddress: string) {
 
-        console.log("safe",this.safe_address);
+        // console.log("safe",this.safe_address);
 
         const safeAbi = ["function enableModule(address module) external"];
         const safeContract = new ethers.Contract(this.safe_address, safeAbi, this.signer);
@@ -607,26 +569,22 @@ export class SafeService implements ISafeService {
         }
     }
 
-    // async addMigrationModule() {
-    //     const safeSdk = await Safe.create({ ethAdapter: new Safe.EthersAdapter({ ethers, this.signer }), safeAddress });
-      
-    //     const migrationModuleAddress = "0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6";
-    //     // Propose module addition transaction
-    //     const txData = safeSdk.createEnableModuleTx(migrationModuleAddress);
-    //     const txResponse = await safeSdk.proposeTransaction({ safeTransactionData: txData });
-    //     console.log("Module addition transaction sent:", txResponse.hash);
-      
-    //     // Wait for the transaction to confirm
-    //     await txResponse.wait();
-    //     console.log("SafeMigration module added successfully.");
-    //   }
+    async addSigner(address: string) {
 
- 
-    
+        const abi = ["function addOwnerWithThreshold(address, uint256)"];
+        const safeContract = new ethers.Contract(this.safe_address, abi, this.signer);
+        const data = safeContract.interface.encodeFunctionData("addOwnerWithThreshold", [address,1]);
 
-   
+        const txData = { 
+            to: this.safe_address,
+            data: data,
+            value: '0'  
+        };
 
-
-    
-
+        if (this.kit instanceof Safe) {
+            this._tx([txData], false);
+        } else  {
+            this._4337tx([txData], false);
+        }
+    }
 }

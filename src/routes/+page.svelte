@@ -38,7 +38,6 @@
 
 
     <section id="safes">
-
         {#if $safe_store && Object.keys($safe_store).length > 0}
             {#each safeEntries as [safe_address, safeSrv]}        
                 <SafeOverview {safe_address} {safeSrv} />

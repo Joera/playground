@@ -12,7 +12,6 @@
 
     const advanced_setup = () => {
         console.log("Button 2 clicked");
-        // Add your action for Button 2 here
     };
 </script>
 
@@ -24,14 +23,18 @@
         align-items: center;
         min-height: 240px
     }
+
+    h2 {
+        margin-bottom: 3rem;
+    }
 </style>
 
 <h2>Welcome!</h2>
 
 <div>
     <label>default:</label>
- <button on:click={default_setup}>New Safe & Circles avatar</button>
+ <button class="button" on:click={default_setup}>New Safe & Circles avatar</button>
  <label>advanced: (requires configuring)</label>
- <button on:click={advanced_setup}>Existing Safe & Circles avatar</button>
+ <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button>
 </div>
 
