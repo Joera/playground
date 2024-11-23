@@ -71,7 +71,6 @@ export const waitForSubscriptions = async (safe_store: Record<string, Writable<S
                 resolve(hasAvatar);
             });
         });
-        console.log(b)
         if (b) {
             safesWithAvatars.push(safe);
         }

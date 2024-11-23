@@ -9,7 +9,6 @@ import { safe_store, hasSafeAddresses } from '../lib/safe.store';
 import { setAvatar } from '$lib/avatar.store';
 import { fixSafeAddress } from '$lib/eth.factory';
 
-
 /** @type {import('./$types').PageLoad} */
 export const load = async () => {
 

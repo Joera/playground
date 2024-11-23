@@ -12,6 +12,7 @@ import { tokenList, type IToken } from './token.factory';
 import { fromStore } from './store.factory';
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types';
 import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
+import { SafeSdkPrivateKeyContractRunner } from '@circles-sdk/adapter-safe';
 import {BrowserProviderContractRunner, PrivateKeyContractRunner} from "@circles-sdk/adapter-ethers"
 import { GnosisChainConfig } from './circles.factory';
 import { hubv2_abi } from './circles_hub_v2';
@@ -49,7 +50,6 @@ export interface ISafeService {
 
 }
 
-console.log(import.meta.env);
  
 const CHAIN = "gno";
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
@@ -135,7 +135,6 @@ export class SafeService implements ISafeService {
     async new() {
 
         this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
-
     }
 
     async invite  (sdk: any, inviteeAddress: string)  {
@@ -155,11 +154,11 @@ export class SafeService implements ISafeService {
         }
     }
 
-    
+    // to do .. untangle with avatar_store
     async initCirclesSDK() {
         
-        const adapter = new PrivateKeyContractRunner(this.provider, this.signer_key);
-        await adapter.init();
+        const adapter = new SafeSdkPrivateKeyContractRunner(this.signer_key, getRPC("gno", ""));
+        await adapter.init(this.safe_address);
         this.circles_sdk = new Sdk(adapter, GnosisChainConfig);
     }
 

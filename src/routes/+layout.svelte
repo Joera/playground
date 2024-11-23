@@ -29,7 +29,6 @@
 		@media screen and (min-width: 860px) {
 			height: calc(100vh - 3rem - 4.8rem - 3rem - 3rem - 1rem);
 		}
-		
 	}
 
  </style>
@@ -37,8 +36,6 @@
 <svelte:head>
     <link rel="stylesheet" type="text/css" href="https://cloud.typography.com/7060374/6692032/css/fonts.css" />
 </svelte:head>
-
-
 
 <main>
 	<h1>Playground</h1>

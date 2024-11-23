@@ -5,8 +5,9 @@ import { hasKey } from './key.store';
 import { Sdk, type Avatar } from '@circles-sdk/sdk';
 import { PrivateKeyContractRunner } from '@circles-sdk/adapter-ethers';
 import { GnosisChainConfig } from './circles.factory';
-import { getProvider } from './eth.factory';
+import { getProvider, getRPC } from './eth.factory';
 import { safe_store } from './safe.store';
+import { SafeSdkPrivateKeyContractRunner } from '@circles-sdk/adapter-safe';
 
 export const avatar_store: Writable<Record<string, any>> = writable({});
 export const circles_sdk_store: Writable<Record<string, any>> = writable({});
@@ -18,8 +19,9 @@ export const setAvatar = async (safe_address: string) : Promise<void> => {
     if (key && typeof key == "string") {
 
         const provider = getProvider("gno", "");
-        const adapter = new PrivateKeyContractRunner(provider, key);
-        await adapter.init();
+        // either this or in service
+        const adapter = new SafeSdkPrivateKeyContractRunner(key, getRPC("gno", ""));
+        await adapter.init(safe_address);
         const circles_sdk = new Sdk(adapter, GnosisChainConfig);
 
         const safeServiceStore: any = await fromStore(safe_store);

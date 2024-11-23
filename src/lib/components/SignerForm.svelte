@@ -11,15 +11,11 @@
         event.preventDefault(); 
         const data = new FormData(event.target);
         formData = Object.fromEntries(data.entries());
-        
         dispatch('signer_address_event', formData.address);
     }
 
 
 </script>
-
-
-
 
     <form id="profile" on:submit={handleAddress}>
 

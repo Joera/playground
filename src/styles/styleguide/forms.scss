@@ -4,5 +4,13 @@
     :global(input) {
         padding: .75rem;
         min-width: 240px;
+        width: 100%;
+    }
+
+    :global(textarea) {
+        border: none;
+        padding: .75rem;
+        min-width: 240px;
+        width: 100%;
     }
 } 

@@ -9,7 +9,7 @@
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
-
+    import { avatar_store } from '$lib/avatar.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -50,8 +50,6 @@
         state.set('contacts');
     }
 
- 
-
     onMount(async () => {
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
@@ -71,6 +69,21 @@
                 owner_address.set($srv.safe_address);
             }
         }
+
+        avatar_store.subscribe(async (_astore) => {
+ 
+           const circlesSdk = Object.values(await _astore)[0];
+           const p = await circlesSdk.getProfile();
+           console.log(p)
+           profile.set(p)
+
+        //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
+        //         avatarEvents.subscribe((event: any) => {
+        //         console.log(event);
+        //     });
+        });
+
+        
     })
 
 
@@ -84,9 +97,9 @@
 
         <ProfileDisplay profile={$profile} owner_address={$owner_address}></ProfileDisplay>
 
-    {:else if $state == 'edit'}
+    <!-- {:else if $state == 'edit'}
 
-        <ProfileForm profile={$profile} friend_address={$friend_address}></ProfileForm>
+        <ProfileForm profile={$profile} friend_address={$friend_address}></ProfileForm> -->
 
     {:else if $state == 'scanner'}
 
@@ -105,7 +118,7 @@
 
     <nav>
         <button class="button" on:click="{handleProfile}">profile</button>
-        <button class="button" on:click="{handleEdit}">edit</button>
+        <!-- <button class="button" on:click="{handleEdit}">edit</button> -->
         <button class="button" on:click="{handleScanner}">scanner</button>
         <button class="button" on:click="{handleContacts}">contacts</button>
     </nav>
