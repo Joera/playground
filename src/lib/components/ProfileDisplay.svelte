@@ -82,12 +82,8 @@
         state.set("edit");
     }
 
-
-
     onMount(() => {
         console.log("ProfileDisplay mounted");
-
-        
     });
 
 </script>

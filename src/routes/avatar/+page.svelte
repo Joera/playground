@@ -73,9 +73,20 @@
         avatar_store.subscribe(async (_astore) => {
  
            const circlesSdk = Object.values(await _astore)[0];
-           const p = await circlesSdk.getProfile();
-           console.log(p)
-           profile.set(p)
+
+           let p;
+
+           try {
+                p = await circlesSdk.initCirclesSDK(); 
+
+           } catch (error) {
+               p = {
+                name: "",
+                description: ""
+               }
+           }
+           profile.set(p);
+           
 
         //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
         //         avatarEvents.subscribe((event: any) => {
@@ -95,11 +106,7 @@
 
     {#if $state == 'profile'}
 
-        <ProfileDisplay profile={$profile} owner_address={$owner_address}></ProfileDisplay>
-
-    <!-- {:else if $state == 'edit'}
-
-        <ProfileForm profile={$profile} friend_address={$friend_address}></ProfileForm> -->
+        <ProfileDisplay profile={$profile} owner_address={$owner_address} friend_address={$friend_address}></ProfileDisplay>
 
     {:else if $state == 'scanner'}
 
