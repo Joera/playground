@@ -50,6 +50,10 @@
         state.set('contacts');
     }
 
+    const handleActivities = async () => {
+        state.set('activities');
+    }
+
     onMount(async () => {
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
@@ -77,9 +81,11 @@
            let p;
 
            try {
-                p = await circlesSdk.initCirclesSDK(); 
+                p = await circlesSdk.getProfile();
 
            } catch (error) {
+
+           console.log("err",error)
                p = {
                 name: "",
                 description: ""
@@ -116,6 +122,10 @@
 
         <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
 
+    {:else if $state == 'activities'}
+
+        <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
+
     {:else if $state == 'spinner'}
 
         <Spinner></Spinner>
@@ -125,9 +135,9 @@
 
     <nav>
         <button class="button" on:click="{handleProfile}">profile</button>
-        <!-- <button class="button" on:click="{handleEdit}">edit</button> -->
-        <button class="button" on:click="{handleScanner}">scanner</button>
-        <button class="button" on:click="{handleContacts}">contacts</button>
+        <button class="button" on:click="{handleScanner}">scan</button>
+        <button class="button" on:click="{handleContacts}">network</button>
+        <button class="button" on:click="{handleActivities}">activity</button>
     </nav>
 
 </article>
