@@ -83,14 +83,15 @@
            try {
                 p = await circlesSdk.getProfile();
 
-           } catch (error) {
+           } catch (error) {}
 
-           
-               p = {
-                name: "",
-                description: ""
-               }
-           }
+           if (p == null || p == undefined) {
+                p = {
+                    name: "",
+                    description: ""
+                }
+            }
+
            profile.set(p);
            
        
