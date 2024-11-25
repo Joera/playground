@@ -85,7 +85,7 @@
 
            } catch (error) {
 
-           console.log("err",error)
+           
                p = {
                 name: "",
                 description: ""
@@ -93,7 +93,7 @@
            }
            profile.set(p);
            
-
+       
         //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
         //         avatarEvents.subscribe((event: any) => {
         //         console.log(event);
