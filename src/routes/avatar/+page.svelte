@@ -103,7 +103,16 @@
         let hex = await $srv.genericCall(nameRegistryAddress, abi, "getMetadataDigest", [$srv.safe_address]);
         hex = hex.startsWith("0x") ? hex.slice(2) : hex;
         let profile_cid  = uint8ArrayToCidV0(hexStringToUint8Array(hex));
-        const _profile: any = await ipfs_cat(profile_cid);
+
+        let _profile = null;
+
+        try {
+           _profile = await ipfs_cat(profile_cid);
+
+        } catch (error) {
+
+            console.log(error)
+        }
 
         let p;
         if (_profile == null || _profile == undefined) {
