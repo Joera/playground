@@ -9,6 +9,7 @@
     import { fixSafeAddress } from "$lib/eth.factory";
     import { safe_store } from "$lib/safe.store";
     import { cidV0ToUint8Array } from "@circles-sdk/utils";
+    import { ipfs_add } from "$lib/ipfs.factory";
 
     export let profile: any;
     export let friend_address: string;
@@ -19,6 +20,8 @@
 
     const handleProfile = async (event: any) => {
 
+        state.set('spinner');
+
         let formData: any = {};      
         event.preventDefault(); 
         const data = new FormData(event.target);
@@ -27,18 +30,19 @@
         const newProfile: Profile = {
             name: formData.name,
             description: formData.description,
-            imageUrl: formData.image, 
+            imageUrl: formData.image || "", 
         };
 
         // this needs to be a cid V0 
         // pinata returns cid v1 but that can only be converted to cid v0 if format is dag-pb
-        const cid = "QmUrU11u74YrLbj9d1Z9JvPPZ2nXmgMVTgh2ZvjrTUc4ZQ";
-        // const cid = await ipfs_add(newProfile);
+       //  const cid = "QmUrU11u74YrLbj9d1Z9JvPPZ2nXmgMVTgh2ZvjrTUc4ZQ";
+        const cid = await ipfs_add(newProfile);
+        console.log(cid);
         // const cid = await uploadFile(newProfile);
         const hubv2Address = "0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8";
         const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
 
-        const abi = [
+        const abi_hub = [
             {
                 "inputs": [
                     { "internalType": "address", "name": "_inviter", "type": "address" },
@@ -51,6 +55,22 @@
             }
         ];
 
+        const abi_nameregistry = [
+            {
+                type: "function",
+                name: "updateMetadataDigest",
+                inputs: [
+                    {
+                        name: "_metadataDigest",
+                        type: "bytes32",
+                        internalType: "bytes32",
+                    },
+                ],
+                outputs: [],
+                stateMutability: "nonpayable",
+            }
+        ];
+
         avatar_store.subscribe(async (_astore) => {
         
             const address = fixSafeAddress(Object.keys(await _astore)[0]);
@@ -60,18 +80,25 @@
                 const safeService = (await store)[address];
                 
                 safeService.subscribe(async (srv) => {
-
-                    state.set("spinner");   
+ 
                     const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
 
                     if(friend_address != "" && friend_address != undefined) {
-                        const r = await srv.genericTx(hubv2Address, abi, "registerHuman", [fixSafeAddress(friend_address), _metadataDigest], false);
+                        const r = await srv.genericTx(hubv2Address, abi_hub, "registerHuman", [fixSafeAddress(friend_address), _metadataDigest], false);
                         console.log(r);
-                    } 
+                    } else {
+                        const r = await srv.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
+                        console.log(r);
+                    }
 
-                    const sdk = Object.values(await _astore)[0]
-                    const r = await sdk.updateProfile(newProfile);
-                    console.log(r);
+                    // const sdk = Object.values(await _astore)[0]
+                    // let r = "";
+
+                    // try {
+                    //     r = await sdk.updateProfile(newProfile);
+                    // } catch (error) {}
+                    
+                    // console.log(r);
                     state.set("")
                 })
             })

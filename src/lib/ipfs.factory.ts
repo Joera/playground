@@ -1,25 +1,50 @@
 
 import { CID } from 'multiformats/cid';
+import axios  from 'axios';
+
+export const add_and_pin = async (object: any)  =>  {
+
+    const cid = await ipfs_add(object);
+    // await cluster_pin(cid);
+
+    return cid;
+
+}
+
+export const ipfs_cat = async (cid: string) => {
+    
+    const ipfs_response = await axios.post(`/cat?arg=${cid}`);
+
+    if (ipfs_response.status !== 200) {
+        throw new Error(`Error uploading to IPFS: ${ipfs_response.statusText}`);
+    }
+
+    console.log('IPFS Response:', ipfs_response);
+
+    return ipfs_response.data;
+
+
+}
 
 export const ipfs_add = async (object: any) => {
 
     try {
 
-        const response = await fetch('https://ipfs.autonomous-times.com/api/v0/add', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(object)
+        const formData = new FormData();
+        formData.append('file', JSON.stringify(object));
+
+        const ipfs_response = await axios.post('/add', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
         });
 
-        console.log('IPFS Response:', response);
-
-        if (!response.ok) {
-            throw new Error(`Error uploading to IPFS: ${response.statusText}`);
+        if (ipfs_response.status !== 200) {
+            throw new Error(`Error uploading to IPFS: ${ipfs_response.statusText}`);
         }
 
-        const result = await response.json();
-        console.log('IPFS Hash:', result.Hash);
-        return result.Hash; 
+       //  console.log('IPFS Response:', ipfs_response.data);
+        return ipfs_response.data["Hash"];
 
     } catch (error) {
 
@@ -28,9 +53,29 @@ export const ipfs_add = async (object: any) => {
     }
 }
 
+export const cluster_pin = async (cid: string) => {
 
+    try { 
 
-// Helper function to convert a CID to bytes32-like format
+        const cluster_response = await axios.post(`/pin/${cid}`, {
+         
+        });
+
+        if (cluster_response.status !== 200) {
+            throw new Error(`Error uploading to IPFS: ${cluster_response.statusText}`);
+        }
+
+       //  console.log('IPFS Response:', ipfs_response.data);
+        return;
+        
+        
+    } catch (error) {
+
+        console.error('Pin failed:', error);
+        throw error;
+    }
+}
+
 export const cidToBytes32 = (cidStr: string): Uint8Array =>  {
     
   const cid = CID.parse(cidStr);        // Parse CID from the string

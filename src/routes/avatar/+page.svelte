@@ -10,6 +10,8 @@
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
     import { avatar_store } from '$lib/avatar.store';
+    import { hexStringToUint8Array, uint8ArrayToCidV0 } from '@circles-sdk/utils';
+    import { ipfs_cat } from '$lib/ipfs.factory';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -74,32 +76,76 @@
             }
         }
 
-        avatar_store.subscribe(async (_astore) => {
- 
-           const circlesSdk = Object.values(await _astore)[0];
+        // get profile cid
+        const abi = [
+                        {
+                    type: "function",
+                    name: "getMetadataDigest",
+                    inputs: [
+                        {
+                            name: "_avatar",
+                            type: "address",
+                            internalType: "address",
+                        },
+                    ],
+                    outputs: [
+                        {
+                            name: "",
+                            type: "bytes32",
+                            internalType: "bytes32",
+                        },
+                    ],
+                    stateMutability: "view",
+                }
+        ];
 
-           let p;
+        const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
+        let hex = await $srv.genericCall(nameRegistryAddress, abi, "getMetadataDigest", [$srv.safe_address]);
+        hex = hex.startsWith("0x") ? hex.slice(2) : hex;
+        let profile_cid  = uint8ArrayToCidV0(hexStringToUint8Array(hex));
+        const _profile: any = await ipfs_cat(profile_cid);
 
-           try {
-                p = await circlesSdk.getProfile();
-
-           } catch (error) {}
-
-           if (p == null || p == undefined) {
-                p = {
+        let p;
+        if (_profile == null || _profile == undefined) {
+            p = {
                     name: "",
                     description: ""
                 }
-            }
+        } else {
 
-           profile.set(p);
+            p = _profile
+        }
+
+        profile.set(p);
+
+        // get cid content 
+
+        // avatar_store.subscribe(async (_astore) => {
+ 
+        //    const circlesSdk = Object.values(await _astore)[0];
+
+        //    
+
+        //    try {
+        //         p = await circlesSdk.getProfile();
+
+        //    } catch (error) {}
+
+        //    if (p == null || p == undefined) {
+        //         p = {
+        //             name: "",
+        //             description: ""
+        //         }
+        //     }
+
+        //    profile.set(p);
            
        
-        //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
-        //         avatarEvents.subscribe((event: any) => {
-        //         console.log(event);
-        //     });
-        });
+        // //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
+        // //         avatarEvents.subscribe((event: any) => {
+        // //         console.log(event);
+        // //     });
+        // });
 
         
     })
