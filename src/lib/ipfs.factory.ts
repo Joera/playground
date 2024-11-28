@@ -1,19 +1,17 @@
 
 import { CID } from 'multiformats/cid';
-import axios  from 'axios';
+import { kubo_api, cluster_api } from './apis';
 
 export const add_and_pin = async (object: any)  =>  {
 
     const cid = await ipfs_add(object);
-    // await cluster_pin(cid);
-
     return cid;
 
 }
 
 export const ipfs_cat = async (cid: string) => {
     
-    const ipfs_response = await axios.post(`/cat?arg=${cid}`);
+    const ipfs_response = await kubo_api.post(`/cat?arg=${cid}`);
 
     if (ipfs_response.status !== 200) {
         throw new Error(`Error uploading to IPFS: ${ipfs_response.statusText}`);
@@ -33,7 +31,7 @@ export const ipfs_add = async (object: any) => {
         const formData = new FormData();
         formData.append('file', JSON.stringify(object));
 
-        const ipfs_response = await axios.post('/add', formData, {
+        const ipfs_response = await kubo_api.post('/add', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             }
@@ -57,7 +55,7 @@ export const cluster_pin = async (cid: string) => {
 
     try { 
 
-        const cluster_response = await axios.post(`/pin/${cid}`, {
+        const cluster_response = await cluster_api.post(`/pin/${cid}`, {
          
         });
 

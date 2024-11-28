@@ -31,9 +31,15 @@ export default defineConfig({
 	},
 	server: {
 		proxy: {
-		  '/add': 'https://ipfs.transport-union.dev/api/v0',
-		  '/cat': 'https://ipfs.transport-union.dev/api/v0', // or your target API URL
-		  '/pin': 'https://pin.transport-union.dev/pins',
+		  '/kubo': {
+			target: 'https://ipfs.transport-union.dev/api/v0',
+			changeOrigin: true,
+			rewrite: (path) => path.replace(/^\/kubo/, '') 
+		  },
+		  '/cluster': {
+			target: 'https://pin.transport-union.dev',
+			changeOrigin: true,
+			rewrite: (path) => path.replace(/^\/cluster/, '')
 		},
 	  },
 });
