@@ -1,5 +1,5 @@
 
-import { CID } from 'multiformats/cid';
+import { CID } from 'multiformats/cid';         
 import { kubo_api, cluster_api } from './apis';
 
 export const add_and_pin = async (object: any)  =>  {
@@ -20,7 +20,6 @@ export const ipfs_cat = async (cid: string) => {
     console.log('IPFS Response:', ipfs_response);
 
     return ipfs_response.data;
-
 
 }
 
