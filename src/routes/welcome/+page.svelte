@@ -32,9 +32,9 @@
 <h2>Welcome!</h2>
 
 <div>
-    <label>default:</label>
- <button class="button" on:click={default_setup}>New Safe & Circles avatar</button>
- <label>advanced: (requires configuring)</label>
- <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button>
+    <label>Click the button to create a private key, deploy a safe on the Gnosis chain and register a circles avatar with the safe address.</label>
+ <button class="button" on:click={default_setup}>Do it!</button>
+ <!-- <label>advanced: (requires configuring)</label>
+ <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button> -->
 </div>
 

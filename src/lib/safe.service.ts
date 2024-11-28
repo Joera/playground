@@ -82,13 +82,15 @@ export class SafeService implements ISafeService {
         
         const instance = new SafeService();
         await instance.initialize(signer_key, safe_address);
-        await instance.initCirclesSDK();
+       
 
         if (isValidEthereumAddress(safe_address)) {
             await instance.setup();
         } else {
             await instance.new();
         }
+
+        await instance.initCirclesSDK();
 
         return instance;
     }
@@ -157,7 +159,10 @@ export class SafeService implements ISafeService {
     // to do .. untangle with avatar_store
     async initCirclesSDK() {
         
-        const adapter = new SafeSdkPrivateKeyContractRunner(this.signer_key, getRPC("gno", ""));
+        console.log("safe",this.safe_address);
+        const rpc = getRPC("gno", "");
+        console.log(rpc);
+        const adapter = new SafeSdkPrivateKeyContractRunner(this.signer_key, rpc);
         await adapter.init(this.safe_address);
         this.circles_sdk = new Sdk(adapter, GnosisChainConfig);
     }
