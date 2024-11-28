@@ -85,11 +85,11 @@ export class SafeService implements ISafeService {
         
         if (isValidEthereumAddress(safe_address)) {
             await instance.setup();
+            await instance.initCirclesSDK();
         } else {
             await instance.new();
+            // cant setup sdk cause new runner checks if safe is deployed 
         }
-
-        await instance.initCirclesSDK();
 
         return instance;
     }
