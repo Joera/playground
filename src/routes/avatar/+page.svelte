@@ -45,7 +45,7 @@
     const handleInviteRequested = async (event: any) => {
         console.log(event);
         friend_address.set(event.detail);
-        state.set('edit');
+        state.set('profile');
     }
 
     const handleInviteApproved = async (event: any) => {
@@ -101,31 +101,35 @@
 
         const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
         let hex = await $srv.genericCall(nameRegistryAddress, abi, "getMetadataDigest", [$srv.safe_address]);
-        hex = hex.startsWith("0x") ? hex.slice(2) : hex;
-        let profile_cid  = uint8ArrayToCidV0(hexStringToUint8Array(hex));
 
-        let _profile = null;
+        if (hex != "0x0000000000000000000000000000000000000000000000000000000000000000") {
+            
+            hex = hex.startsWith("0x") ? hex.slice(2) : hex;
+            let profile_cid  = uint8ArrayToCidV0(hexStringToUint8Array(hex));
 
-        try {
-           _profile = await ipfs_cat(profile_cid);
+            let _profile = null;
 
-        } catch (error) {
+            try {
+            _profile = await ipfs_cat(profile_cid);
 
-            console.log(error)
+            } catch (error) {
+
+                console.log(error)
+            }
+
+            let p;
+            if (_profile == null || _profile == undefined) {
+                p = {
+                        name: "",
+                        description: ""
+                    }
+            } else {
+
+                p = _profile
+            }
+
+            profile.set(p);
         }
-
-        let p;
-        if (_profile == null || _profile == undefined) {
-            p = {
-                    name: "",
-                    description: ""
-                }
-        } else {
-
-            p = _profile
-        }
-
-        profile.set(p);
 
         // get cid content 
 

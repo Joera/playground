@@ -6,7 +6,7 @@
     // Function to handle button clicks
     const default_setup = async () => {
         await initPK();
-        await addSafe();
+        await addSafe(0);
         goto('/avatar');
     };
 

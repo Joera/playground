@@ -16,6 +16,7 @@ import { SafeSdkPrivateKeyContractRunner } from '@circles-sdk/adapter-safe';
 import {BrowserProviderContractRunner, PrivateKeyContractRunner} from "@circles-sdk/adapter-ethers"
 import { GnosisChainConfig } from './circles.factory';
 import { hubv2_abi } from './circles_hub_v2';
+import { avatar_address } from './avatar.store';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
@@ -75,21 +76,33 @@ export class SafeService implements ISafeService {
     signer?: Signer;
     kit?: Safe4337Pack | Safe;
     circles_sdk?: Sdk;
+    pairedWithAvatar: boolean = false;
 
     private constructor() {}
 
-    static async create(signer_key: string, safe_address: string) {
+    static async create(signer_key: string, safe_address: string, index: number) {
         
         const instance = new SafeService();
         await instance.initialize(signer_key, safe_address);
         
         if (isValidEthereumAddress(safe_address)) {
             await instance.setup();
-            await instance.initCirclesSDK();
+            
         } else {
             await instance.new();
-            // cant setup sdk cause new runner checks if safe is deployed 
+            
         }
+
+        if (index == 0) {
+            avatar_address.set(instance.safe_address);
+            instance.pairedWithAvatar = true;
+        }
+
+        
+        if (instance.pairedWithAvatar && await instance.isDeployed() ) {
+            console.log("safe is deployed");
+            await instance.initCirclesSDK();
+        } 
 
         return instance;
     }

@@ -7,13 +7,13 @@ import { fixSafeAddress, fixAddressArray } from './eth.factory';
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
 
-export const addSafe = async () : Promise<void> => {
+export const addSafe = async (index: number) : Promise<void> => {
 
     const key = await hasKey()
 
     if(typeof key == "string") {
 
-        const srv = await SafeService.create(key, "");
+        const srv = await SafeService.create(key, "", index);
         
         console.log(srv.safe_address);
 

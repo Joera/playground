@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { avatar_store } from "$lib/avatar.store";
+    import { avatar_address, avatar_store } from "$lib/avatar.store";
     import QRCode from "@castlenine/svelte-qrcode";
     import { onMount } from "svelte";
     import { on } from "svelte/events";
@@ -71,9 +71,8 @@
             }
         ];
 
-        avatar_store.subscribe(async (_astore) => {
+        avatar_address.subscribe(async (address: string) => {
         
-            const address = fixSafeAddress(Object.keys(await _astore)[0]);
 
             safe_store.subscribe(async (store) => {
 
@@ -83,10 +82,14 @@
  
                     const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
 
+                    console.log("friend",friend_address)
+
                     if(friend_address != "" && friend_address != undefined) {
+                        console.log("registering");
                         const r = await srv.genericTx(hubv2Address, abi_hub, "registerHuman", [fixSafeAddress(friend_address), _metadataDigest], false);
                         console.log(r);
                     } else {
+                        console.log("updating profile");
                         const r = await srv.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
                         console.log(r);
                     }
@@ -109,8 +112,19 @@
         state.set("edit");
     }
 
+    // should i get friend address from contacts?
+    // first make that array of events as a writable? 
+
     onMount(() => {
-        console.log("ProfileDisplay mounted");
+        // console.log("ProfileDisplay mounted");
+        if (profile == null) {
+            profile = {
+                name: "",
+                description: "",
+                imageUrl: "",
+            };
+            state.set("edit");
+        }
     });
 
 </script>

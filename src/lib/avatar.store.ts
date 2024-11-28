@@ -9,6 +9,7 @@ import { getProvider, getRPC } from './eth.factory';
 import { safe_store } from './safe.store';
 import { SafeSdkPrivateKeyContractRunner } from '@circles-sdk/adapter-safe';
 
+export const avatar_address = writable('');
 export const avatar_store: Writable<Record<string, any>> = writable({});
 export const circles_sdk_store: Writable<Record<string, any>> = writable({});
 

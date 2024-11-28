@@ -19,11 +19,12 @@ export const load = async () => {
 
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
+        let i = 0;
         for (let safe of safe_array) {
 
             safe = fixSafeAddress(safe);
             
-            SafeService.create(keyExists, safe).then( async (safeService) => {
+            SafeService.create(keyExists, safe, i).then( async (safeService) => {
                 safe_store.update((safes) => { 
                     safes[safe] = writable(safeService); 
                     return safes; 
@@ -33,12 +34,14 @@ export const load = async () => {
                     circles_addresses.push(safe);
                 }
             });
+
+            i++;
         }
 
         if (circles_addresses.length > 0) {
             await setAvatar(circles_addresses[0])
         } else {
-            await setAvatar(safe_array[0])
+            // await setAvatar(safe_array[0])
         }
     } 
    

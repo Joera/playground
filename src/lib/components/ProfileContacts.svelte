@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { avatar_store, circles_sdk_store } from "$lib/avatar.store";
+    import { avatar_address, avatar_store, circles_sdk_store } from "$lib/avatar.store";
     import { displayAddress, fixSafeAddress } from "$lib/eth.factory";
     import { CirclesData, CirclesRpc } from "@circles-sdk/data";
     import { writable, type Writable } from "svelte/store";
@@ -24,9 +24,12 @@
 
     const getEvents = async () => {
 
-        avatar_store.subscribe(async (store) => {
+        console.log(1)
 
-            const address = Object.keys(await store)[0]
+        avatar_address.subscribe(async (address: string) => {
+
+            console.log(address);
+
             const avatarEvents = await data.getEvents(address, 10000000);
             
             avatar_trust_events.set(
@@ -40,6 +43,7 @@
             );
             
             avatar_events.set(avatarEvents);
+
         })
     }
 
