@@ -82,8 +82,7 @@ export class SafeService implements ISafeService {
         
         const instance = new SafeService();
         await instance.initialize(signer_key, safe_address);
-       
-
+        
         if (isValidEthereumAddress(safe_address)) {
             await instance.setup();
         } else {
