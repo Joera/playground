@@ -1,22 +1,18 @@
 export const ssr = false;
 export const prerender = false;
 
-import { error } from '@sveltejs/kit';
-import { hasKey, initPK  } from '../lib/key.store';
+import { hasKey  } from '../lib/key.store';
 import { SafeService, type ISafeService } from '$lib/safe.service';
 import { writable } from 'svelte/store';
-import { safe_store, hasSafeAddresses } from '../lib/safe.store';
-import { setAvatar } from '$lib/avatar.store';
+import { safe_store, hasSafeAddresses, circles_addresses } from '../lib/safe.store';
+// import { setAvatar } from '$lib/avatar.store';
 import { fixSafeAddress } from '$lib/eth.factory';
-import { CirclesData, CirclesRpc } from '@circles-sdk/data';
 
 /** @type {import('./$types').PageLoad} */
 export const load = async () => {
 
     const keyExists = await hasKey();
     const safe_array = await hasSafeAddresses();
-
-    const circles_addresses: any[] = [];
 
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
@@ -32,7 +28,7 @@ export const load = async () => {
                 });
 
                 if (await safeService.checkAvatar()) {
-                    circles_addresses.push(safe);
+                    circles_addresses.update (addresses => [...addresses, safe]);
                 }
             });
 
@@ -49,6 +45,7 @@ export const load = async () => {
     return {
         safe_array,
         keyExists, 
+        circles_addresses
     };
 }
 

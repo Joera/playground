@@ -6,6 +6,7 @@ import { fixSafeAddress, fixAddressArray } from './eth.factory';
 
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
+export const circles_addresses = writable<string[]>([]);
 
 export const addSafe = async (index: number) : Promise<void> => {
 
@@ -82,4 +83,13 @@ export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, W
             }
         }, 100);
     });
+}
+
+export const safeWithCircles = async () => {
+    const safe = await new Promise(resolve => {
+        safe_store.subscribe(async (safeService) => {
+            resolve(safeService);
+        });
+    });
+    return safe;
 }

@@ -15,7 +15,6 @@
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
-    let isTrusted = writable(false);
     let state = writable("profile");
     let profile : Writable<any> = writable(null);
     let owner_address: Writable<string> = writable("");
@@ -74,6 +73,7 @@
                 owner_address.set($srv.safe_address);
             }
         }
+
 
         profile.set(
             await getProfile($srv)

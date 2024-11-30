@@ -168,9 +168,6 @@ export class SafeService implements ISafeService {
                 const paddedHex = addressHex.padStart(64, '0');
                 return BigInt("0x" + paddedHex).toString();
             }
-
-
-            // improve on type
             
             if(balances) {
                 this.circles.update((circles) => {
@@ -225,6 +222,7 @@ export class SafeService implements ISafeService {
         return await this.circles_data.getAggregatedTrustRelations(this.safe_address);
     }
 
+ 
  
 
     async initSafe() {

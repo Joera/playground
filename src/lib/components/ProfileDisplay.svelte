@@ -1,22 +1,24 @@
 <script lang="ts">
-    import { avatar_address, avatar_store } from "$lib/avatar.store";
+    // import { avatar_address, avatar_store } from "$lib/avatar.store";
     import QRCode from "@castlenine/svelte-qrcode";
     import { onMount } from "svelte";
     import { on } from "svelte/events";
-    import { writable } from "svelte/store";
+    import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
     import type { Profile } from "@circles-sdk/profiles";
     import { fixSafeAddress } from "$lib/eth.factory";
-    import { safe_store } from "$lib/safe.store";
+    import { circles_addresses, safe_store } from "$lib/safe.store";
     import { cidV0ToUint8Array } from "@circles-sdk/utils";
     import { ipfs_add } from "$lib/ipfs.factory";
 
     export let profile: any;
     export let friend_address: string;
     export let owner_address: string;
+    // export let is_trusted: Writable<boolean>;  
 
     const isTrusted = false;
     const state = writable("");
+
 
     const handleProfile = async (event: any) => {
 
@@ -67,16 +69,15 @@
             }
         ];
 
-        avatar_address.subscribe(async (address: string) => {
+        circles_addresses.subscribe(async (addresses) => {
         
             safe_store.subscribe(async (store) => {
 
-                const safeService = (await store)[address];
-                
+                const safeService = (await store)[addresses[0]];
+            
                 safeService.subscribe(async (srv) => {
- 
-                    const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
 
+                    const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
                     console.log("friend",friend_address)
 
                     if(friend_address != "" && friend_address != undefined) {
@@ -101,7 +102,7 @@
                 })
             })
         });
-        }
+    }
 
     const handleEdit = async () => {
         state.set("edit");
@@ -113,19 +114,9 @@
         }
     });
 
-    // should i get friend address from contacts?
-    // first make that array of events as a writable? 
-
     onMount(() => {
-        // console.log("ProfileDisplay mounted");
-        // if (profile == null) {
-        //     profile = {
-        //         name: "",
-        //         description: "",
-        //         imageUrl: "",
-        //     };
-            
-        // }
+
+
     });
 
 </script>
@@ -162,7 +153,7 @@
             <p>{$profile.description }</p>
         </div>
 
-        {#if isTrusted}
+        {#if friend_address != ""}
             <button class="icon" on:click={handleEdit}>
                 <svg xmlns:x="http://ns.adobe.com/Extensibility/1.0/" xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/" xmlns:graph="http://ns.adobe.com/Graphs/1.0/" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" style="enable-background:new 0 0 100 100;" xml:space="preserve"><switch><foreignObject requiredExtensions="http://ns.adobe.com/AdobeIllustrator/10.0/" x="0" y="0" width="1" height="1"/><g i:extraneous="self"><path d="M82.1,14.9c-0.4-1.5-1.3-2.7-2.5-3.4L66,3.3c-2.6-1.5-6.1-0.7-7.7,1.9L19.9,68.8c-0.1,0.3-0.2,0.5-0.3,0.8l-1.9,25.8    c-0.1,0.7,0.3,1.4,0.9,1.7c0.4,0.3,0.9,0.3,1.4,0.2c0.2,0,0.4-0.1,0.5-0.2l21.9-13.8c0.2-0.2,0.5-0.4,0.6-0.6l38.4-63.7    C82.3,17.9,82.5,16.4,82.1,14.9z M54,19.5l3.5,2.1L27.6,71.1L24.1,69L54,19.5z M60.7,23.5l3.5,2.1L34.3,75.2l-3.5-2.1L60.7,23.5z     M26.5,89.1l-4.3-2.6l1-13.7l14.9,9L26.5,89.1z M40.9,79.2l-3.5-2.1l29.8-49.5l3.5,2.1L40.9,79.2z M72.7,26.5L55.9,16.3l2.3-3.8    L75,22.6L72.7,26.5z M78.3,17.2l-1.3,2.2L60.1,9.3l1.3-2.2C62,6.2,63.2,5.9,64,6.5l13.6,8.2C78.5,15.2,78.8,16.3,78.3,17.2z"/></g></switch></svg>
             </button>
@@ -171,7 +162,7 @@
 
     {#if owner_address != ""}
         <div class="centered">
-            {#if !isTrusted}
+            {#if friend_address == "" && $profile.name == ""}
                 <p>You are not yet trusted by circles to be a human. Ask a (new) friend to scan this and invite you. </p>
             {/if}
             <QRCode data="{owner_address}" backgroundColor="transparent" />
@@ -212,7 +203,4 @@
             margin-top: .25rem;
         }
     }
-
-
-  
 </style>

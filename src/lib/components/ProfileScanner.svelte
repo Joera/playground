@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { avatar_store } from '$lib/avatar.store';
+ 
     import { displayAddress } from '$lib/eth.factory';
 
     import { BrowserMultiFormatReader } from '@zxing/library';
@@ -7,7 +7,7 @@
     import { writable } from 'svelte/store';
     import Spinner from './Spinner.svelte';
     import { goto } from '$app/navigation';
-    import { safe_store } from '$lib/safe.store';
+    import { circles_addresses, safe_store } from '$lib/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
     import { cidV0ToUint8Array } from '@circles-sdk/utils';
     import { GnosisChainConfig } from '$lib/circles.factory';
@@ -40,20 +40,17 @@
 
     const inviteHandler = async () => {
 
-      avatar_store.subscribe(async (store) => {
+      // avatar_store.subscribe(async (store) => {
 
         const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
         const expiryTimeMs = Date.now() + 24 * 60 * 60 * 1000;
         const expiryTimeSeconds = Math.floor(expiryTimeMs / 1000);
         const expiryTimeHex = "0x" + expiryTimeSeconds.toString(16).padStart(64, '0');
 
-        avatar_store.subscribe(async (_astore) => {
-           
-            const address = Object.keys(await _astore)[0];
-
+        circles_addresses.subscribe( (addresses) => {
             safe_store.subscribe(async (store) => {
 
-                const safeService = (await store)[address];
+                const safeService = (await store)[addresses[0]];
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
@@ -64,7 +61,7 @@
                 })
             })
         });
-      })
+     
     }
 
 </script>
