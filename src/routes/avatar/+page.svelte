@@ -8,15 +8,16 @@
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
-    import { hexStringToUint8Array, uint8ArrayToCidV0 } from '@circles-sdk/utils';
-    import { ipfs_cat } from '$lib/ipfs.factory';
     import { getProfile } from '$lib/profile.factory';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
     let state = writable("profile");
-    let profile : Writable<any> = writable(null);
+    let profile : Writable<any> = writable({
+        name: "",
+        description: ""
+    });
     let owner_address: Writable<string> = writable("");
     let friend_address: Writable<string> = writable("");
 
@@ -99,7 +100,7 @@
 
     {#if $state == 'profile'}
 
-        <ProfileDisplay profile={profile} owner_address={$owner_address} friend_address={$friend_address}></ProfileDisplay>
+        <ProfileDisplay profile={profile} owner_address={owner_address} friend_address={friend_address}></ProfileDisplay>
 
     {:else if $state == 'scanner'}
 
