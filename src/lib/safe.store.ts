@@ -13,10 +13,8 @@ export const addSafe = async (index: number) : Promise<void> => {
 
     if(typeof key == "string") {
 
-        const srv = await SafeService.create(key, "", index);
+        const srv = await SafeService.create(key, "");
         
-        console.log(srv.safe_address);
-
         safe_store.update((safes) => { 
             safes[srv.safe_address] = writable(srv); 
             return safes; 
@@ -31,12 +29,7 @@ export const addSafe = async (index: number) : Promise<void> => {
 
             });
         }
-    }
-
-    // something in ux for profile
-    // get invite
-    // register as human avatar
- 
+    } 
 }   
 
 export const addSafeAddress = async (address: string) : Promise<void> => {
@@ -67,7 +60,7 @@ export const waitForSubscriptions = async (safe_store: Record<string, Writable<S
     for (const safe of Object.keys(safe_store)) {
         let b = await new Promise(resolve => {
             safe_store[safe].subscribe(async (safeService) => {
-                const hasAvatar = await safeService.hasAvatar();
+                const hasAvatar = await safeService.checkAvatar();
                 resolve(hasAvatar);
             });
         });

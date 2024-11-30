@@ -9,8 +9,7 @@
     import { LOG } from "@zxing/library/esm/core/datamatrix/encoder/constants";
 
 
-    const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
-    const data = new CirclesData(circlesRpc);
+
 
     const dispatch = createEventDispatcher();
 
@@ -24,11 +23,7 @@
 
     const getEvents = async () => {
 
-        console.log(1)
-
         avatar_address.subscribe(async (address: string) => {
-
-            console.log(address);
 
             const avatarEvents = await data.getEvents(address, 10000000);
             

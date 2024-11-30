@@ -16,12 +16,19 @@
 </script>
 
 <style global lang="scss">
-    div {
+    article {
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         align-items: center;
-        min-height: 240px
+        min-height: 240px;
+        max-width: calc(100% - 4rem);
+
+        label {
+            text-align: center;
+            line-height: 1.55;
+            margin: 0 .75rem .75rem;
+        }
     }
 
     h2 {
@@ -31,10 +38,10 @@
 
 <h2>Welcome!</h2>
 
-<div>
+<article>
     <label>Click the button to create a private key, deploy a safe on the Gnosis chain and register a circles avatar with the safe address.</label>
  <button class="button" on:click={default_setup}>Do it!</button>
  <!-- <label>advanced: (requires configuring)</label>
  <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button> -->
-</div>
+</article>
 

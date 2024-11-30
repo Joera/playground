@@ -2,25 +2,22 @@ export const ssr = false;
 export const prerender = false;
 
 import { writable, type Writable } from 'svelte/store';
-import SafeApiKit from '@safe-global/api-kit'
 import Safe from "@safe-global/protocol-kit";
-import SafeFactory from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
 import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress } from "./eth.factory";
 import { tokenList, type IToken } from './token.factory';
 import { fromStore } from './store.factory';
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types';
 import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
-import { SafeSdkPrivateKeyContractRunner } from '@circles-sdk/adapter-safe';
-import {BrowserProviderContractRunner, PrivateKeyContractRunner} from "@circles-sdk/adapter-ethers"
 import { GnosisChainConfig } from './circles.factory';
 import { hubv2_abi } from './circles_hub_v2';
-import { avatar_address } from './avatar.store';
+import { CirclesData, CirclesRpc } from '@circles-sdk/data';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
 const migrationModuleAddress = "0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6";
+const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
+
 
 export interface ISafeService {
 
@@ -37,7 +34,7 @@ export interface ISafeService {
     tokens: Writable<Map<string, IToken>>;
     circles: Writable<Map<string, any>>;
     modules: Writable<string[]>;
-    hasAvatar: () => Promise<boolean>;
+    hasAvatar: boolean;
 
     upgrade: () => Promise<void>;
     getBalances: () => Promise<void>;
@@ -75,12 +72,12 @@ export class SafeService implements ISafeService {
 
     signer?: Signer;
     kit?: Safe4337Pack | Safe;
-    circles_sdk?: Sdk;
-    pairedWithAvatar: boolean = false;
+    circles_data?: any;
+    hasAvatar: boolean = false;
 
     private constructor() {}
 
-    static async create(signer_key: string, safe_address: string, index: number) {
+    static async create(signer_key: string, safe_address: string) {
         
         const instance = new SafeService();
         await instance.initialize(signer_key, safe_address);
@@ -93,17 +90,6 @@ export class SafeService implements ISafeService {
             
         }
 
-        if (index == 0) {
-            avatar_address.set(instance.safe_address);
-            instance.pairedWithAvatar = true;
-        }
-
-        
-        if (instance.pairedWithAvatar && await instance.isDeployed() ) {
-            console.log("safe is deployed");
-            await instance.initCirclesSDK();
-        } 
-
         return instance;
     }
 
@@ -114,17 +100,22 @@ export class SafeService implements ISafeService {
         let signer = new ethers.Wallet(signer_key);
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));
+
+        const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
+        this.circles_data = new CirclesData(circlesRpc);
+
     }
    
     async setup () {
+
         await this.initSafeWithRelay();
         const d = await this.isDeployed();
 
         if (d) {
             await this.getVersion();
             await this.getSigners();
-            
-            await this.getCircles();
+            await this.checkAvatar();
+            if (this.hasAvatar) await this.getCircles();          
             await this.getModules();
             this.getBalances();
 
@@ -151,41 +142,25 @@ export class SafeService implements ISafeService {
         this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
     }
 
-    async invite  (sdk: any, inviteeAddress: string)  {
-
-        //const a = await this.circles_sdk.invite(inviteeAddress);    
-    }
-
-    async hasAvatar() {
+    async checkAvatar() {
         
         try {
-            const avatar = await this.circles_sdk?.getAvatar(this.safe_address);
-            return true;
+            const avatar = await this.genericCall(hubv2Address,hubv2_abi,"avatars",[this.safe_address]);
+            this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
+            return this.hasAvatar;
 
         } catch (error) {
-
             return false;
         }
-    }
-
-    // to do .. untangle with avatar_store
-    async initCirclesSDK() {
-        
-        console.log("safe",this.safe_address);
-        const rpc = getRPC("gno", "");
-        console.log(rpc);
-        const adapter = new SafeSdkPrivateKeyContractRunner(this.signer_key, rpc);
-        await adapter.init(this.safe_address);
-        this.circles_sdk = new Sdk(adapter, GnosisChainConfig);
     }
 
     async getCircles() {
 
         try {
 
-            const avatar = await this.circles_sdk?.getAvatar(this.safe_address);
-            const balances = await avatar?.getBalances();
-            const mintable = await avatar?.getMintableAmount();
+            const balances = await this.circles_data?.getTokenBalances(this.safe_address);
+            const issuance = await this.genericCall(hubv2Address,hubv2_abi,"calculateIssuance",[this.safe_address]);
+            const mintable = ethers.formatUnits(issuance.split(",")[1], 8);
 
             function addressToUint256(address: string): string {
                 const addressHex = address.startsWith("0x") ? address.slice(2) : address;
@@ -197,7 +172,6 @@ export class SafeService implements ISafeService {
             // improve on type
             
             if(balances) {
-                // console.log(balances);
                 this.circles.update((circles) => {
                     for (let b of balances) {
 
@@ -211,7 +185,7 @@ export class SafeService implements ISafeService {
                         }
 
                         if (mintable != undefined && b.tokenId === addressToUint256(this.safe_address)) {
-                            t.mintable = mintable.toString();
+                            t.mintable = parseFloat(mintable.toString()).toFixed(0).toString();
                         }
 
                         circles.set(b.tokenId, t);
@@ -226,8 +200,6 @@ export class SafeService implements ISafeService {
     }
 
     async mintCircles() {
-
-        const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
 
         await this.genericTx(hubv2Address, hubv2_abi, "personalMint",[], false);
 
@@ -246,6 +218,10 @@ export class SafeService implements ISafeService {
 
         return
 
+    }
+
+    async getNetwork() {
+        return await this.circles_data.getAggregatedTrustRelations(this.safe_address);
     }
 
  

@@ -8,6 +8,7 @@ import { writable } from 'svelte/store';
 import { safe_store, hasSafeAddresses } from '../lib/safe.store';
 import { setAvatar } from '$lib/avatar.store';
 import { fixSafeAddress } from '$lib/eth.factory';
+import { CirclesData, CirclesRpc } from '@circles-sdk/data';
 
 /** @type {import('./$types').PageLoad} */
 export const load = async () => {
@@ -23,14 +24,14 @@ export const load = async () => {
         for (let safe of safe_array) {
 
             safe = fixSafeAddress(safe);
-            
-            SafeService.create(keyExists, safe, i).then( async (safeService) => {
+
+            SafeService.create(keyExists, safe).then( async (safeService) => {
                 safe_store.update((safes) => { 
                     safes[safe] = writable(safeService); 
                     return safes; 
                 });
 
-                if (await safeService.hasAvatar()) {
+                if (await safeService.checkAvatar()) {
                     circles_addresses.push(safe);
                 }
             });
@@ -38,11 +39,11 @@ export const load = async () => {
             i++;
         }
 
-        if (circles_addresses.length > 0) {
-            await setAvatar(circles_addresses[0])
-        } else {
-            // await setAvatar(safe_array[0])
-        }
+        // if (circles_addresses.length > 0) {
+        //     await setAvatar(circles_addresses[0])
+        // } else {
+        //     // await setAvatar(safe_array[0])
+        // }
     } 
    
     return {
