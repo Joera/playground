@@ -161,7 +161,7 @@ export class SafeService implements ISafeService {
 
             const balances = await this.circles_data?.getTokenBalances(this.safe_address);
             const issuance = await this.genericCall(hubv2Address,hubv2_abi,"calculateIssuance",[this.safe_address]);
-            const mintable = ethers.formatUnits(issuance.split(",")[1], 8);
+            const mintable = ethers.formatUnits(issuance.split(",")[0], 18);
 
             function addressToUint256(address: string): string {
                 const addressHex = address.startsWith("0x") ? address.slice(2) : address;
@@ -221,9 +221,6 @@ export class SafeService implements ISafeService {
     async getNetwork() {
         return await this.circles_data.getAggregatedTrustRelations(this.safe_address);
     }
-
- 
- 
 
     async initSafe() {
 

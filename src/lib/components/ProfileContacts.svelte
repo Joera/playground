@@ -1,11 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { avatar_address, avatar_store, circles_sdk_store } from "$lib/avatar.store";
     import { displayAddress, fixSafeAddress } from "$lib/eth.factory";
     import { CirclesData, CirclesRpc } from "@circles-sdk/data";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher } from 'svelte';
-    import { safe_addresses } from "$lib/safe.store";
+    import { circles_addresses, safe_addresses, safe_store } from "$lib/safe.store";
     import { LOG } from "@zxing/library/esm/core/datamatrix/encoder/constants";
 
 
@@ -23,22 +22,27 @@
 
     const getEvents = async () => {
 
-        avatar_address.subscribe(async (address: string) => {
+        circles_addresses.subscribe(async (addresses: string[]) => {
+            safe_store.subscribe(async (store) => {
+                (await store)[addresses[0]].subscribe(async (srv) => {
 
-            const avatarEvents = await data.getEvents(address, 10000000);
-            
-            avatar_trust_events.set(
-                avatarEvents
-                .filter((event) => event.$event == "CrcV2_Trust")
-                .filter((item, index, array) => {
-                    const pair = `${item.trustee}-${item.truster}`;
-                    return index === array.findIndex(i => `${i.trustee}-${i.truster}` === pair);
+                    const avatarEvents: any[] = await srv.circles_data.getEvents(addresses[0], 10000000);
+                
+                    avatar_trust_events.set(
+
+                        avatarEvents
+                        .filter((event) => event.$event == "CrcV2_Trust")
+                        .filter((item, index, array) => {
+                            const pair = `${item.trustee}-${item.truster}`;
+                            return index === array.findIndex(i => `${i.trustee}-${i.truster}` === pair);
+                        })
+                        .filter((event) => $safe_addresses.includes(fixSafeAddress(event.trustee|| "")))
+                    );
+                    
+                    avatar_events.set(avatarEvents);
+
                 })
-                .filter((event) => $safe_addresses.includes(fixSafeAddress(event.trustee|| "")))
-            );
-            
-            avatar_events.set(avatarEvents);
-
+            })
         })
     }
 
@@ -57,7 +61,7 @@
                     <div>
                         { displayAddress("gno", fixSafeAddress(event.truster)) } trusts you
                     </div>
-                    {#if Object.values($avatar_store)[0] == null}
+                    {#if $circles_addresses[0] == undefined}
                         <button class="button"on:click={() => handleInvite(fixSafeAddress(event.truster))}>join circles</button>
                     {/if}
              

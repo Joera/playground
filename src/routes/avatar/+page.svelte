@@ -9,6 +9,7 @@
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
     import { getProfile } from '$lib/profile.factory';
+    import ProfileNetwork from '$lib/components/ProfileNetwork.svelte';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -36,9 +37,9 @@
         state.set('scanner');
     }
 
-    const handleContacts = async () => {
+    const handleNetwork = async () => {
         
-        state.set('contacts');
+        state.set('network');
     }
 
     const handleInviteRequested = async (event: any) => {
@@ -106,9 +107,9 @@
 
         <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner>
 
-    {:else if $state == 'contacts'}
+    {:else if $state == 'network'}
 
-        <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
+        <ProfileNetwork on:friend_address_event={handleInviteRequested}></ProfileNetwork>
 
     {:else if $state == 'activities'}
 
@@ -124,7 +125,7 @@
     <nav>
         <button class="button" on:click="{handleProfile}">profile</button>
         <button class="button" on:click="{handleScanner}">scan</button>
-        <button class="button" on:click="{handleContacts}">network</button>
+        <button class="button" on:click="{handleNetwork}">network</button>
         <button class="button" on:click="{handleActivities}">activity</button>
     </nav>
 
