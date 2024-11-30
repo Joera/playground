@@ -146,6 +146,7 @@ export class SafeService implements ISafeService {
         
         try {
             const avatar = await this.genericCall(hubv2Address,hubv2_abi,"avatars",[this.safe_address]);
+            console.log("avatar",avatar);
             this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
             return this.hasAvatar;
 
