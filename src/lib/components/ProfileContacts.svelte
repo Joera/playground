@@ -1,101 +1,201 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { displayAddress, fixSafeAddress } from "$lib/eth.factory";
-    import { CirclesData, CirclesRpc } from "@circles-sdk/data";
+    import { displayAddress } from "$lib/eth.factory";
+    import { circles_addresses, safe_store } from "$lib/safe.store";
+    import { ethers } from "ethers";
     import { writable, type Writable } from "svelte/store";
-    import { createEventDispatcher } from 'svelte';
-    import { circles_addresses, safe_addresses, safe_store } from "$lib/safe.store";
-    import { LOG } from "@zxing/library/esm/core/datamatrix/encoder/constants";
+    import Spinner from "./Spinner.svelte";
+    import { contacts } from "$lib/contacts.store";
 
-
-
-
-    const dispatch = createEventDispatcher();
-
-    const avatar_events: Writable<any[]> = writable([]);
-    const avatar_trust_events: Writable<any[]> = writable([]);
-
-    const handleInvite = async (friend_adress:string) => {
-       
-        dispatch('friend_address_event', friend_adress);
+    type Contact = {
+        objectAvatar: string;
+        relation: string;
+        subjectAvatar: string;
     }
 
-    const getEvents = async () => {
 
-        circles_addresses.subscribe(async (addresses: string[]) => {
-            safe_store.subscribe(async (store) => {
-                (await store)[addresses[0]].subscribe(async (srv) => {
+    const network: Writable<Contact[]> = writable([])
 
-                    const avatarEvents: any[] = await srv.circles_data.getEvents(addresses[0], 10000000);
-                
-                    avatar_trust_events.set(
-
-                        avatarEvents
-                        .filter((event) => event.$event == "CrcV2_Trust")
-                        .filter((item, index, array) => {
-                            const pair = `${item.trustee}-${item.truster}`;
-                            return index === array.findIndex(i => `${i.trustee}-${i.truster}` === pair);
-                        })
-                        .filter((event) => $safe_addresses.includes(fixSafeAddress(event.trustee|| "")))
-                    );
-                    
-                    avatar_events.set(avatarEvents);
-
-                })
-            })
+    // fill from local storage
+    if (contacts) {
+        contacts.subscribe((contacts) => {
+            if (contacts != "") {
+                network.set(JSON.parse(contacts))
+            }
         })
     }
 
-    getEvents();
+    circles_addresses.subscribe((addresses) => {
+        
+        const srv = $safe_store[addresses[0]];
+        
+        srv.subscribe(  async (srv) => {
+
+            const trust_query = await srv.getNetwork();
+
+            const trustListRows = [];
+            while (await trust_query.queryNextPage()) {
+                const resultRows = trust_query.currentPage?.results ?? [];
+                if (resultRows.length === 0)
+                    break;
+                    trustListRows.push(...resultRows);
+                if (resultRows.length < 1000)
+                    break;
+            }
+
+            const trustBucket : any = {};
+            trustListRows.forEach( (row: any) => {
+                if (ethers.getAddress(row.truster) !== addresses[0]) {
+                    trustBucket[row.truster] = trustBucket[row.truster] || [];
+                    if (row.trustee !== row.truster) {
+                        trustBucket[row.truster].push(row);
+                    }
+                }
+                if (ethers.getAddress(row.trustee) !== addresses[0]) {
+                    trustBucket[row.trustee] = trustBucket[row.trustee] || [];
+                    if (row.trustee !== row.truster) {
+                        trustBucket[row.trustee].push(row);
+                    }
+                }
+            });
+
+            const format = async (trustBucket: any, addresses: string[]) => { 
+                
+                const contacts: any[] = []; 
+                
+                await Promise.all(
+                    Object.entries(trustBucket)
+                    .filter(([avatar]) => ethers.getAddress(avatar) !== addresses[0])
+                    .map( async ([avatar, rows]) => {
+
+                        const maxTimestamp = Math.max(...(rows as any[]).map(o => o.timestamp));
+
+                        let relation;
+                        if ((rows as any[]).length === 2) {
+                            relation = 'mutuallyTrusts';
+                        }
+                        else if (ethers.getAddress((rows as any[])[0].trustee) === addresses[0]) {
+                            relation = 'trustedBy';
+                        }
+                        else if (ethers.getAddress((rows as any[])[0].truster) === addresses[0]) {
+                            relation = 'trusts';
+                        }
+                        else {
+                            // console.log(avatar)
+                            relation = null  //  throw new Error(`Unexpected trust list row. Couldn't determine trust relation.`);
+                        }
+
+                        const o = await srv.getAvatarName(avatar)
+
+                        if (relation != null && o != undefined) {
+                            contacts.push({
+                                subjectAvatar: "you",
+                                relation: relation,
+                                objectAvatar: o,
+                                timestamp: maxTimestamp
+                            });
+                        }
+
+
+                    })
+                );
+
+                return contacts.sort((a, b) => a.objectAvatar.localeCompare(b.objectAvatar)); 
+            }
+
+            const fetched_contacts = await format(trustBucket, addresses);
+            network.set(fetched_contacts)
+            if (contacts != undefined) {
+                contacts.set(JSON.stringify(fetched_contacts));
+            }
+        });
+    })
+    
+
+
 
 </script>
 
+<section class="scrolltainer">
 
-<article>
+    <article>
 
-    {#each $avatar_trust_events as event}
+        {#if $network.length == 0}
+            <Spinner></Spinner>
+        {:else }
 
-         
-            <div class="event">
+            {#each $network as contact}
+                <div>
+                    
+                    {#if contact.relation == "mutuallyTrusts"}
+                        <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                    {:else if contact.relation == "trustedBy"}
+                        trustedBy
+                    {:else if contact.relation == "trusts"}
+                        <svg class="relation" width="25" height="32"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M99.251,48.167L58.6,7.516c-0.999-1.001-2.62-1.001-3.62,0l-6.859,6.859c-1.001,1-0.999,2.62,0,3.621l24.58,24.58H2.56  c-1.414,0-2.56,1.146-2.56,2.56v9.702c0,1.414,1.146,2.561,2.56,2.561H72.7L48.094,82.004c-1,1-1,2.621,0,3.621l6.859,6.859  c1,1.001,2.621,1,3.621,0l40.677-40.677c0.503-0.502,0.751-1.162,0.749-1.821C100.002,49.329,99.754,48.668,99.251,48.167z"/></svg>
+                    {/if} 
 
-                    <div>
-                        { displayAddress("gno", fixSafeAddress(event.truster)) } trusts you
-                    </div>
-                    {#if $circles_addresses[0] == undefined}
-                        <button class="button"on:click={() => handleInvite(fixSafeAddress(event.truster))}>join circles</button>
-                    {/if}
-             
-            </div>
-    {/each}
+                    <span class="name">{contact.objectAvatar.slice(0,20)}</span>
 
-</article>
+                    <svg class="transfer" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0" width="50" height="60">
+                        <path d="m89.582 28.082h-56.523-0.019532-12.051c-1.7266 0-3.125 1.3984-3.125 3.125 0 1.7266 1.3984 3.125 3.125 3.125h8.0234l-2.6641 10.348h-15.93c-1.7266 0-3.125 1.3984-3.125 3.125 0 1.7266 1.3984 3.125 3.125 3.125h14.32l-2.6641 10.348h-8.0977c-1.7266 0-3.125 1.3984-3.125 3.125 0 1.7266 1.3984 3.125 3.125 3.125h10.359c0.058593 0 0.10547 0.035156 0.16406 0.035156h56.543c1.4219 0 2.668-0.95703 3.0234-2.3359l8.5469-33.242c0.23828-0.93359 0.027344-1.9258-0.5625-2.6875-0.58984-0.76172-1.5-1.207-2.4648-1.207zm-45.578 33.223h-15.488l6.9453-26.973h12.102c-2.1328 3.1406-3.7578 7-4.6094 11.242-1.2148 5.875-0.76562 11.449 1.0508 15.73zm21.758-12.5c-1.0703 5.3281-3.7422 10.109-6.8945 12.5h-7.625c-2.125-2.3828-3.5977-7.582-2.168-14.484 1.0664-5.3203 3.7305-10.09 6.875-12.488h7.6602c2.1172 2.3867 3.5781 7.5781 2.1523 14.465zm12.863 12.5h-11.355c2.1367-3.1445 3.7656-7.0078 4.6172-11.254 1.2109-5.8672 0.76172-11.438-1.0508-15.711h14.727l-6.9414 26.973z"/>
+                    </svg>
+                </div>
+            {/each}
+        {/if}
+
+    </article>
+
+</section>
 
 <style>
-    .event { 
 
+
+    .scrolltainer {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
+        position: relative;
+        height: 100%;
+        overflow-y: scroll;
+        width: 100%;
+        max-width: 420px;
+        margin: 3rem 0;
+    }
 
+    article {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;            
+        justify-content: flex-start;
+        max-width: calc(100% - 4rem);
+        /* min-height: 100%; */
+        
 
-        > div  {
+        > div {
             display: flex;
             flex-direction: row;
+            justify-content: flex-start;
             align-items: center;
-            justify-content: space-between;
-
-            /* > div {
-                margin: 0 1rem; 
-            } */
-        }
-
-        button {
-            margin-top: .5rem;
-            margin-bottom: 1.5rem;
+            height: 3.5rem;
+            width: 100%;
+            border-bottom:  3px solid black;
         }
     }
 
+    .name {
+        line-height: 1.125;
+        margin-right: 15px;
+    }
 
+    svg.relation {
+        margin-top: 8px;
+        margin-right: 15px;
+    }
+
+    svg.transfer {
+        margin: 6px 0 0 auto;
+    }
 
 </style>

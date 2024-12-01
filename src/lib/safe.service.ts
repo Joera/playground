@@ -5,13 +5,14 @@ import { writable, type Writable } from 'svelte/store';
 import Safe from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
-import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress } from "./eth.factory";
+import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress } from "./eth.factory";
 import { tokenList, type IToken } from './token.factory';
 import { fromStore } from './store.factory';
 import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
 import { GnosisChainConfig } from './circles.factory';
 import { hubv2_abi } from './circles_hub_v2';
 import { CirclesData, CirclesRpc } from '@circles-sdk/data';
+import { ipfs_cat } from './ipfs.factory';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
@@ -218,8 +219,49 @@ export class SafeService implements ISafeService {
 
     }
 
+    async getAvatarName(address: string) {
+        
+        let cid;
+
+        try {
+            cid = await this.circles_data.getMetadataCidForAddress(address);
+        } catch (error) {
+            return undefined;
+        }
+
+        
+        if (cid != undefined) {
+
+            let profile: any;
+            try {
+                profile = await ipfs_cat(cid);
+            } catch (error) {
+                return displayShorterAddress(address);
+            }
+            if(profile && profile.name) {
+                return profile.name;
+            } else {
+                return displayShorterAddress(address);
+            }    
+        }  else {
+            undefined
+        }  
+    }
+
+    async getCircleTxs() {
+        return await this.circles_data.getTransactionHistory(this.safe_address,100);
+    }
+
+    async getCircleEvents() {
+        return await this.circles_data.getEvents(this.safe_address,10000000);
+    }
+
+    async getSponsor() {
+        return await this.circles_data.getAvatarInfo(this.safe_address);
+    }
+
     async getNetwork() {
-        return await this.circles_data.getAggregatedTrustRelations(this.safe_address);
+        return await this.circles_data.getTrustRelations(this.safe_address);
     }
 
     async initSafe() {

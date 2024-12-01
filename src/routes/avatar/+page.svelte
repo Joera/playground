@@ -9,7 +9,8 @@
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
     import { getProfile } from '$lib/profile.factory';
-    import ProfileNetwork from '$lib/components/ProfileNetwork.svelte';
+    import ProfileNetwork from '$lib/components/ProfileContacts.svelte';
+    import ProfileActivities from '$lib/components/ProfileActivities.svelte';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -37,9 +38,9 @@
         state.set('scanner');
     }
 
-    const handleNetwork = async () => {
+    const handleContacts = async () => {
         
-        state.set('network');
+        state.set('contacts');
     }
 
     const handleInviteRequested = async (event: any) => {
@@ -97,23 +98,31 @@
 
 <article>
 
-    <h2>circles avatar</h2>
+    
 
     {#if $state == 'profile'}
+
+    <h2>circles avatar</h2>
 
         <ProfileDisplay profile={profile} owner_address={owner_address} friend_address={friend_address}></ProfileDisplay>
 
     {:else if $state == 'scanner'}
 
+    <h2>circles scanner</h2>
+
         <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner>
 
-    {:else if $state == 'network'}
+    {:else if $state == 'contacts'}
 
-        <ProfileNetwork on:friend_address_event={handleInviteRequested}></ProfileNetwork>
+    <h2>circles contacts</h2>
+
+        <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
 
     {:else if $state == 'activities'}
 
-        <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
+    <h2>circles activities</h2>
+
+        <ProfileActivities on:friend_address_event={handleInviteRequested}></ProfileActivities>
 
     {:else if $state == 'spinner'}
 
@@ -125,7 +134,7 @@
     <nav>
         <button class="button" on:click="{handleProfile}">profile</button>
         <button class="button" on:click="{handleScanner}">scan</button>
-        <button class="button" on:click="{handleNetwork}">network</button>
+        <button class="button" on:click="{handleContacts}">contacts</button>
         <button class="button" on:click="{handleActivities}">activity</button>
     </nav>
 

@@ -113,8 +113,31 @@ export const getInternalTransactions = async (chain: string,txHash: string, toke
 }
 
 export const displayAddress = (chain: string,address: string) => {
-    return chain + ":" + address.substring(0, 4) + "..." + address.substring(38, 42);
+
+    let a = "0x";
+    try {
+        a = chain + ":" + address.substring(0, 4) + "..." + address.substring(38, 42);
+    }
+    catch (error) {
+        console.log(error)
+    }
+
+    return a;
 }
+
+export const displayShorterAddress = (address: string) => {
+
+    let a = "0x";
+    try {
+        a = "..." + address.substring(38, 42);
+    }
+    catch (error) {
+        console.log(error)
+    }
+
+    return a;
+}
+
 
 
 
