@@ -12,11 +12,6 @@
     const avatar_events: Writable<any[]> = writable([]);
     const avatar_trust_events: Writable<any[]> = writable([]);
 
-    const handleInvite = async (friend_adress:string) => {
-       
-        dispatch('friend_address_event', friend_adress);
-    }
-
     type Activity = {
         
         // attoCircles: number,
@@ -191,17 +186,6 @@
 
     {/each}
 
-    <!-- {#each $avatar_trust_events as event}
-
-            <div class="event">
-                <div>
-                    { displayAddress("gno", fixSafeAddress(event.truster)) } trusts you
-                </div>
-                {#if $circles_addresses[0] == undefined}
-                    <button class="button"on:click={() => handleInvite(fixSafeAddress(event.truster))}>join circles</button>
-                {/if}
-            </div>
-    {/each} -->
 
 </article>
 

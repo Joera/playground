@@ -122,7 +122,7 @@
 
     <h2>circles activities</h2>
 
-        <ProfileActivities on:friend_address_event={handleInviteRequested}></ProfileActivities>
+        <ProfileActivities></ProfileActivities>
 
     {:else if $state == 'spinner'}
 
