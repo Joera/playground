@@ -78,9 +78,11 @@
         }
 
 
-        profile.set(
-            await getProfile($srv)
-        );
+        if ($srv) {
+            profile.set(     
+                await getProfile($srv)
+            );
+        }
 
            
        

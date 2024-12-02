@@ -5,19 +5,23 @@
     import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
     import { contacts } from "$lib/contacts.store";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher();
 
     type Contact = {
         objectAvatar: string;
         relation: string;
         subjectAvatar: string;
+        objectName: string;
     }
 
     const handleInvite = async (friend_adress:string) => {
        dispatch('friend_address_event', friend_adress);
     }
 
-    const handleTransfer = async (friend_adress:string) => {
-       dispatch('friend_address_event', friend_adress);
+    const handleTransfer = async (to:string) => {
+       dispatch('transfer_event', to);
     }
 
     const network: Writable<Contact[]> = writable([])
@@ -32,6 +36,9 @@
     }
 
     circles_addresses.subscribe((addresses) => {
+
+        // console.log('a',addresses);
+        // console.log($safe_store);
         
         const srv = $safe_store[addresses[0]];
         
@@ -51,6 +58,9 @@
 
             const trustBucket : any = {};
             trustListRows.forEach( (row: any) => {
+
+                console.log(row);
+
                 if (ethers.getAddress(row.truster) !== addresses[0]) {
                     trustBucket[row.truster] = trustBucket[row.truster] || [];
                     if (row.trustee !== row.truster) {
@@ -74,6 +84,8 @@
                     .filter(([avatar]) => ethers.getAddress(avatar) !== addresses[0])
                     .map( async ([avatar, rows]) => {
 
+                        console.log(rows);
+
                         const maxTimestamp = Math.max(...(rows as any[]).map(o => o.timestamp));
 
                         let relation;
@@ -91,23 +103,33 @@
                             relation = null  //  throw new Error(`Unexpected trust list row. Couldn't determine trust relation.`);
                         }
 
-                        const o = await srv.getAvatarName(avatar)
+                        // console.log(avatar, relation);
 
-                        if (relation != null && o != undefined) {
+                        let o;
+                        if(relation != 'trusts') {
+                            o = await srv.getAvatarName(avatar)
+                        }
+
+                        // console.log(0, o);
+
+                        if (relation != null) {
                             contacts.push({
                                 subjectAvatar: "you",
                                 relation: relation,
-                                objectAvatar: o,
+                                objectAvatar: avatar,
+                                objectName: o || avatar,
                                 timestamp: maxTimestamp
                             });
                         }
                     })
                 );
 
-                return contacts.sort((a, b) => a.objectAvatar.localeCompare(b.objectAvatar)); 
+                return contacts.sort((a, b) => a.objectName.localeCompare(b.objectName)); 
             }
 
             const fetched_contacts = await format(trustBucket, addresses);
+
+
             network.set(fetched_contacts)
             if (contacts != undefined) {
                 contacts.set(JSON.stringify(fetched_contacts));
@@ -115,14 +137,6 @@
         });
     })
     
-
-
-
-
-
-    function dispatch(arg0: string, friend_adress: string) {
-        throw new Error("Function not implemented.");
-    }
 </script>
 
 <section class="scrolltainer">
@@ -137,20 +151,24 @@
                 <div>
                     
                     {#if contact.relation == "mutuallyTrusts"}
-                        <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
-                        <span class="name">{contact.objectAvatar.slice(0,20)}</span>
+                        <div class="contact-left">
+                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            <span class="name">{contact.objectName.slice(0,20)}</span>
+                        </div>
                     {:else if contact.relation == "trustedBy"}
-
-                        <span class="name">{contact.objectAvatar.slice(0,20)}</span>
-                        <svg class="relation" width="25" height="32"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M99.251,48.167L58.6,7.516c-0.999-1.001-2.62-1.001-3.62,0l-6.859,6.859c-1.001,1-0.999,2.62,0,3.621l24.58,24.58H2.56  c-1.414,0-2.56,1.146-2.56,2.56v9.702c0,1.414,1.146,2.561,2.56,2.561H72.7L48.094,82.004c-1,1-1,2.621,0,3.621l6.859,6.859  c1,1.001,2.621,1,3.621,0l40.677-40.677c0.503-0.502,0.751-1.162,0.749-1.821C100.002,49.329,99.754,48.668,99.251,48.167z"/></svg>
-                      
+                        <div class="contact-left">
+                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            <span class="name">{contact.objectName.slice(0,20)}</span>
+                        </div>
                     {:else if contact.relation == "trusts"}
-                         <svg class="relation" width="25" height="32"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M99.251,48.167L58.6,7.516c-0.999-1.001-2.62-1.001-3.62,0l-6.859,6.859c-1.001,1-0.999,2.62,0,3.621l24.58,24.58H2.56  c-1.414,0-2.56,1.146-2.56,2.56v9.702c0,1.414,1.146,2.561,2.56,2.561H72.7L48.094,82.004c-1,1-1,2.621,0,3.621l6.859,6.859  c1,1.001,2.621,1,3.621,0l40.677-40.677c0.503-0.502,0.751-1.162,0.749-1.821C100.002,49.329,99.754,48.668,99.251,48.167z"/></svg>
-                         <span class="name">{contact.objectAvatar.slice(0,20)}</span>
+                        <div class="contact-left">
+                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            <span class="name">{contact.objectName.slice(0,20)}</span>
+                        </div>
                     {/if} 
 
                    
-                    {#if $circles_addresses[0] == undefined }
+                    {#if contact.relation == "trustedBy" }
                         <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 25" x="0px" y="0px"><g><path d="M6.13971,6.42572a3.19,3.19,0,1,1,3.19,3.19A3.19017,3.19017,0,0,1,6.13971,6.42572Zm4.85,8.49a1.50456,1.50456,0,0,1,1.34-1.49,1.47274,1.47274,0,0,1,1.34-1.32,3.45884,3.45884,0,0,0-2.85-1.49h-2.98a3.50386,3.50386,0,0,0-3.5,3.5v2.11a.49514.49514,0,0,0,.5.5h7.57a.83678.83678,0,0,1-.08-.31A1.50708,1.50708,0,0,1,10.98969,14.91571Zm4.17059-.49591h-.83447v-.83447a.5.5,0,0,0-1,0v.83447h-.83448a.5.5,0,0,0,0,1h.83448v.83447a.5.5,0,0,0,1,0V15.4198h.83447a.5.5,0,0,0,0-1Z"/></g></svg>
                         </button>
@@ -191,6 +209,7 @@
         flex-direction: column;
         align-items: center;            
         justify-content: flex-start;
+        width: 100%;
         max-width: calc(100% - 4rem);
         /* min-height: 100%; */
         
@@ -198,12 +217,18 @@
         > div {
             display: flex;
             flex-direction: row;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
             height: 3.5rem;
             width: 100%;
             border-bottom:  3px solid black;
         }
+    }
+
+    .contact-left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 
     .name {

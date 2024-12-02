@@ -40,15 +40,19 @@
 
 :global(.icon) {
 
-  :global(svg) {
-    width: 2.4rem;
-    height: 2.4rem;
-  }
-  // border: 1px solid black;
-  // border-radius: 50%;;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  :global(svg) {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  &:hover {
+    background: transparent;
+    
+  }
 }
 
 

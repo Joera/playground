@@ -450,12 +450,22 @@ export class SafeService implements ISafeService {
 
     async getVersion() {
 
+        
+
         const gnosisSafeAbi = [
             "function VERSION() view returns (string)"
         ];
 
         const safeContract = new ethers.Contract(this.safe_address, gnosisSafeAbi, this.provider);
-        const v = await safeContract.VERSION();
+
+        let v;
+
+        try {
+            v = await safeContract.VERSION();
+        } catch (e) {
+            v = "unknown";
+        }
+        
         this.version.set(v);
     }
 

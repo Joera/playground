@@ -123,7 +123,7 @@
 
     <Spinner></Spinner>
 
-{:else if $state == "edit"}
+{:else if $state == "edit" || $friend_address != ""}    
 
     <form id="profile" on:submit={handleProfile}>
 

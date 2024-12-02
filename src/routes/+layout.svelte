@@ -3,6 +3,7 @@
 	import Entry from '$lib/components/Entry.svelte';
     import Nav from '$lib/components/Nav.svelte';
     import Signer from '$lib/components/Signer.svelte';
+    import Ticker from '$lib/components/Ticker.svelte';
     import { setContext } from 'svelte';
 	export let data;
 
@@ -38,6 +39,9 @@
 </svelte:head>
 
 <main>
+
+	<Ticker />
+
 	<h1>Playground</h1>
 	
 	<Entry {data} />

@@ -27,7 +27,15 @@ export const addSafe = async (index: number) : Promise<void> => {
                     addresses = [...addresses, srv.safe_address];
                 }
                 return addresses;
+            });
+        }
 
+        if (circles_addresses) {
+            circles_addresses.update((addresses) => {
+                if (addresses.length == 0) {
+                    addresses = [...addresses, srv.safe_address];
+                }
+                return addresses;
             });
         }
     } 
