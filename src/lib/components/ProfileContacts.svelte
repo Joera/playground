@@ -9,9 +9,9 @@
     import { HUBV2ADDRESS } from "$lib/constants";
     import { hubv2_abi } from "$lib/circles_hub_v2";
     import { updateContacts, type Contact } from "$lib/contact.factory";
+    import { state } from "$lib/state.store";
 
     const dispatch = createEventDispatcher();
-    const state = writable("");
 
   
     const handleInvite = async (friend_adress:string) => {
