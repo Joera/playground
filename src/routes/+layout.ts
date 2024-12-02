@@ -89,10 +89,9 @@ export const load = async () => {
                         const name = await srv.getAvatarName(truster);
 
                         const e = {
-
-                            msg : `${name} trusts you`,
-                            url: '/avatar',
-                            state: 'contacts'
+                            msg : `${name} trusts you. Accept?`,
+                            method: 'accept_invite',
+                            address: truster
                         }
 
                         events?.update((eventsString) => {

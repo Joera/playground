@@ -1,8 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { events } from "$lib/event.store";
+    import { createEventDispatcher } from "svelte";
 
 
+    const dispatch = createEventDispatcher();
 
     const handleClick = (event: any) => {
 
@@ -15,6 +17,11 @@
                 }
             }
         })
+
+        if (event.method == "accept_invite") {
+            
+            dispatch('friend_address_event', event.address);
+        }
     }
 
 </script>
@@ -24,9 +31,9 @@
 
     {#if $events}
         {#each (JSON.parse($events)).reverse().slice(0,1) as event}
-                <button on:click={ () => handleClick(event)}>
-                    <span class="event">{event.msg}</span>
-                </button>
+            <button on:click={ () => handleClick(event)}>
+                <span class="event">{event.msg}</span>
+            </button>
         {/each}
     {/if}
 

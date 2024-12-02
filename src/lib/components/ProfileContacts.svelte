@@ -1,13 +1,16 @@
 <script lang="ts">
-    import { displayAddress, fixSafeAddress } from "$lib/eth.factory";
+    import { displayAddress, expiredTimeHex, expiryTimeHex, fixSafeAddress } from "$lib/eth.factory";
     import { circles_addresses, safe_store } from "$lib/safe.store";
     import { ethers, getAddress } from "ethers";
     import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
     import { contacts } from "$lib/contacts.store";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
+    import { HUBV2ADDRESS } from "$lib/constants";
+    import { hubv2_abi } from "$lib/circles_hub_v2";
 
     const dispatch = createEventDispatcher();
+    const state = writable("");
 
     type Contact = {
         objectAvatar: string;
@@ -24,7 +27,33 @@
        dispatch('transfer_event', to);
     }
 
+    const handleTrustChange = async (contact: Contact) => {
+
+        console.log(1,contact);
+
+        circles_addresses.subscribe((addresses) => {
+            const srv = $safe_store[addresses[0]];
+            srv.subscribe(  async (srv) => {
+            
+                const expiryTime = 
+                (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
+                ? expiredTimeHex() : expiryTimeHex();
+
+                console.log(2, expiryTime);
+
+                console.log(3, contact.objectAvatar);
+
+                state.set("spinner")
+                const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
+                console.log(r)
+                await updateContacts();
+                state.set("")
+            })
+        })  
+    }
+
     const network: Writable<Contact[]> = writable([])
+    const hasAvatar: Writable<boolean> = writable(false)
 
     // fill from local storage
     if (contacts) {
@@ -35,107 +64,113 @@
         })
     }
 
-    circles_addresses.subscribe((addresses) => {
+    const updateContacts = async () => {
 
-        // console.log('a',addresses);
-        // console.log($safe_store);
-        
-        const srv = $safe_store[addresses[0]];
-        
-        srv.subscribe(  async (srv) => {
+        circles_addresses.subscribe((addresses) => {
+            
+            const srv = $safe_store[addresses[0]];
+            
+            srv.subscribe(  async (srv) => {
 
-            const trust_query = await srv.getNetwork();
+                hasAvatar.set(await srv.checkAvatar());
 
-            const trustListRows = [];
-            while (await trust_query.queryNextPage()) {
-                const resultRows = trust_query.currentPage?.results ?? [];
-                if (resultRows.length === 0)
-                    break;
-                    trustListRows.push(...resultRows);
-                if (resultRows.length < 1000)
-                    break;
-            }
+                const trust_query = await srv.getNetwork();
 
-            const trustBucket : any = {};
-            trustListRows.forEach( (row: any) => {
-
-                console.log(row);
-
-                if (ethers.getAddress(row.truster) !== addresses[0]) {
-                    trustBucket[row.truster] = trustBucket[row.truster] || [];
-                    if (row.trustee !== row.truster) {
-                        trustBucket[row.truster].push(row);
-                    }
+                const trustListRows = [];
+                while (await trust_query.queryNextPage()) {
+                    const resultRows = trust_query.currentPage?.results ?? [];
+                    if (resultRows.length === 0)
+                        break;
+                        trustListRows.push(...resultRows);
+                    if (resultRows.length < 1000)
+                        break;
                 }
-                if (ethers.getAddress(row.trustee) !== addresses[0]) {
-                    trustBucket[row.trustee] = trustBucket[row.trustee] || [];
-                    if (row.trustee !== row.truster) {
-                        trustBucket[row.trustee].push(row);
+
+                const trustBucket : any = {};
+                trustListRows.forEach( (row: any) => {
+
+                    if (ethers.getAddress(row.truster) !== addresses[0]) {
+                        trustBucket[row.truster] = trustBucket[row.truster] || [];
+                        if (row.trustee !== row.truster) {
+                            trustBucket[row.truster].push(row);
+                        }
                     }
+                    if (ethers.getAddress(row.trustee) !== addresses[0]) {
+                        trustBucket[row.trustee] = trustBucket[row.trustee] || [];
+                        if (row.trustee !== row.truster) {
+                            trustBucket[row.trustee].push(row);
+                        }
+                    }
+                });
+
+                const format = async (trustBucket: any, addresses: string[]) => { 
+                    
+                    const contacts: any[] = []; 
+                    
+                    await Promise.all(
+                        Object.entries(trustBucket)
+                        .filter(([avatar]) => ethers.getAddress(avatar) !== addresses[0])
+                        .filter(([avatar]) => ethers.isAddress(avatar))
+                        .map( async ([avatar, rows]) => {
+
+                            const maxTimestamp = Math.max(...(rows as any[]).map(o => o.timestamp));
+
+                            let relation;
+                            if ((rows as any[]).length === 2) {
+                                relation = 'mutuallyTrusts';
+                            }
+                            else if (ethers.getAddress((rows as any[])[0].trustee) === addresses[0]) {
+                                relation = 'trustedBy';
+                            }
+                            else if (ethers.getAddress((rows as any[])[0].truster) === addresses[0]) {
+                                relation = 'trusts';
+                            }
+                            else {
+                                // console.log(avatar)
+                                relation = null  //  throw new Error(`Unexpected trust list row. Couldn't determine trust relation.`);
+                            }
+
+                            // console.log(avatar, relation);
+
+                            let o;
+                            if(relation != 'trusts') {
+                                o = await srv.getAvatarName(avatar)
+                            }
+
+                            // console.log(0, o);
+
+                            if (relation != null) {
+                                contacts.push({
+                                    subjectAvatar: "you",
+                                    relation: relation,
+                                    objectAvatar: avatar,
+                                    objectName: o || avatar,
+                                    timestamp: maxTimestamp
+                                });
+                            }
+                        })
+                    );
+
+
+                    
+                    return contacts.sort((a, b) => a.objectName.localeCompare(b.objectName)); 
+                }
+
+                const fetched_contacts = await format(trustBucket, addresses);
+
+                network.set(fetched_contacts)
+                if (contacts != undefined) {
+                    contacts.set(JSON.stringify(fetched_contacts));
                 }
             });
+        })
+    }
 
-            const format = async (trustBucket: any, addresses: string[]) => { 
-                
-                const contacts: any[] = []; 
-                
-                await Promise.all(
-                    Object.entries(trustBucket)
-                    .filter(([avatar]) => ethers.getAddress(avatar) !== addresses[0])
-                    .map( async ([avatar, rows]) => {
-
-                        console.log(rows);
-
-                        const maxTimestamp = Math.max(...(rows as any[]).map(o => o.timestamp));
-
-                        let relation;
-                        if ((rows as any[]).length === 2) {
-                            relation = 'mutuallyTrusts';
-                        }
-                        else if (ethers.getAddress((rows as any[])[0].trustee) === addresses[0]) {
-                            relation = 'trustedBy';
-                        }
-                        else if (ethers.getAddress((rows as any[])[0].truster) === addresses[0]) {
-                            relation = 'trusts';
-                        }
-                        else {
-                            // console.log(avatar)
-                            relation = null  //  throw new Error(`Unexpected trust list row. Couldn't determine trust relation.`);
-                        }
-
-                        // console.log(avatar, relation);
-
-                        let o;
-                        if(relation != 'trusts') {
-                            o = await srv.getAvatarName(avatar)
-                        }
-
-                        // console.log(0, o);
-
-                        if (relation != null) {
-                            contacts.push({
-                                subjectAvatar: "you",
-                                relation: relation,
-                                objectAvatar: avatar,
-                                objectName: o || avatar,
-                                timestamp: maxTimestamp
-                            });
-                        }
-                    })
-                );
-
-                return contacts.sort((a, b) => a.objectName.localeCompare(b.objectName)); 
-            }
-
-            const fetched_contacts = await format(trustBucket, addresses);
-
-
-            network.set(fetched_contacts)
-            if (contacts != undefined) {
-                contacts.set(JSON.stringify(fetched_contacts));
-            }
-        });
+    onMount(() => {
+        updateContacts();
     })
+
+    
     
 </script>
 
@@ -143,32 +178,28 @@
 
     <article>
 
-        {#if $network.length == 0}
+        {#if $network.length == 0 || $state == "spinner"}
             <Spinner></Spinner>
+
         {:else }
 
             {#each $network as contact}
                 <div>
                     
-                    {#if contact.relation == "mutuallyTrusts"}
-                        <div class="contact-left">
-                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
-                            <span class="name">{contact.objectName.slice(0,20)}</span>
-                        </div>
-                    {:else if contact.relation == "trustedBy"}
-                        <div class="contact-left">
-                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
-                            <span class="name">{contact.objectName.slice(0,20)}</span>
-                        </div>
-                    {:else if contact.relation == "trusts"}
-                        <div class="contact-left">
-                            <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
-                            <span class="name">{contact.objectName.slice(0,20)}</span>
-                        </div>
-                    {/if} 
-
-                   
-                    {#if contact.relation == "trustedBy" }
+                    <div class="contact-left">
+                        <button on:click={() => handleTrustChange(contact)}>
+                            {#if contact.relation == "mutuallyTrusts"}
+                                <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            {:else if contact.relation == "trustedBy"}
+                                <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            {:else if contact.relation == "trusts"}
+                                <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
+                            {/if}
+                            </button>
+                            <span class="name">{contact.objectName.slice(0,6)} ... {contact.objectName.slice(-8)}</span>
+                    </div>
+                
+                    {#if contact.relation == "trustedBy" && !$hasAvatar}
                         <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 25" x="0px" y="0px"><g><path d="M6.13971,6.42572a3.19,3.19,0,1,1,3.19,3.19A3.19017,3.19017,0,0,1,6.13971,6.42572Zm4.85,8.49a1.50456,1.50456,0,0,1,1.34-1.49,1.47274,1.47274,0,0,1,1.34-1.32,3.45884,3.45884,0,0,0-2.85-1.49h-2.98a3.50386,3.50386,0,0,0-3.5,3.5v2.11a.49514.49514,0,0,0,.5.5h7.57a.83678.83678,0,0,1-.08-.31A1.50708,1.50708,0,0,1,10.98969,14.91571Zm4.17059-.49591h-.83447v-.83447a.5.5,0,0,0-1,0v.83447h-.83448a.5.5,0,0,0,0,1h.83448v.83447a.5.5,0,0,0,1,0V15.4198h.83447a.5.5,0,0,0,0-1Z"/></g></svg>
                         </button>
@@ -188,6 +219,7 @@
 </section>
 
 <style>
+
 
 
     .scrolltainer {
@@ -237,7 +269,7 @@
     }
 
     svg.relation {
-        margin-top: 8px;
+        margin-top: 12px;
         margin-right: 15px;
     }
 

@@ -201,3 +201,15 @@ export const hexToAddress = (hexString: string) => {
     return address;
 
 }  
+
+export const expiryTimeHex = () => {
+
+    const expiryTimeMs = Date.now() + 10 * 365 * 24 * 60 * 60 * 1000; 
+    const expiryTimeSeconds = Math.floor(expiryTimeMs / 1000);
+    return "0x" + expiryTimeSeconds.toString(16).padStart(64, '0');
+}
+
+export const expiredTimeHex = () => {
+    const expiryTimeSeconds = 0;
+    return "0x" + expiryTimeSeconds.toString(16).padStart(64, '0');
+}

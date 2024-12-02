@@ -1,6 +1,6 @@
 <script lang="ts">
  
-    import { displayAddress } from '$lib/eth.factory';
+    import { displayAddress, expiryTimeHex } from '$lib/eth.factory';
 
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { createEventDispatcher, onMount } from 'svelte';
@@ -43,9 +43,7 @@
       // avatar_store.subscribe(async (store) => {
 
         const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
-        const expiryTimeMs = Date.now() + 24 * 60 * 60 * 1000;
-        const expiryTimeSeconds = Math.floor(expiryTimeMs / 1000);
-        const expiryTimeHex = "0x" + expiryTimeSeconds.toString(16).padStart(64, '0');
+        
 
         circles_addresses.subscribe( (addresses) => {
             safe_store.subscribe(async (store) => {
@@ -54,7 +52,7 @@
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
-                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [$newby_address, expiryTimeHex], false);
+                    const r = await srv.genericTx(hubv2Address, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
                     console.log(r);  
                     dispatch('invite_success_event');
                     spinner.set(false);

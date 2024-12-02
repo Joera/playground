@@ -82,20 +82,13 @@
                         console.log("registering");
                         const r = await srv.genericTx(hubv2Address, abi_hub, "registerHuman", [fixSafeAddress($friend_address), _metadataDigest], false);
                         console.log(r);
+                        friend_address.set("");
                     } else {
                         console.log("updating profile");
                         const r = await srv.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
                         console.log(r);
                     }
 
-                    // const sdk = Object.values(await _astore)[0]
-                    // let r = "";
-
-                    // try {
-                    //     r = await sdk.updateProfile(newProfile);
-                    // } catch (error) {}
-                    
-                    // console.log(r);
                     state.set("")
                 })
             })
@@ -147,8 +140,8 @@
 
     {#if $profile.name != ""}
         <div class="centered">
-            <h3>{$profile.name }</h3>
-            <p>{$profile.description }</p>
+            <h3>{$profile.name}</h3>
+            <p>{$profile.description}</p>
         </div>
 
         {#if $friend_address != ""}

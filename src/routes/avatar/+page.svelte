@@ -9,8 +9,8 @@
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
     import { getProfile } from '$lib/profile.factory';
-    import ProfileNetwork from '$lib/components/ProfileContacts.svelte';
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
+    import { friend_address } from '$lib/contacts.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -21,7 +21,7 @@
         description: ""
     });
     let owner_address: Writable<string> = writable("");
-    let friend_address: Writable<string> = writable("");
+    
 
     const handleProfile = async () => {
         
@@ -44,7 +44,6 @@
     }
 
     const handleInviteRequested = async (event: any) => {
-        console.log(event);
         friend_address.set(event.detail);
         state.set('profile');
     }
