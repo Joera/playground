@@ -196,7 +196,13 @@
                                 <svg class="relation" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="32" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" enable-background="new 0 0 100 100" xml:space="preserve"><polygon fill-rule="evenodd" fill="transparent" clip-rule="evenodd" points="0.177,43.555 99.823,43.555 99.822,29.753 33.306,29.753 52.103,10.956   42.322,1.176 0.199,43.299 0.333,43.434 "/><polygon fill-rule="evenodd" fill="black" clip-rule="evenodd" points="99.823,56.445 0.177,56.445 0.178,70.246 66.694,70.246 47.897,89.043   57.678,98.824 99.801,56.701 99.667,56.566 "/></svg>
                             {/if}
                             </button>
-                            <span class="name">{contact.objectName.slice(0,6)} ... {contact.objectName.slice(-8)}</span>
+                            <span class="name">
+                                {#if contact.objectName.length > 20}
+                                    {contact.objectName.slice(0,6)} ... {contact.objectName.slice(-8)}
+                                {:else}
+                                    {contact.objectName}
+                                {/if}
+                            </span>
                     </div>
                 
                     {#if contact.relation == "trustedBy" && !$hasAvatar}
