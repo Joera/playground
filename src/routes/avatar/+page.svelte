@@ -11,11 +11,12 @@
     import { getProfile } from '$lib/profile.factory';
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
     import { friend_address } from '$lib/contacts.store';
+    import { state } from '$lib/state.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
-    let state = writable("profile");
+    state.set("profile");
     let profile : Writable<any> = writable({
         name: "",
         description: ""
@@ -28,10 +29,6 @@
         state.set('profile');
     }
 
-    const handleEdit = async () => {
-        
-        state.set('edit');
-    }
 
     const handleScanner = async () => {
         

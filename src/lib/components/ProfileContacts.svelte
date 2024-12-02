@@ -8,10 +8,12 @@
     import { createEventDispatcher, onMount } from "svelte";
     import { HUBV2ADDRESS } from "$lib/constants";
     import { hubv2_abi } from "$lib/circles_hub_v2";
-    import { updateContacts, type Contact } from "$lib/contact.factory";
-    import { state } from "$lib/state.store";
+    import { trustChange, updateContacts, type Contact } from "$lib/contact.factory";
+    import { contacts_state, state } from "$lib/state.store";
+    import Transfer from "./transfer.svelte";
 
     const dispatch = createEventDispatcher();
+    const to_address = writable("");
 
   
     const handleInvite = async (friend_adress:string) => {
@@ -19,10 +21,19 @@
     }
 
     const handleTransfer = async (to:string) => {
-       dispatch('transfer_event', to);
+       
+        console.log(to);
+        to_address.set(to);
+        contacts_state.set("transfer")
     }
 
-    const handleTrustChange = async (contact: Contact) => {}
+    const handleTrustChange = async (contact: Contact) => {
+
+        contacts_state.set("spinner")
+        await trustChange(contact)
+        contacts_state.set("")
+
+    }
 
     const network: Writable<Contact[]> = writable([])
     const hasAvatar: Writable<boolean> = writable(false)
@@ -50,8 +61,13 @@
 
     <article>
 
-        {#if $network.length == 0 || $state == "spinner"}
+
+        {#if $network.length == 0 || $contacts_state == "spinner"}
             <Spinner></Spinner>
+
+        {:else if $contacts_state == "transfer"}
+            <!-- kan ook niveau hoger-->
+            <Transfer toAddress={$to_address}></Transfer>
 
         {:else }
 

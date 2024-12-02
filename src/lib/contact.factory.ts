@@ -15,7 +15,7 @@ export type Contact = {
 }
 
 
-export const trustChange = (contact: Contact) => {
+export const trustChange = async (contact: Contact) => {
 
     circles_addresses.subscribe((addresses) => {
         safe_store.subscribe((safes) => {
@@ -28,12 +28,9 @@ export const trustChange = (contact: Contact) => {
 
                 // console.log(2, expiryTime);
                 // console.log(3, contact.objectAvatar);
-
-                state.set("spinner")
                 const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
                 console.log(r)
                 await updateContacts();
-                state.set("")
             })
         })
     }) 
