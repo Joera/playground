@@ -13,10 +13,10 @@
     cursor: pointer; /* Ensure it shows the pointer cursor */
     line-height: normal; /* Fix for different default line heights */
 
-    &:hover {
-      background: black;
-      color: $lime;
-    }
+    // &:hover {
+    //   background: black;
+    //   color: $lime;
+    // }
     &:focus {
       outline: none; /* Remove default focus outline */
     }

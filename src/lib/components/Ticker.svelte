@@ -19,7 +19,6 @@
         })
 
         if (event.method == "accept_invite") {
-            
             dispatch('friend_address_event', event.address);
         }
     }
@@ -48,16 +47,17 @@
 
     .ticker {
         position: fixed;
-        top: 0;
+        top: auto;
+        bottom: 3rem;
         left: 0;
-        z-index: 1000;
+        z-index: 1001;
         background: white;
         height: 2.8rem;
         width: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
 
        
     }
@@ -70,7 +70,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         height: 100%;
     }
 

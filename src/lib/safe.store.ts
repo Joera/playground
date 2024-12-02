@@ -7,6 +7,7 @@ import { fixSafeAddress, fixAddressArray } from './eth.factory';
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
 export const circles_addresses = writable<string[]>([]);
+export const hasAvatar = writable(false);
 
 export const addSafe = async (index: number) : Promise<void> => {
 

@@ -6,15 +6,22 @@
     import Nav from '$lib/components/Nav.svelte';
     import Signer from '$lib/components/Signer.svelte';
     import Ticker from '$lib/components/Ticker.svelte';
-    import { friend_address } from '$lib/contacts.store.js';
+    import {friend_address } from '$lib/contacts.store.js';
+    import { hasAvatar } from '$lib/safe.store.js';
 	export let data;
 
 	const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 
 	const handleInviteRequested = async (event: any) => {
-		friend_address.set(event.detail);
-        goto('/avatar')
+ 
+		if (!$hasAvatar) {
+			friend_address.set(event.detail);
+        	goto('/avatar')
+		} else {
+			// reciprocate 
+		}
+		
 	}
 
 </script>

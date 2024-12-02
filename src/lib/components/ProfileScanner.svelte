@@ -77,7 +77,7 @@
       <video bind:this={videoElement} autoplay></video>
     {:else}
       <div>
-        <h3>Will you invite ... </h3>
+        <h3>Do you trust ... </h3>
         { displayAddress("gno", $newby_address)}</div>
 
         <!--check crc balance - shoud be > 96 --> 
