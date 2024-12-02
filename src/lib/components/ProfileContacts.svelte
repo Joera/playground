@@ -29,8 +29,6 @@
 
     const handleTrustChange = async (contact: Contact) => {
 
-        console.log(1,contact);
-
         circles_addresses.subscribe((addresses) => {
             const srv = $safe_store[addresses[0]];
             srv.subscribe(  async (srv) => {
@@ -39,9 +37,8 @@
                 (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
                 ? expiredTimeHex() : expiryTimeHex();
 
-                console.log(2, expiryTime);
-
-                console.log(3, contact.objectAvatar);
+                // console.log(2, expiryTime);
+                // console.log(3, contact.objectAvatar);
 
                 state.set("spinner")
                 const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
