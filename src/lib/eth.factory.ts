@@ -185,15 +185,10 @@ export function fixAddressArray<T extends Iterable<any>>(store: Writable<T> | un
 
 export const hexToAddress = (hexString: string) => {
     
-    // Ensure the hex string is 42 characters long (20 bytes for the address + 2 for "0x")
     if (hexString.length !== 66 || !hexString.startsWith("0x")) {
         throw new Error("Invalid hex string format");
     }
-
-    // Extract the last 40 characters (20 bytes) and prepend "0x"
     const address = `0x${hexString.slice(-40)}`;
-
-    // Validate that it's a valid Ethereum address
     if (!ethers.isAddress(address)) {
         throw new Error("Invalid Ethereum address");
     }
@@ -201,6 +196,15 @@ export const hexToAddress = (hexString: string) => {
     return address;
 
 }  
+
+export const addressToUint256 = (address: string)  => {
+
+    return  ethers.toBigInt(
+        ethers.getAddress(
+            address
+        ))
+        .toString();
+}
 
 export const expiryTimeHex = () => {
 

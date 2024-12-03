@@ -11,12 +11,12 @@
     import { getProfile } from '$lib/profile.factory';
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
     import { friend_address } from '$lib/contacts.store';
-    import { state } from '$lib/state.store';
+    import { avatar_state } from '$lib/state.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
-    state.set("profile");
+        avatar_state.set("profile");
     let profile : Writable<any> = writable({
         name: "",
         description: ""
@@ -26,31 +26,31 @@
 
     const handleProfile = async () => {
         
-        state.set('profile');
+        avatar_state.set('profile');
     }
 
 
     const handleScanner = async () => {
         
-        state.set('scanner');
+        avatar_state.set('scanner');
     }
 
     const handleContacts = async () => {
         
-        state.set('contacts');
+        avatar_state.set('contacts');
     }
 
     const handleInviteRequested = async (event: any) => {
         friend_address.set(event.detail);
-        state.set('profile');
+        avatar_state.set('profile');
     }
 
     const handleInviteApproved = async (event: any) => {
-        state.set('contacts');
+        avatar_state.set('contacts');
     }
 
     const handleActivities = async () => {
-        state.set('activities');
+        avatar_state.set('activities');
     }
 
     onMount(async () => {
@@ -79,16 +79,6 @@
                 await getProfile($srv)
             );
         }
-
-           
-       
-        // //    const avatarEvents = await circlesSdk.data.subscribeToEvents($srv.safe_address);
-        // //         avatarEvents.subscribe((event: any) => {
-        // //         console.log(event);
-        // //     });
-        // });
-
-        
     })
 
 
@@ -98,31 +88,31 @@
 
     
 
-    {#if $state == 'profile'}
+    {#if $avatar_state == 'profile'}
 
     <h2>circles avatar</h2>
 
         <ProfileDisplay profile={profile} owner_address={owner_address} friend_address={friend_address}></ProfileDisplay>
 
-    {:else if $state == 'scanner'}
+    {:else if $avatar_state == 'scanner'}
 
     <h2>circles scanner</h2>
 
         <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner>
 
-    {:else if $state == 'contacts'}
+    {:else if $avatar_state == 'contacts'}
 
     <h2>circles contacts</h2>
 
         <ProfileContacts on:friend_address_event={handleInviteRequested}></ProfileContacts>
 
-    {:else if $state == 'activities'}
+    {:else if $avatar_state == 'activities'}
 
     <h2>circles activities</h2>
 
         <ProfileActivities></ProfileActivities>
 
-    {:else if $state == 'spinner'}
+    {:else if $avatar_state == 'spinner'}
 
         <Spinner></Spinner>
 

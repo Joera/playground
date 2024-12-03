@@ -1,19 +1,37 @@
 <script lang="ts">
     import { hubv2_abi } from "$lib/circles_hub_v2";
     import { HUBV2ADDRESS } from "$lib/constants";
-    import { fixSafeAddress } from "$lib/eth.factory";
+    import { addressToUint256, fixSafeAddress } from "$lib/eth.factory";
     import { circles_addresses, safe_store } from "$lib/safe.store";
+    import { avatar_state, transfer_state } from "$lib/state.store";
+    import { ethers } from "ethers";
+    import Spinner from "./Spinner.svelte";
 
     export let toAddress;
 
     const handleSubmit = async (event: any) => {
 
+
+     
         circles_addresses.subscribe((addresses) => {
             safe_store.subscribe((safes) => {
                 const srv = safes[addresses[0]];
                 srv.subscribe(async (srv) => {
-                    const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "safeTransferFrom", [fixSafeAddress(srv.safe_address),fixSafeAddress(toAddress), event.target.amount.value, null], false);
+
+                    transfer_state.set("spinner");
+
+                    const r = await srv.genericTx(HUBV2ADDRESS,hubv2_abi,"safeTransferFrom", [
+                        fixSafeAddress(srv.safe_address),
+                        fixSafeAddress(toAddress), 
+                        addressToUint256(srv.safe_address),
+                        ethers.parseUnits(event.target.amount.value, "ether"), 
+                        "0x"
+                        ], 
+                        false
+                    );
                     console.log(r);
+                    transfer_state.set("");
+                    avatar_state.set("activities");
                 });
             });
         });
@@ -39,7 +57,13 @@
             placeholder="0" 
             required 
         />
-        <button class="button"type="submit">Transfer</button>
+
+        {#if $transfer_state == "spinner"}
+            <Spinner></Spinner>
+        {:else}
+            <button class="button"type="submit">Transfer</button>
+        {/if}
+
     </form>
 
 </article>

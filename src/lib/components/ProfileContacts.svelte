@@ -1,16 +1,12 @@
 <script lang="ts">
-    import { displayAddress, expiredTimeHex, expiryTimeHex, fixSafeAddress } from "$lib/eth.factory";
-    import { circles_addresses, safe_store } from "$lib/safe.store";
-    import { ethers, getAddress } from "ethers";
+    import { fixSafeAddress } from "$lib/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
     import { contacts } from "$lib/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
-    import { HUBV2ADDRESS } from "$lib/constants";
-    import { hubv2_abi } from "$lib/circles_hub_v2";
     import { trustChange, updateContacts, type Contact } from "$lib/contact.factory";
-    import { contacts_state, state } from "$lib/state.store";
-    import Transfer from "./transfer.svelte";
+    import { contacts_state } from "$lib/state.store";
+    import Transfer from "./Transfer.svelte";
 
     const dispatch = createEventDispatcher();
     const to_address = writable("");
@@ -32,7 +28,6 @@
         contacts_state.set("spinner")
         await trustChange(contact)
         contacts_state.set("")
-
     }
 
     const network: Writable<Contact[]> = writable([])
@@ -53,8 +48,6 @@
         );
     })
 
-    
-    
 </script>
 
 <section class="scrolltainer">

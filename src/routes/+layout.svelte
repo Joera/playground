@@ -6,8 +6,9 @@
     import Nav from '$lib/components/Nav.svelte';
     import Signer from '$lib/components/Signer.svelte';
     import Ticker from '$lib/components/Ticker.svelte';
-    import {friend_address } from '$lib/contacts.store.js';
-    import { hasAvatar } from '$lib/safe.store.js';
+    import {reciprocateTrust} from '$lib/contact.factory.js';
+    import {friend_address} from '$lib/contacts.store.js';
+    import {hasAvatar} from '$lib/safe.store.js';
 	export let data;
 
 	const vh = window.innerHeight * 0.01;
@@ -20,8 +21,8 @@
         	goto('/avatar')
 		} else {
 			// reciprocate 
+			await reciprocateTrust(event.detail);
 		}
-		
 	}
 
 </script>
@@ -37,10 +38,9 @@
 	}
 
 	section {
+
 		position: relative;
-
 		height: calc((var(--vh, 1vh) * 100) - 3rem - 2.6rem - 3rem - 3rem - 1rem);
-
 		@media screen and (min-width: 860px) {
 			height: calc(100vh - 3rem - 4.8rem - 3rem - 3rem - 1rem);
 		}

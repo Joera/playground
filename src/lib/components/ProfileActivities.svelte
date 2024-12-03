@@ -65,7 +65,7 @@
                     break;
             }
 
-            console.log(txs);
+            // console.log(txs);
 
             for (let tx of txs) {
 
@@ -77,8 +77,12 @@
                     tx.toName = await srv.getAvatarName(tx.to)
                 }
 
-                if (ethers.getAddress(tx.from) == $circles_addresses[0] && tx.to == "0x0000000000000000000000000000000000000000" && tx.circles == 96) {
+                else if (ethers.getAddress(tx.from) == $circles_addresses[0] && tx.to == "0x0000000000000000000000000000000000000000" && tx.circles == 96) {
                     tx.toName = await srv.getAvatarName(tx.operator)
+                }
+
+                else if (ethers.getAddress(tx.to) == $circles_addresses[0]) {
+                    tx.toName = await srv.getAvatarName(tx.to)
                 }
 
             }
@@ -88,34 +92,6 @@
             
         });
     });
-
-    // const getEvents = async () => {
-
-    //     circles_addresses.subscribe(async (addresses: string[]) => {
-    //         safe_store.subscribe(async (store) => {
-    //             (await store)[addresses[0]].subscribe(async (srv) => {
-
-    //                 const avatarEvents: any[] = await srv.circles_data.getEvents(addresses[0], 10000000);
-                
-    //                 avatar_trust_events.set(
-
-    //                     avatarEvents
-    //                     .filter((event) => event.$event == "CrcV2_Trust")
-    //                     .filter((item, index, array) => {
-    //                         const pair = `${item.trustee}-${item.truster}`;
-    //                         return index === array.findIndex(i => `${i.trustee}-${i.truster}` === pair);
-    //                     })
-    //                     .filter((event) => $safe_addresses.includes(fixSafeAddress(event.trustee|| "")))
-    //                 );
-                    
-    //                 avatar_events.set(avatarEvents);
-
-    //             })
-    //         })
-    //     })
-    // }
-
-    // getEvents();
 
     const formatDate = (timestamp:  number) => {
 
@@ -131,10 +107,6 @@
             hour12: false,
         }).format(date);
     }
-
-   
-
-
 
 </script>
 
@@ -174,7 +146,7 @@
                         {:else}
                             <span>from: {'.' + a.to.slice(a.to.length - 5, a.to.length -1)}</span>
                         {/if}
-                        <span> { '-' + a.circles.toFixed(2) }</span>
+                        <span> { '+' + a.circles.toFixed(2) }</span>
                     {/if}
                 {:else if a.type == "CrcV1_Transfer"}
                     

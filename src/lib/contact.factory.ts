@@ -5,7 +5,6 @@ import { expiredTimeHex, expiryTimeHex, fixSafeAddress } from "./eth.factory";
 import { circles_addresses, hasAvatar } from "./safe.store";
 import { safe_store } from "./safe.store";
 import { contacts } from "./contacts.store";
-import { state } from "./state.store";
 
 export type Contact = {
     objectAvatar: string;
@@ -14,6 +13,18 @@ export type Contact = {
     objectName: string;
 }
 
+export const reciprocateTrust = async (objectAddress: string) => {
+    circles_addresses.subscribe((addresses) => {
+        safe_store.subscribe((safes) => {
+            const srv = safes[addresses[0]];
+            srv.subscribe(  async (srv) => {
+                const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(objectAddress), expiryTimeHex()], false);
+                console.log(r)
+                await updateContacts();
+            })
+        })
+    }) 
+}
 
 export const trustChange = async (contact: Contact) => {
 
