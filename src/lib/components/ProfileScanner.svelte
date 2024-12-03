@@ -6,10 +6,8 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import { writable } from 'svelte/store';
     import Spinner from './Spinner.svelte';
-    import { goto } from '$app/navigation';
     import { circles_addresses, safe_store } from '$lib/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
-    import { cidV0ToUint8Array } from '@circles-sdk/utils';
     import { GnosisChainConfig } from '$lib/circles.factory';
 
     let videoElement: any;
