@@ -3,6 +3,7 @@
 
     import { signer_key  } from '$lib/key.store';
     import { safe_addresses } from '$lib/safe.store';
+    import { onMount } from 'svelte';
 
     console.log($signer_key);
 
@@ -24,9 +25,27 @@
         
     }
 
-    const handleImport = () => {
+    // const handleImport = () => {
+
+    onMount(() => {
         
-    }
+        const input = document.getElementById('file_import') as HTMLInputElement;
+        input.addEventListener('change', (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = event.target?.result;
+                const object = JSON.parse(data as string);
+                signer_key?.set(object.signer_key);
+                safe_addresses?.set(object.safe_addresses);
+            };
+            reader.readAsText(file);
+        });
+        // input.click();
+    })
 
 </script>
 
@@ -44,9 +63,11 @@
         <div>{safe}</div>
     {/each} -->
 
-    <button class="button" on:click={ () => handleSave()}>save your key on device</button>
+    <label>Store your key on device</label>
+    <button class="button" on:click={ () => handleSave()}>save</button>
 
-    <button class="button" on:click={ () => handleImport()}>import key from file</button>
+    <label>Import key from file</label>
+    <input class="button" id="file_import" type="file" accept=".json">
 
 </article>
 
@@ -65,8 +86,12 @@
             align-items: center;
         }
 
-        button {
-            margin: 1.5rem 0;
+        button, input {
+            margin: .75rem 0 3rem 0;
+        }
+
+        input {
+
         }
     }
 

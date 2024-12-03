@@ -4,9 +4,9 @@
 
     $: safeEntries = Object.entries($safe_store);
 
-    const handleAddSafe = async () => {
-        addSafe();
-    }
+    // const handleAddSafe = async () => {
+    //     addSafe();
+    // }
 
 </script>
 
@@ -43,9 +43,9 @@
                 <SafeOverview {safe_address} {safeSrv} />
             {/each}
         {/if}
-        <article class="safe_container">
+        <!-- <article class="safe_container">
             <button on:click={handleAddSafe}>+</button>
-        </article>
+        </article> -->
     </section>
   
 
