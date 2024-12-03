@@ -86,25 +86,7 @@
 
     const handleBack = async () => {
         state.set("");
-    }
-
-
-    const handleRemoteSigner = async () => {
-        state.set("remotesigner")
-        // popup
-    }
-
-    const handleAddSigner = async (address: string) => {
-    
-        state.set("spinner")
-        safeSrv.subscribe( async(srv: SafeService) => {
-
-            await srv.addSigner(address);
-            state.set("")
-        })
-
-        
-    }
+    }   
 
 </script>
 
@@ -115,10 +97,6 @@
         {#if $state == "spinner"} 
 
             <Spinner></Spinner>
-
-        {:else if $state == "remotesigner"}
-
-            <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail)}></SignerForm>
 
         {:else if $state == "token"} 
 
@@ -183,9 +161,7 @@
         {#if  $deployed && !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
             <button on:click={handleEnableModule}>enable AA</button>
         {/if}
-        {#if $signers.length > 0}
-            <button class="button"on:click={handleRemoteSigner}>add remote signer</button>
-        {/if}
+    
     </div>
 </article>
 

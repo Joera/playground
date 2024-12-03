@@ -1,11 +1,11 @@
 
 <script lang="ts">
-
+    import SignerForm from '$lib/components/SignerForm.svelte';
+    import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { signer_key  } from '$lib/key.store';
-    import { safe_addresses } from '$lib/safe.store';
+    import { circles_addresses, safe_addresses, safe_store } from '$lib/safe.store';
+    import { maintenance_state } from '$lib/state.store';
     import { onMount } from 'svelte';
-
-    console.log($signer_key);
 
     const handleSave = () => {
         
@@ -19,13 +19,33 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'plg_backup.json';
+        a.download = `plg_${$safe_addresses[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        
     }
 
-    // const handleImport = () => {
+    const handleRemoteSigner = async () => {
+        maintenance_state.set("remotesigner")
+        // popup
+    }
+
+    const handleAddSigner = async (address: string) => {
+
+        console.log(1)
+        maintenance_state.set("spinner");
+
+        circles_addresses.subscribe(async (addresses) => {
+            safe_store.subscribe(async (store) => {
+                const safeService = (await store)[addresses[0]];
+                safeService.subscribe(async (srv) => {
+                    console.log(2)
+                    await srv.addSigner(address);
+                    maintenance_state.set("")
+                });
+            });
+        });
+    };
+
 
     onMount(() => {
         
@@ -52,22 +72,32 @@
 
 <article>
 
-    <!-- <div>
-        <label>private key</label>
-        <div>{$signer_key}</div>
-    </div>
+    {#if $maintenance_state == "spinner"}
 
-    <div>
-        <label>safes</label>
-    {#each $safe_addresses as safe}
-        <div>{safe}</div>
-    {/each} -->
+        <SpinnerWave></SpinnerWave>
 
-    <label>Store your key on device</label>
-    <button class="button" on:click={ () => handleSave()}>save</button>
+    {:else if $maintenance_state == "remotesigner"}
 
-    <label>Import key from file</label>
-    <input class="button" id="file_import" type="file" accept=".json">
+        <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail)}></SignerForm>
+
+    {:else}
+
+        <div>
+            <label>eoa</label>
+            <!-- <div>{owner_address}</div> -->
+        </div>
+
+        <label>Remote signer</label>
+        <button class="button"on:click={handleRemoteSigner}>add</button>
+
+
+        <label>Store your key on device</label>
+        <button class="button" on:click={ () => handleSave()}>save</button>
+
+        <label>Import key from file</label>
+        <input class="button" id="file_import" type="file" accept=".json">
+
+    {/if}
 
 </article>
 

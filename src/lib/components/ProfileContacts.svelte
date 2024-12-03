@@ -1,15 +1,23 @@
 <script lang="ts">
-    import { fixSafeAddress } from "$lib/eth.factory";
+    import { displayShorterAddress, fixSafeAddress } from "$lib/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
-    import { contacts } from "$lib/contacts.store";
+    import { contacts, hidden_contacts } from "$lib/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
     import { trustChange, updateContacts, type Contact } from "$lib/contact.factory";
     import { contacts_state } from "$lib/state.store";
     import Transfer from "./Transfer.svelte";
+    import SpinnerWave from "./SpinnerWave.svelte";
+    import { ethers } from "ethers";
 
     const dispatch = createEventDispatcher();
     const to_address = writable("");
+    const activeContact: Writable<Contact|null> = writable(null);
+
+
+    const handleBack = async () => {
+        contacts_state.set("");
+    }
 
   
     const handleInvite = async (friend_adress:string) => {
@@ -17,17 +25,55 @@
     }
 
     const handleTransfer = async (to:string) => {
-       
-        console.log(to);
+    
         to_address.set(to);
         contacts_state.set("transfer")
     }
 
     const handleTrustChange = async (contact: Contact) => {
 
-        contacts_state.set("spinner")
+        activeContact.set(contact);
+
+        if (contact.relation === "trusts") {
+            contacts_state.set("reciprocate")
+        } else if (contact.relation === "mutuallyTrusts") {
+            contacts_state.set("revoke")
+        } else {
+            contacts_state.set("trustchoice")
+            // await runTrustChange(contact)
+        }
+    }
+
+    const handleReciprocate = async () => {
+        if ($activeContact == null) return;
+        await runTrustChange($activeContact)
+    }
+
+    const handleRevoke = async () => {
+        if ($activeContact == null) return;
+        await runTrustChange($activeContact)
+    }
+
+    const handleHide = async () => {
+        if ($activeContact == null) return;
+        hidden_contacts?.update((hidden: string) => {
+
+            let parsed;
+            try {
+                parsed = JSON.parse(hidden);
+            } catch (error) {
+                parsed = [];
+            }
+            let h = [...parsed, ethers.getAddress($activeContact.objectAvatar)];
+            return JSON.stringify(h)
+        })
+    }
+
+    const runTrustChange = async (contact: Contact) => {
+        contacts_state.set("spinner");
         await trustChange(contact)
-        contacts_state.set("")
+        activeContact.set(null);
+        contacts_state.set("");
     }
 
     const network: Writable<Contact[]> = writable([])
@@ -56,10 +102,25 @@
 
 
         {#if $network.length == 0 || $contacts_state == "spinner"}
-            <Spinner></Spinner>
+            <SpinnerWave></SpinnerWave>
+
+        {:else if $contacts_state == "reciprocate"}
+            <label>Do you wish to reciprocate trust {#if $activeContact?.objectName} to {displayShorterAddress($activeContact?.objectName)} {/if}</label>
+            <button class="button"on:click={handleReciprocate}>Yes!</button>
+            <button class="button"on:click={handleBack}>Nope, that me back</button>
+
+        {:else if $contacts_state == "revoke"}
+            <button on:click={handleReciprocate}>Revoke trust from {$activeContact?.objectName}</button>
+            <button class="button"on:click={handleRevoke}>Yes!</button>
+            <button class="button"on:click={handleBack}>Nope, take me back</button>
+
+        {:else if $contacts_state == "trustchoice"}
+            <button on:click={handleReciprocate}>what do you want to do with {$activeContact?.objectName}?</button>
+            <button class="button"on:click={handleReciprocate}>Reciprocate trust</button>
+            <button class="button"on:click={handleHide}>Hide from contacts</button>
+            <button class="button"on:click={handleBack}>Take me back</button>
 
         {:else if $contacts_state == "transfer"}
-            <!-- kan ook niveau hoger-->
             <Transfer toAddress={$to_address}></Transfer>
 
         {:else }
@@ -106,8 +167,6 @@
 </section>
 
 <style>
-
-
 
     .scrolltainer {
         display: flex;
@@ -162,6 +221,14 @@
 
     svg.transfer {
         margin: 6px 0 0 auto;
+    }
+
+    label {
+        text-align: center;
+    }
+
+    button.button {
+        margin: 3rem 0 0 0;
     }
 
 </style>

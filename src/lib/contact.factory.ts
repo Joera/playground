@@ -4,7 +4,7 @@ import { HUBV2ADDRESS } from "./constants";
 import { expiredTimeHex, expiryTimeHex, fixSafeAddress } from "./eth.factory";
 import { circles_addresses, hasAvatar } from "./safe.store";
 import { safe_store } from "./safe.store";
-import { contacts } from "./contacts.store";
+import { contacts, hidden_contacts } from "./contacts.store";
 
 export type Contact = {
     objectAvatar: string;
@@ -13,38 +13,47 @@ export type Contact = {
     objectName: string;
 }
 
-export const reciprocateTrust = async (objectAddress: string) => {
-    circles_addresses.subscribe((addresses) => {
-        safe_store.subscribe((safes) => {
-            const srv = safes[addresses[0]];
-            srv.subscribe(  async (srv) => {
-                const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(objectAddress), expiryTimeHex()], false);
-                console.log(r)
-                await updateContacts();
+export const reciprocateTrust = async (objectAddress: string) : Promise<void> => {
+
+    return new Promise((resolve, reject) => {
+
+        circles_addresses.subscribe((addresses) => {
+            safe_store.subscribe((safes) => {
+                const srv = safes[addresses[0]];
+                srv.subscribe(  async (srv) => {
+                    const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(objectAddress), expiryTimeHex()], false);
+                    console.log(r)
+                    await updateContacts();
+                    resolve()
+                })
             })
-        })
-    }) 
+        }) 
+    });
 }
 
-export const trustChange = async (contact: Contact) => {
+export const trustChange = async (contact: Contact) : Promise<void> => {
 
-    circles_addresses.subscribe((addresses) => {
-        safe_store.subscribe((safes) => {
-            const srv = safes[addresses[0]];
-            srv.subscribe(  async (srv) => {
-            
-                const expiryTime = 
-                (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
-                ? expiredTimeHex() : expiryTimeHex();
+    return new Promise((resolve, reject) => {
+        
+        circles_addresses.subscribe((addresses) => {
+            safe_store.subscribe((safes) => {
+                const srv = safes[addresses[0]];
+                srv.subscribe(  async (srv) => {
+                
+                    const expiryTime = 
+                    (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
+                    ? expiredTimeHex() : expiryTimeHex();
 
-                // console.log(2, expiryTime);
-                // console.log(3, contact.objectAvatar);
-                const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
-                console.log(r)
-                await updateContacts();
+                    // console.log(2, expiryTime);
+                    // console.log(3, contact.objectAvatar);
+                    const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
+                    console.log(r)
+                    await updateContacts();
+                    resolve();
+                })
             })
-        })
-    }) 
+        }) 
+    });
 }
 
 export const updateContacts = async () :Promise<Contact[]> => {
@@ -53,13 +62,14 @@ export const updateContacts = async () :Promise<Contact[]> => {
 
     return new Promise((resolve, reject) => {
 
+        let hidden: string[] = [];
+        hidden_contacts?.subscribe((value) => {
+            hidden = JSON.parse(value) || [];
+        });
 
         circles_addresses.subscribe((addresses) => {
-
             safe_store.subscribe((safes) => {
-            
                 const srv = safes[addresses[0]];
-                
                 srv.subscribe(  async (srv) => {
 
                     hasAvatar.set(await srv.checkAvatar());
@@ -140,15 +150,15 @@ export const updateContacts = async () :Promise<Contact[]> => {
                                 }
                             })
                         );
-
-
-                        
                         return contacts.sort((a, b) => a.objectName.localeCompare(b.objectName)); 
                     }
 
                     fetched_contacts = await format(trustBucket, addresses);
 
-                    
+                    fetched_contacts = fetched_contacts.filter((contact) => {
+                        return !hidden.includes(ethers.getAddress(contact.objectAvatar));
+                    });
+
                     if (contacts != undefined) {
                         contacts.set(JSON.stringify(fetched_contacts));
                     }

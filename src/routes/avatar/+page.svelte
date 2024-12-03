@@ -11,7 +11,7 @@
     import { getProfile } from '$lib/profile.factory';
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
     import { friend_address } from '$lib/contacts.store';
-    import { avatar_state } from '$lib/state.store';
+    import { avatar_state, contacts_state, profile_state } from '$lib/state.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -22,21 +22,17 @@
         description: ""
     });
     let owner_address: Writable<string> = writable("");
-    
 
     const handleProfile = async () => {
-        
         avatar_state.set('profile');
     }
 
-
     const handleScanner = async () => {
-        
         avatar_state.set('scanner');
     }
 
-    const handleContacts = async () => {
-        
+    const handleContacts = async () => {  
+        contacts_state.set("");
         avatar_state.set('contacts');
     }
 
@@ -55,6 +51,8 @@
 
     onMount(async () => {
 
+        profile_state.set("spinner");
+
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         await waitForSubscriptions($safe_store, safesWithAvatars);
 
@@ -72,7 +70,6 @@
                 owner_address.set($srv.safe_address);
             }
         }
-
 
         if ($srv) {
             profile.set(     

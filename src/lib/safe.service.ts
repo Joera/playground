@@ -622,9 +622,11 @@ export class SafeService implements ISafeService {
         };
 
         if (this.kit instanceof Safe) {
-            this._tx([txData], false);
+            await this._tx([txData], false);
         } else  {
-            this._4337tx([txData], false);
+            await this._4337tx([txData], false);
         }
+
+        return
     }
 }
