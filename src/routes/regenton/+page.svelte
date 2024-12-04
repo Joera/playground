@@ -7,20 +7,20 @@
     import { onMount } from "svelte";
     import { displayAddress } from "$lib/eth.factory";
     import Spinner from "$lib/components/Spinner.svelte";
+    import { validators_api } from "$lib/apis";
+    import SpinnerWave from "$lib/components/SpinnerWave.svelte";
 
     const state = writable("");
+    const regenton: any = writable({});
     const currentStake = writable(0);
     const availableGNO: Writable<Record<string, number>> = writable({});
     let safesWithAvatars: string[] = [];
 
     const regentonContract = "0x05456E26dF26ef77f6A2DA6f14E8cCbd96b10c3E";
 
-
     const getStake = async (safe_address: string, srv: SafeService) => {
         return await srv.genericCall(regentonContract, regenton_abi, "balanceOf", [safe_address]);
     }
-
-
 
     async function getInfo(safe_address: string, srv: Writable<SafeService>) : Promise<number> {
 
@@ -47,11 +47,10 @@
             srv.tokens.subscribe((tokens) => {
                 console.log(tokens)
                 for (let [address, token] of tokens) {
-                    console.log(address);
-                    console.log(token);
+             
                     if (token.name == "GNO") {
                         if (token && parseFloat(token.balance) > 0) {
-                            console.log($safe_addresses[0], token.balance)
+                        
                             availableGNO.update((available) => {
                                 available[$safe_addresses[0]] = parseFloat(token.balance);
                                 return available;
@@ -66,10 +65,31 @@
         currentStake.set(balance);
     }
 
+    const fetchMetrics = async () => {
+    
+        const regenton_response = await validators_api.get('/metrics', {
+            headers: {
+                'Content-Type': 'apllication/json',
+            }
+        });
+
+        if (regenton_response.status !== 200) {
+            throw new Error(`Error uploading to IPFS: ${regenton_response.statusText}`);
+        }
+
+        return regenton_response.data;
+    }
+
     onMount(async () => {
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         await waitForSubscriptions($safe_store, safesWithAvatars);
+
+        regenton.set(
+            await fetchMetrics()
+        );
+
+        
         
         init();
     })
@@ -99,17 +119,26 @@
     <h2>Regenton</h2>
 
     <div>
-        Your current stake is {$currentStake} GNO
+        <!-- <h3>Community:</h3> -->
+        <label>TVL</label>
+        <div class="number">{@html $regenton.tvl}</div>
+        <label>Rewards</label>
+        <div class="number">{@html $regenton.rewards}</div>
+
     </div>
 
+   
+
     {#if $state == "spinner"}
-        <Spinner></Spinner>
+        <SpinnerWave></SpinnerWave>
     {:else}
-        <div>
-            {#each Object.entries($availableGNO) as [safe_address, balance]}
-                <div>{displayAddress("gno", safe_address)}: {balance} GNO</div>
-                <button class="button" on:click={() => handleStake(safe_address)}>Stake 1 GNO</button>
-            {/each}
+        <div class="centered">
+            <span>Your current stake is {$currentStake} GNO</span>
+            <span>Available to stake: {$availableGNO[$safe_addresses[0]]}GNO</span>
+            <!-- {#each Object.entries($availableGNO) as [safe_address, balance]}
+                <div>{balance} GNO</div> -->
+            <button class="button" on:click={() => handleStake($safe_addresses[0])}>Stake 1 GNO</button>
+            <!-- {/each} -->
         </div>
     {/if}
 
@@ -129,7 +158,7 @@
     }
 
     article > div {
-        margin: 3rem 0;
+        margin: 1.5rem 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -138,6 +167,18 @@
         > button {
             margin: .75rem 0;
         }
+    }
+
+    .number {
+        font-size: 3rem;
+        font-weight: 700;
+        font-family: 'Gotham A', 'GOTHAM B';
+    }
+
+    .centered {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
 

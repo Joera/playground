@@ -31,16 +31,21 @@ export default defineConfig({
 	},
 	server: {
 		proxy: {
-		  '/kubo': {
+		'/kubo': {
 			target: 'https://ipfs.transport-union.dev/api/v0',
 			changeOrigin: true,
 			rewrite: (path) => path.replace(/^\/kubo/, '') 
-		  },
-		  '/cluster': {
+		},
+		'/cluster': {
 			target: 'https://pin.transport-union.dev',
 			changeOrigin: true,
 			rewrite: (path) => path.replace(/^\/cluster/, '')
 		},
+		'/validators': {
+			target: 'https://validators.autonomous-times.com',
+			changeOrigin: true,	
+			rewrite: (path) => path.replace(/^\/validators/, '')
+		}
 	  }
-	}
+	}	
 });
