@@ -61,12 +61,12 @@
 
             if (safe_addresses != undefined) {
                 owner_address.set($safe_addresses[0]);
-                srv = $safe_store[$safe_addresses[0]]; 
+                srv = $safe_store["gnosis"]; 
             }
 
         } else {
 
-            srv = $safe_store[safesWithAvatars[0]];
+            srv = $safe_store["gnosis"];
             if ($srv) {
                 owner_address.set($srv.safe_address);
             }

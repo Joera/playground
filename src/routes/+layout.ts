@@ -16,7 +16,7 @@ export const load = async () => {
     const safe_array = await hasSafeAddresses();
     let safe = safe_array[0];
     const chain_array = ['gnosis','base']; // ,
-
+    
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
         let i = 0;

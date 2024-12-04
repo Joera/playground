@@ -49,7 +49,7 @@
 
     circles_addresses.subscribe((addresses) => {
         
-        const srv = $safe_store[addresses[0]];
+        const srv = $safe_store["gnosis"];
         
         srv.subscribe(  async (srv) => {
 

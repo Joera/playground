@@ -69,7 +69,7 @@ export const updateContacts = async () :Promise<Contact[]> => {
 
         circles_addresses.subscribe((addresses) => {
             safe_store.subscribe((safes) => {
-                const srv = safes[addresses[0]];
+                const srv = safes["gnosis"];
                 srv.subscribe(  async (srv) => {
 
                     hasAvatar.set(await srv.checkAvatar());

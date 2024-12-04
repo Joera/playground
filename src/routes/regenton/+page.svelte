@@ -82,7 +82,7 @@
         const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
 
-        const srv = $safe_store[safe_address];
+        const srv = $safe_store["gnosis"];
 
         srv.subscribe( async (srv: SafeService) => {
             state.set("spinner");
