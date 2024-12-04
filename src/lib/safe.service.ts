@@ -22,6 +22,7 @@ const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainCo
 
 export interface ISafeService {
 
+    chain: string;
     safe_address: string;
     signer_key: string;
     signer?: Signer;
@@ -50,7 +51,6 @@ export interface ISafeService {
 }
 
  
-const CHAIN = "gno";
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
 const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
 const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;
@@ -58,6 +58,7 @@ const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;
 export class SafeService implements ISafeService {
 
     avatar?: any;
+    chain!: string;
     safe_address: string = "";
     signer_key: string = "";
     
@@ -69,7 +70,7 @@ export class SafeService implements ISafeService {
     circles: Writable<Map<string, any>> = writable(new Map());
     modules: Writable<string[]> = writable([]);
 
-    provider: Provider = getProvider(CHAIN, alchemy_key);
+    provider!: Provider;
 
     signer?: Signer;
     kit?: Safe4337Pack | Safe;
@@ -78,33 +79,37 @@ export class SafeService implements ISafeService {
 
     private constructor() {}
 
-    static async create(signer_key: string, safe_address: string) {
+    static async create(chain: string, signer_key: string, safe_address: string) {
         
         const instance = new SafeService();
-        await instance.initialize(signer_key, safe_address);
+        await instance.initialize(chain, signer_key, safe_address);
         
         if (isValidEthereumAddress(safe_address)) {
             await instance.setup();
             
         } else {
             await instance.new();
-            
         }
 
         return instance;
     }
 
-    private async initialize(signer_key: string, safe_address: string) {
+    private async initialize(chain: string, signer_key: string, safe_address: string) {
 
+        console.log("aa", safe_address)
+
+        this.chain = chain;
         this.signer_key = signer_key;
         this.safe_address = safe_address;
         let signer = new ethers.Wallet(signer_key);
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));
+        this.provider = getProvider(chain, alchemy_key);
 
-        const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
-        this.circles_data = new CirclesData(circlesRpc);
-
+        if (chain == "gnosis") {
+            const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
+            this.circles_data = new CirclesData(circlesRpc);
+        }
     }
    
     async setup () {
@@ -115,8 +120,10 @@ export class SafeService implements ISafeService {
         if (d) {
             await this.getVersion();
             await this.getSigners();
-            await this.checkAvatar();
-            if (this.hasAvatar) await this.getCircles();          
+            if (this.chain == "gnosis") {
+                await this.checkAvatar();
+                if (this.hasAvatar) await this.getCircles();  
+            }        
             await this.getModules();
             this.getBalances();
 
@@ -267,7 +274,7 @@ export class SafeService implements ISafeService {
     async initSafe() {
 
         this.kit = await Safe.init({
-            provider: getRPC(CHAIN, alchemy_key),
+            provider: getRPC(this.chain, alchemy_key),
             signer : this.signer_key,
             safeAddress : this.safe_address
         });
@@ -275,7 +282,7 @@ export class SafeService implements ISafeService {
 
     async initSafeWithRelay () {
 
-        const rpc = getRPC(CHAIN, alchemy_key);
+        const rpc = getRPC(this.chain, alchemy_key);
         const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v002_' + this.signer_address)));
         let options: any = {};
         
@@ -293,6 +300,7 @@ export class SafeService implements ISafeService {
             }
         }
         
+        console.log("rpc", rpc);
         this.kit = await Safe4337Pack.init({    
             provider: rpc,
             signer: this.signer_key,
@@ -401,7 +409,7 @@ export class SafeService implements ISafeService {
 
             this.provider.waitForTransaction(userOperationPayload.transactionHash);
 
-            const txs = await getInternalTransactions(CHAIN, userOperationPayload.transactionHash, gnosisscan_key);
+            const txs = await getInternalTransactions(this.chain, userOperationPayload.transactionHash, gnosisscan_key);
             console.log(txs)
 
             // check for succes or failure and pass up ??? 

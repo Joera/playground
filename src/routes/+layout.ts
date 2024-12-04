@@ -14,17 +14,19 @@ export const load = async () => {
 
     const keyExists = await hasKey();
     const safe_array = await hasSafeAddresses();
+    let safe = safe_array[0];
+    const chain_array = ['gnosis','base']; // ,
 
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
         let i = 0;
-        for (let safe of safe_array) {
+        for (let chain of chain_array) {
 
             safe = fixSafeAddress(safe);
 
-            SafeService.create(keyExists, safe).then( async (safeService) => {
+            SafeService.create(chain, keyExists, safe).then( async (safeService) => {
                 safe_store.update((safes) => { 
-                    safes[safe] = writable(safeService); 
+                    safes[chain] = writable(safeService); 
                     return safes; 
                 });
 

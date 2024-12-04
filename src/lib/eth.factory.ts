@@ -19,7 +19,11 @@ export const getRPC = (chain: string, alchemy_key: string) => {
             rpc = `https://base-sepolia.g.alchemy.com/v2/${alchemy_key}`;
             break;
 
-        case 'gno':
+        case 'base':
+                rpc = `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`;
+                break;
+
+        case 'gnosis':
             rpc = `https://rpc.gnosis.gateway.fm`;
             break;
 
@@ -37,7 +41,7 @@ export const getProvider = (chain: string, alchemy_key: string) => {
 
     switch (chain) {
 
-        case 'gno':
+        case 'gnosis':
             provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
             break;
 
@@ -55,6 +59,15 @@ export const getProvider = (chain: string, alchemy_key: string) => {
                 "https://arb-sepolia.g.alchemy.com/v2/" + alchemy_key ,
                 {
                     alchemy: alchemy_key 
+                }
+            );
+            break;
+
+        case 'base':
+            provider = ethers.getDefaultProvider(
+                `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`,
+                {
+                    alchemy: alchemy_key   
                 }
             );
             break;
@@ -117,6 +130,19 @@ export const displayAddress = (chain: string,address: string) => {
     let a = "0x";
     try {
         a = chain + ":" + address.substring(0, 4) + "..." + address.substring(38, 42);
+    }
+    catch (error) {
+        console.log(error)
+    }
+
+    return a;
+}
+
+export const displayShortAddress = (address: string) => {
+
+    let a = "0x";
+    try {
+        a = address.substring(0, 4) + "..." + address.substring(38, 42);
     }
     catch (error) {
         console.log(error)

@@ -168,18 +168,7 @@
 
 <style>
 
-    .scrolltainer {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        position: relative;
-        height: 100%;
-        overflow-y: scroll;
-        width: 100%;
-        max-width: 420px;
-        margin: 3rem 0;
-    }
+   
 
     article {
         position: relative;

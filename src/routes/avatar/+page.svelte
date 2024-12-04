@@ -24,6 +24,7 @@
     let owner_address: Writable<string> = writable("");
 
     const handleProfile = async () => {
+        profile_state.set("");
         avatar_state.set('profile');
     }
 
@@ -82,8 +83,6 @@
 </script>
 
 <article>
-
-    
 
     {#if $avatar_state == 'profile'}
 

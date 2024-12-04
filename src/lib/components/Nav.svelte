@@ -3,8 +3,6 @@
 
 </script>
 
-
-
 <nav class="container">
     <a href="/">Home</a>
     <a href="/avatar">Circles</a>

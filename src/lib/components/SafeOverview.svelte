@@ -7,11 +7,13 @@
     import type { IToken } from '$lib/token.factory';
     import Spinner from './Spinner.svelte';
     import SignerForm from './SignerForm.svelte';
+    import SpinnerWave from './SpinnerWave.svelte';
 
     export let safe_address: string;
     export let safeSrv: Writable<SafeService>;
 
     // Reactive values
+    $: chain = $safeSrv.chain
     $: signer_address = $safeSrv.signer_address;
     $: version = $safeSrv.version;
     $: deployed = $safeSrv.deployed;
@@ -96,7 +98,7 @@
 
         {#if $state == "spinner"} 
 
-            <Spinner></Spinner>
+            <SpinnerWave></SpinnerWave>
 
         {:else if $state == "token"} 
 
@@ -112,11 +114,8 @@
             <button class="button" on:click={handleBack}>back</button>
 
         {:else}
-            <label>Safe: <span>{$version}</span></label>
 
-            <div class="address">
-                <span>{ @html displaySafeAddress("gno", safe_address)}</span>
-            </div>
+            <h3>{chain}</h3>
 
             <div class="tokens">
                 {#each $tokens.entries() as [address,token]}

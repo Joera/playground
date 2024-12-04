@@ -6,7 +6,7 @@
     import Nav from '$lib/components/Nav.svelte';
     import Signer from '$lib/components/Signer.svelte';
     import Ticker from '$lib/components/Ticker.svelte';
-    import {reciprocateTrust} from '$lib/contact.factory.js';
+    import {reciprocateTrust, trustChange } from '$lib/contact.factory.js';
     import {friend_address} from '$lib/contacts.store.js';
     import {hasAvatar} from '$lib/safe.store.js';
 	export let data;

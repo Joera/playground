@@ -1,7 +1,9 @@
 
 <script lang="ts">
-    import SignerForm from '$lib/components/SignerForm.svelte';
+    import CopyAddress from '$lib/components/CopyAddress.svelte';
+import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
+    import { addressFromKey } from '$lib/eth.factory';
     import { signer_key  } from '$lib/key.store';
     import { circles_addresses, safe_addresses, safe_store } from '$lib/safe.store';
     import { maintenance_state } from '$lib/state.store';
@@ -31,7 +33,6 @@
 
     const handleAddSigner = async (address: string) => {
 
-        console.log(1)
         maintenance_state.set("spinner");
 
         circles_addresses.subscribe(async (addresses) => {
@@ -69,37 +70,52 @@
 
 </script>
 
+<h2>Accounts</h2>
 
-<article>
+<section class="scrolltainer">
 
-    {#if $maintenance_state == "spinner"}
+    <article>
 
-        <SpinnerWave></SpinnerWave>
+        {#if $maintenance_state == "spinner"}
 
-    {:else if $maintenance_state == "remotesigner"}
+            <SpinnerWave></SpinnerWave>
 
-        <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail)}></SignerForm>
+        {:else if $maintenance_state == "remotesigner"}
 
-    {:else}
+            <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail)}></SignerForm>
 
-        <div>
-            <label>eoa</label>
-            <!-- <div>{owner_address}</div> -->
-        </div>
+        {:else}
 
-        <label>Remote signer</label>
-        <button class="button"on:click={handleRemoteSigner}>add</button>
+            <div>
+                <h3>Signer</h3>
+                <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
+            </div>
 
+            <div>
+                <h3>Safes</h3>
+                <CopyAddress address={$safe_addresses[0]}></CopyAddress>
+            </div>
 
-        <label>Store your key on device</label>
-        <button class="button" on:click={ () => handleSave()}>save</button>
+            <div>
+                <h3>Backup to device</h3>
+                <button class="button" on:click={ () => handleSave()}>save</button>
+            </div>
 
-        <label>Import key from file</label>
-        <input class="button" id="file_import" type="file" accept=".json">
+            <div>
+                <h3>Restore from backup</h3>
+                <input class="button" id="file_import" type="file" accept=".json">
+            </div>
 
-    {/if}
+            <div>
+                <h3>Remote signer</h3>
+                <button class="button"on:click={handleRemoteSigner}>add</button>
+            </div>
 
-</article>
+        {/if}
+
+    </article>
+
+</section>
 
 
 <style>
@@ -114,10 +130,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-bottom: 1.5rem;
         }
 
         button, input {
-            margin: .75rem 0 3rem 0;
+            margin: 1.5rem 0 0 0;
+        }
+
+        #file_import {
+            width: 260px;
         }
 
         input {
