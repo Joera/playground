@@ -15,8 +15,8 @@ export const load = async () => {
     const keyExists = await hasKey();
     const safe_array = await hasSafeAddresses();
     let safe = safe_array[0];
-    const chain_array = ['gnosis','base']; // ,
-    
+    const chain_array = ['base','gnosis']; // ,
+
     if (typeof keyExists == "string" && keyExists && safe_array.length > 0) {
         
         let i = 0;
