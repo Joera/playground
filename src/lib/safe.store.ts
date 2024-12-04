@@ -2,20 +2,19 @@ import { localStorageStore } from './localstorage.store';
 import { writable, type Writable } from 'svelte/store';
 import { SafeService } from './safe.service';
 import { hasKey } from './key.store';
-import { fixSafeAddress, fixAddressArray } from './eth.factory';
 
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
 export const circles_addresses = writable<string[]>([]);
 export const hasAvatar = writable(false);
 
-export const addSafe = async (index: number) : Promise<void> => {
+export const addSafe = async (chain: string) : Promise<void> => {
 
     const key = await hasKey()
 
     if(typeof key == "string") {
 
-        const srv = await SafeService.create(key, "");
+        const srv = await SafeService.create(chain, key, "");
         
         safe_store.update((safes) => { 
             safes[srv.safe_address] = writable(srv); 

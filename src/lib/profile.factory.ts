@@ -4,6 +4,8 @@ import type { ISafeService } from "./safe.service";
 
 export const getProfile = async(srv: ISafeService) => {
 
+    console.log(0);
+
     const abi = [
         {
         type: "function",
@@ -33,6 +35,8 @@ export const getProfile = async(srv: ISafeService) => {
         name: "",
         description: ""
     }
+
+    console.log(1);
 
     if (hex != "0x0000000000000000000000000000000000000000000000000000000000000000") {
 

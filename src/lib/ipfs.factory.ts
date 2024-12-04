@@ -17,7 +17,7 @@ export const ipfs_cat = async (cid: string) => {
         throw new Error(`Error uploading to IPFS: ${ipfs_response.statusText}`);
     }
 
-    console.log('IPFS Response:', ipfs_response);
+    // console.log('IPFS Response:', ipfs_response);
 
     return ipfs_response.data;
 

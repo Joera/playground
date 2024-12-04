@@ -96,8 +96,6 @@ export class SafeService implements ISafeService {
 
     private async initialize(chain: string, signer_key: string, safe_address: string) {
 
-        console.log("aa", safe_address)
-
         this.chain = chain;
         this.signer_key = signer_key;
         this.safe_address = safe_address;
@@ -141,7 +139,7 @@ export class SafeService implements ISafeService {
 
         } else {
             this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
-            console.log("predictedAddress",this.safe_address);
+            // console.log("predictedAddress",this.safe_address);
         }
     }
 
@@ -154,7 +152,7 @@ export class SafeService implements ISafeService {
         
         try {
             const avatar = await this.genericCall(hubv2Address,hubv2_abi,"avatars",[this.safe_address]);
-            console.log("avatar",avatar);
+            // console.log("avatar",avatar);
             this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
             return this.hasAvatar;
 
@@ -300,7 +298,7 @@ export class SafeService implements ISafeService {
             }
         }
         
-        console.log("rpc", rpc);
+        // console.log("rpc", rpc);
         this.kit = await Safe4337Pack.init({    
             provider: rpc,
             signer: this.signer_key,

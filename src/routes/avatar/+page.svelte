@@ -12,6 +12,7 @@
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
     import { friend_address } from '$lib/contacts.store';
     import { avatar_state, contacts_state, profile_state } from '$lib/state.store';
+    import { profile_store } from '$lib/profile.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
@@ -54,30 +55,50 @@
 
         profile_state.set("spinner");
 
+        profile_store?.subscribe(async (p) => {
+
+            let _profile; 
+            try {
+                _profile = JSON.parse(p);
+            } catch (error) {
+                _profile = {}
+            }
+
+            if(_profile.name != "" && _profile.name != undefined) {
+                profile.set(_profile);
+                profile_state.set("");
+            }
+        })
+
+        owner_address.set($safe_addresses[0])
+
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         await waitForSubscriptions($safe_store, safesWithAvatars);
 
-        if (safesWithAvatars.length == 0) {
+        // if (safesWithAvatars.length == 0) {
 
-            if (safe_addresses != undefined) {
-                owner_address.set($safe_addresses[0]);
-                srv = $safe_store["gnosis"]; 
-            }
+        //     if (safe_addresses != undefined) {
+        //         owner_address.set($safe_addresses[0]);
+        //         srv = $safe_store["gnosis"]; 
+        //     }
 
-        } else {
+        // } else {
 
-            srv = $safe_store["gnosis"];
-            if ($srv) {
-                owner_address.set($srv.safe_address);
-            }
-        }
+        srv = $safe_store["gnosis"];
+        //     if ($srv) {
+        //         owner_address.set($srv.safe_address);
+        //     }
+        // }
+
+        
 
         if ($srv) {
 
-            if ($profile.name == "") {
-                profile.set(     
-                    await getProfile($srv)
-                );
+            if ($profile.name == "" || $profile.name == undefined) {
+                const p = await getProfile($srv);
+                console.log('p',p);
+                profile.set(p);
+                profile_store?.set(JSON.stringify(p));
                 profile_state.set("");
             }
             
