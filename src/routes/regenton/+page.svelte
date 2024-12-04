@@ -37,35 +37,33 @@
 
     async function init() {
         let balance = 0;
-        for (let [safe_address, srv] of Object.entries($safe_store)) {
-            
-            balance += await getInfo(safe_address, srv);
+        // for (let [safe_address, srv] of Object.entries($safe_store)) {
 
-            srv.subscribe((srv: SafeService) => {
-                srv.tokens.subscribe((tokens) => {
-                    console.log(tokens)
-                    for (let [address, token] of tokens) {
-                        console.log(address);
-                        console.log(token);
-                        if (token.name == "GNO") {
-                            if (token && parseFloat(token.balance) > 0) {
-                                console.log(safe_address, token.balance)
-                                availableGNO.update((available) => {
-                                    available[safe_address] = parseFloat(token.balance);
-                                    return available;
-                                });
-                            }
+        const srv = $safe_store["gnosis"];
+            
+        balance += await getInfo($safe_addresses[0], srv);
+
+        srv.subscribe((srv: SafeService) => {
+            srv.tokens.subscribe((tokens) => {
+                console.log(tokens)
+                for (let [address, token] of tokens) {
+                    console.log(address);
+                    console.log(token);
+                    if (token.name == "GNO") {
+                        if (token && parseFloat(token.balance) > 0) {
+                            console.log($safe_addresses[0], token.balance)
+                            availableGNO.update((available) => {
+                                available[$safe_addresses[0]] = parseFloat(token.balance);
+                                return available;
+                            });
                         }
                     }
-                    
-                })
+                }
+                
             })
-
-            
-        }
+        })   
+     
         currentStake.set(balance);
-
-
     }
 
     onMount(async () => {
