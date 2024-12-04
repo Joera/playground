@@ -41,10 +41,10 @@ export default defineConfig({
 			changeOrigin: true,
 			rewrite: (path) => path.replace(/^\/cluster/, '')
 		},
-		'/regenton': {
+		'/rgntn': {
 			target: 'https://validators.autonomous-times.com',
 			changeOrigin: true,	
-			rewrite: (path) => path.replace(/^\/regenton/, '')
+			rewrite: (path) => path.replace(/^\/rgntn/, '')
 		}
 	  }
 	}	
