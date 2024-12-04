@@ -69,12 +69,12 @@
     
         const regenton_response = await validators_api.get('/metrics', {
             headers: {
-                'Content-Type': 'apllication/json',
+                'Content-Type': 'application/json',
             }
         });
 
         if (regenton_response.status !== 200) {
-            throw new Error(`Error uploading to IPFS: ${regenton_response.statusText}`);
+            throw new Error(`Error calling regenton metrics: ${regenton_response.statusText}`);
         }
 
         return regenton_response.data;
@@ -132,7 +132,7 @@
     {#if $state == "spinner"}
         <SpinnerWave></SpinnerWave>
     {:else}
-        <div class="centered">
+        <div class="centered">  
             <span>Your current stake is {$currentStake} GNO</span>
             <span>Available to stake: {$availableGNO[$safe_addresses[0]]}GNO</span>
             <!-- {#each Object.entries($availableGNO) as [safe_address, balance]}
