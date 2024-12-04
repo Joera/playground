@@ -32,7 +32,7 @@
         };
 
         const cid = await ipfs_add(newProfile);
-        console.log(cid);
+        // console.log(cid);
         const hubv2Address = "0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8";
         const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
 
@@ -69,7 +69,7 @@
         
             safe_store.subscribe(async (store) => {
 
-                const safeService = (await store)[addresses[0]];
+                const safeService = (await store)["gnosis"];
             
                 safeService.subscribe(async (srv) => {
 
@@ -99,13 +99,13 @@
         profile_state.set("edit");
     }
 
-    profile.subscribe((p: any) => {
-        if (profile.name == "") {
-            profile_state.set("edit");
-        } else {
-            profile_state.set("");
-        }
-    });
+    // profile.subscribe((p: any) => {
+    //     if (profile.name == "") {
+    //         profile_state.set("edit");
+    //     } else {
+    //         profile_state.set("");
+    //     }
+    // });
 
     onMount(() => {
 

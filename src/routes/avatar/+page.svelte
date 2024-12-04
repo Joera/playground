@@ -73,9 +73,14 @@
         }
 
         if ($srv) {
-            profile.set(     
-                await getProfile($srv)
-            );
+
+            if ($profile.name == "") {
+                profile.set(     
+                    await getProfile($srv)
+                );
+                profile_state.set("");
+            }
+            
         }
     })
 
