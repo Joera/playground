@@ -40,7 +40,6 @@
             safe_store.subscribe(async (store) => {
                 const safeService = (await store)[addresses[0]];
                 safeService.subscribe(async (srv) => {
-                    console.log(2)
                     await srv.addSigner(address);
                     maintenance_state.set("")
                 });
@@ -108,7 +107,7 @@
 
             <div>
                 <h3>Backup to device</h3>
-                <button class="button" on:click={ () => handleSave()}>save</button>
+                <button class="button" on:click={() => handleSave()}>save</button>
             </div>
 
             <div>
@@ -118,7 +117,7 @@
 
             <div>
                 <h3>Clear localstorage</h3>
-                <button class="button" on:click={ () => handleClear()}>clear</button>
+                <button class="button" on:click={() => handleClear()}>clear</button>
             </div>
 
             <div>
@@ -154,10 +153,6 @@
 
         #file_import {
             width: 260px;
-        }
-
-        input {
-
         }
     }
 

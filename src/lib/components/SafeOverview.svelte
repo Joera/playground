@@ -1,15 +1,14 @@
 <!-- src/components/SafeOverview.svelte -->
 <script lang="ts">
-    import { displayAddress, displaySafeAddress, roundBalance } from '$lib/factory/eth.factory.js';
+    import { roundBalance } from '$lib/factory/eth.factory.js';
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
     import type { IToken } from '$lib/factory/token.factory';
-    import Spinner from './Spinner.svelte';
-    import SignerForm from './SignerForm.svelte';
     import SpinnerWave from './SpinnerWave.svelte';
+    import { safe_state } from '$lib/store/state.store';
 
-    export let safe_address: string;
+
     export let safeSrv: Writable<SafeService>;
 
     // Reactive values
@@ -22,7 +21,7 @@
     $: signers = $safeSrv.signers;
     $: modules = $safeSrv.modules;
 
-    const state = writable("");
+
     const tokenId = writable("");
     const tokenBalance = writable(0);
     const mintable = writable(0);
@@ -50,11 +49,11 @@
 
     const handleMint = async () => {
         safeSrv.subscribe( async (srv: SafeService) => {
-            state.set("spinner");
+            safe_state.set("spinner");
             await srv.mintCircles();
             // display link to tx on scan? (txs page?? )
             await srv.getCircles();
-            state.set("token");
+            safe_state.set("");
             
         })
     }
@@ -76,18 +75,18 @@
         if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
             mintable.set(parseFloat(token.mintable));
         }
-        state.set("token");
+        safe_state.set("token");
     }
 
     const handleTokenInfo = async (address: string, token: IToken) => {
         tokenId.set(address);
         tokenBalance.set(parseFloat(token.balance));
        
-        state.set("token");
+        safe_state.set("token");
     }
 
     const handleBack = async () => {
-        state.set("");
+        safe_state.set("");
     }   
 
 </script>
@@ -96,18 +95,17 @@
     <div class="safe_container">
 
 
-        {#if $state == "spinner"} 
+        {#if $safe_state == "spinner"} 
 
             <SpinnerWave></SpinnerWave>
 
-        {:else if $state == "token"} 
+        {:else if $safe_state == "token"} 
 
             <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
             
             <button class="button">transfer</button>
             {#if $mintable > 0}
                 <label>Mintable: <span>{$mintable.toFixed(2)}</span></label>   
-                  
                 <button class="button" on:click={handleMint}>mint</button>
             {/if}
             
@@ -115,7 +113,7 @@
 
         {:else}
 
-            <h3>{chain}</h3>
+            <!-- <h3>{chain}</h3> -->
 
             <div class="tokens">
                 {#each $tokens.entries() as [address,token]}
@@ -198,8 +196,8 @@
                 display: flex;
                 flex-direction: row;
                 justify-content: space-between;
-                min-width: 160px;
-                /* margin: .25rem 0 */
+                min-width: 240px;
+                margin: .75rem 0;
             }
 
             .signers {

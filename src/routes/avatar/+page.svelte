@@ -140,7 +140,7 @@
         height: 100%;
         width: 100%;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
 
         div {

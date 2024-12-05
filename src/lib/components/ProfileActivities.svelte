@@ -3,7 +3,7 @@
     import { displayAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher } from 'svelte';
-    import { circles_addresses, safe_addresses, safe_store } from "$lib/store/safe.store";
+    import { circles_addresses, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from "$lib/store/safe.store";
     import { activities } from "$lib/store/activities.store";
     import { ethers, EtherscanPlugin } from "ethers";
     import SpinnerWave from "./SpinnerWave.svelte";
@@ -49,11 +49,13 @@
         }
     })
 
-    circles_addresses.subscribe((addresses) => {
+    circles_addresses.subscribe( async (addresses) => {
 
         if($activity.length < 1) {
             activity_state.set("spinner");
         }
+
+        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
         
         const srv = $safe_store["gnosis"];
         
@@ -177,18 +179,7 @@
 
 <style>
     
-    .scrolltainer {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        position: relative;
-        height: 100%;
-        overflow-y: scroll;
-        width: 100%;
-        max-width: 420px;
-        margin: 3rem 0;
-    }
+
 
     article {
         position: relative;

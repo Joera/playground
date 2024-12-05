@@ -92,6 +92,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;  
+    min-height: calc(100% - 4rem);
+   
   }
 
   button {

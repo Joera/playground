@@ -1,51 +1,78 @@
 <script lang="ts">
     import SafeOverview from '$lib/components/SafeOverview.svelte';
-    import { safe_store, addSafe } from '$lib/store/safe.store';
+    import type { SafeService } from '$lib/safe.service';
+    import { safe_store, safe_addresses, waitForSafeStoreToBePopulated, chain_array} from '$lib/store/safe.store';
+    import { onMount } from 'svelte';
+    import { writable, type Writable } from 'svelte/store';
 
-    $: safeEntries = Object.entries($safe_store);
+    let chains: Writable<string[]> = writable(chain_array);   
+    let safeSrv: Writable<SafeService> = writable();
+    let chain: Writable<string> = writable("");
 
-    // const handleAddSafe = async () => {
-    //     addSafe();
-    // }
+    const handleChain = async (c: string) => {
+        $safe_store[c].subscribe(async (srv) => {
+            safeSrv.set(srv);
+            chain.set(c);
+        })
+    }
+
+    onMount(async () => {
+        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
+        handleChain('gnosis');
+    })
 
 </script>
 
-<style>
-    #safes {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: center;
-        width: calc(100vw - 1rem);
-        /* min-height: calc(100vh - 16rem); */
-        overflow: auto;
-        margin: 0 .5rem;
-        height: 100%;
+    <section class="scrolltainer">
 
-        @media screen  and (min-width: 860px) {
-            justify-content: center;
-        }
-    }
-
-    button {
-        border: none;
-        font-size: 6rem;
-        font-weight: 400;
-    }
-
-
-</style>
-
-
-    <section id="safes">
-        {#if $safe_store && Object.keys($safe_store).length > 0}
-            {#each safeEntries as [safe_address, safeSrv]}        
-                <SafeOverview {safe_address} {safeSrv} />
-            {/each}
+        <h2>{$chain}</h2>
+        {#if $safeSrv}
+            <SafeOverview {safeSrv} />
         {/if}
-        <!-- <article class="safe_container">
-            <button on:click={handleAddSafe}>+</button>
-        </article> -->
+ 
+        
     </section>
+
+    <nav>
+        {#each $chains as chain}
+        <button class="button" on:click="{() => handleChain(chain)}">{chain}</button>
+        {/each}        
+    </nav>
   
 
+    <style>
+        #safes {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: calc(100vw - 1rem);
+            /* min-height: calc(100vh - 16rem); */
+            overflow: auto;
+            margin: 0 .5rem;
+            height: 100%;
+    
+            @media screen  and (min-width: 860px) {
+                justify-content: center;
+            }
+        }
+
+        nav {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            > button {
+                margin: 0 .5rem;
+            }
+        }
+    
+        /* button {
+            border: none;
+            font-size: 6rem;
+            font-weight: 400;
+        } */
+    
+    
+    </style>
