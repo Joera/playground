@@ -103,7 +103,7 @@ export class SafeService implements ISafeService {
         this.provider = getProvider(chain, alchemy_key);
 
         if (chain == "gnosis") {
-            const circlesRpc = new CirclesRpc("/circles");
+            const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
             this.circles_data = new CirclesData(circlesRpc);
         }
     }
