@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { displayShorterAddress, fixSafeAddress } from "$lib/factory/eth.factory";
+    import { displayShortAddress, displayShorterAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import { contacts, hidden_contacts } from "$lib/store/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
@@ -118,7 +118,7 @@
             <button class="button"on:click={handleBack}>Nope, take me back</button>
 
         {:else if $contacts_state == "trustchoice"}
-            <button on:click={handleReciprocate}>what do you want to do with {$activeContact?.objectName}?</button>
+            <button on:click={handleReciprocate}>what do you want to do with {displayShortAddress($activeContact?.objectName || "")}?</button>
             <button class="button"on:click={handleReciprocate}>Reciprocate trust</button>
             <button class="button"on:click={handleHide}>Hide from contacts</button>
             <button class="button"on:click={handleBack}>Take me back</button>
