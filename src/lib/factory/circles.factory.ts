@@ -26,7 +26,7 @@ export const setCirclesListener = () => {
 
             safe_store.subscribe(async (stores) => {
 
-                const safeService = (await stores)[addresses[0]];
+                const safeService = (await stores)["gnosis"];
 
                 if (!safeService) return;
 

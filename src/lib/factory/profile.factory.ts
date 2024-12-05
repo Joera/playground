@@ -4,8 +4,6 @@ import type { ISafeService } from "../safe.service";
 
 export const getProfile = async(srv: ISafeService) => {
 
-    console.log(0);
-
     const abi = [
         {
         type: "function",

@@ -9,6 +9,7 @@
     import { circles_addresses, safe_store } from '$lib/store/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
     import { GnosisChainConfig } from '$lib/factory/circles.factory';
+    import SpinnerWave  from './SpinnerWave.svelte';
 
     let videoElement: any;
     let logMessage = '';
@@ -67,7 +68,7 @@
 
   {#if $spinner}
 
-    <Spinner></Spinner>
+    <SpinnerWave></SpinnerWave>
 
   {:else}
 

@@ -86,7 +86,6 @@ export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, W
     return new Promise(resolve => {
         const intervalId = setInterval(() => {
             const safes = Object.keys(safe_store);
-            console.log(safes)
             if (safes.length === chain_array.length) {
                 clearInterval(intervalId);
                 resolve();
