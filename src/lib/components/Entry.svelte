@@ -1,10 +1,12 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    export let data;
-  
+    import { hasKey } from '$lib/key.store';
+    
     onMount( async () => {
-      if (!data.keyExists) {
+
+      console.log(await hasKey())
+      if ( await(hasKey()) == false) {
           goto('/welcome');
       } 
     });
