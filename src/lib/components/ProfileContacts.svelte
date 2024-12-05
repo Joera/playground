@@ -55,6 +55,7 @@
 
     const handleHide = async () => {
         if ($activeContact == null) return;
+        contacts_state.set("spinner");
         hidden_contacts?.update((hidden: string) => {
 
             let parsed;
@@ -66,6 +67,10 @@
             let h = [...parsed, ethers.getAddress($activeContact.objectAvatar)];
             return JSON.stringify(h)
         })
+
+        await updateContacts();
+        contacts_state.set("");
+
     }
 
     const runTrustChange = async (contact: Contact) => {
