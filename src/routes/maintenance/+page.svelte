@@ -51,6 +51,7 @@
     const handleClear = async () => {
         
         localStorage.clear();
+        goto('/');
     }
 
 
@@ -133,8 +134,6 @@
 
 
 <style>
-
-   
 
     article {
 
