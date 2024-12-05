@@ -1,7 +1,6 @@
 <script lang="ts">
     import { displayShorterAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
-    import Spinner from "./Spinner.svelte";
     import { contacts, hidden_contacts } from "$lib/store/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
     import { trustChange, updateContacts, type Contact } from "$lib/factory/contact.factory";
@@ -100,7 +99,6 @@
 
     <article>
 
-
         {#if $network.length == 0 || $contacts_state == "spinner"}
             <SpinnerWave></SpinnerWave>
 
@@ -178,6 +176,7 @@
         justify-content: flex-start;
         width: 100%;
         max-width: calc(100% - 4rem);
+        margin: auto;
         /* min-height: 100%; */
         
 
@@ -217,7 +216,7 @@
     }
 
     button.button {
-        margin: 3rem 0 0 0;
+        margin: 1.5rem 0 0 0;
     }
 
 </style>
