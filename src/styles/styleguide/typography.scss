@@ -27,7 +27,16 @@
     font-weight: 700;
     font-size: 1.375rem;
     margin: 0;
+    text-transform: lowercase;
 }
+
+:global(h3 + div.address-container) {
+    margin-top: -1.5rem;
+}
+
+// :global(h3 + button) {
+//     margin-top: -1.5rem;
+// }
  
 @mixin sans {
 

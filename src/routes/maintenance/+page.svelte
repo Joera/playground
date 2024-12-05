@@ -48,6 +48,11 @@
         });
     };
 
+    const handleClear = async () => {
+        
+        localStorage.clear();
+    }
+
 
     onMount(() => {
         
@@ -111,6 +116,11 @@
             </div>
 
             <div>
+                <h3>Clear localstorage</h3>
+                <button class="button" on:click={ () => handleClear()}>clear</button>
+            </div>
+
+            <div>
                 <h3>Remote signer</h3>
                 <button class="button"on:click={handleRemoteSigner}>add</button>
             </div>
@@ -123,6 +133,8 @@
 
 
 <style>
+
+   
 
     article {
 
@@ -138,7 +150,7 @@
         }
 
         button, input {
-            margin: 1.5rem 0 0 0;
+            margin: .5rem 0 0 0;
         }
 
         #file_import {
