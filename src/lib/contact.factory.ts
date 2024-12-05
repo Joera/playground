@@ -64,7 +64,12 @@ export const updateContacts = async () :Promise<Contact[]> => {
 
         let hidden: string[] = [];
         hidden_contacts?.subscribe((value) => {
-            hidden = JSON.parse(value) || [];
+            hidden =  []
+            try {
+                hidden = JSON.parse(value);
+             } catch (error) {
+                 
+             }
         });
 
         circles_addresses.subscribe((addresses) => {

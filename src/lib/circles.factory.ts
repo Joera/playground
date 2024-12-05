@@ -1,6 +1,9 @@
 import type {CirclesConfig} from "@circles-sdk/sdk";
-import { safe_store } from "./safe.store";
+import { circles_addresses, safe_store } from "./safe.store";
 import type { SafeService } from "./safe.service";
+import { getDefaultProvider, ethers } from "ethers";
+import { hexToAddress } from "./eth.factory";
+import { events } from "./event.store";
 
 
 export const GnosisChainConfig: CirclesConfig = {
@@ -12,6 +15,62 @@ export const GnosisChainConfig: CirclesConfig = {
     migrationAddress: "0xD44B8dcFBaDfC78EA64c55B705BFc68199B56376",
     profileServiceUrl: "https://rpc.aboutcircles.com/profiles/",
 };
+
+export const setCirclesListener = () => {
+
+    let listening = false;
+
+    circles_addresses.subscribe(async (addresses) => {
+
+        if (!listening && addresses.length > 0) {
+
+            safe_store.subscribe(async (stores) => {
+
+                const safeService = (await stores)[addresses[0]];
+
+                if (!safeService) return;
+
+                safeService.subscribe(async (srv) => {
+
+                    const provider = getDefaultProvider('wss://rpc.gnosischain.com/wss');
+                    const contractAddress = '0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8';
+                    const contractABI = [
+                        "event Trust(address indexed truster, address indexed trustee, uint256 expiryTime)"
+                    ];
+
+                    const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+                    const filter = contract.filters.Trust(null, ethers.getAddress(addresses[0]), null);
+
+                    contract.on(filter, async (event: any, log: any) => {
+
+                        if (ethers.getAddress(event.log.address) != ethers.getAddress(contractAddress)) return;
+                        
+                        const truster = hexToAddress(event.log.topics[1])
+                        console.log("trust detected from ", truster);
+                        const name = await srv.getAvatarName(truster);
+
+                        const e = {
+                            msg : `${name} trusts you. Accept?`,
+                            method: 'accept_invite',
+                            address: truster
+                        }
+
+                        events?.update((eventsString) => {
+                            let events = eventsString != "" ? JSON.parse(eventsString) : [];
+                            events = [...events, e]
+                            return JSON.stringify(events);
+                        });
+                        
+                    });
+
+                    listening = true;
+                    console.log('listening to events for ', addresses[0]);
+                });
+            });
+        }
+    });
+}
 
 
 // export const hasSafeWithAvatar = async (address: string) => {

@@ -17,7 +17,7 @@
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();
 
-        avatar_state.set("profile");
+    avatar_state.set("profile");
     let profile : Writable<any> = writable({
         name: "",
         description: ""

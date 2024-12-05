@@ -7,6 +7,7 @@ export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
 export const circles_addresses = writable<string[]>([]);
 export const hasAvatar = writable(false);
+export const chain_array = ['base','gnosis'];
 
 export const addSafe = async (chain: string) : Promise<void> => {
 
@@ -85,7 +86,8 @@ export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, W
     return new Promise(resolve => {
         const intervalId = setInterval(() => {
             const safes = Object.keys(safe_store);
-            if (safes.length === 2) {
+            console.log(safes)
+            if (safes.length === chain_array.length) {
                 clearInterval(intervalId);
                 resolve();
             }

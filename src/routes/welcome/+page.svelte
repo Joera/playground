@@ -1,7 +1,12 @@
-<script>
+<script lang="ts">
     import { goto } from "$app/navigation";
-    import { initPK } from "$lib/key.store";
-    import { addSafe } from "$lib/safe.store";
+    import { initPK, signer_key } from "$lib/key.store";
+    import { addSafe, safe_addresses } from "$lib/safe.store";
+    import { onMount } from "svelte";
+
+    import { welcome_state } from "$lib/state.store";
+    import { initApp } from "$lib/app.factory";
+    import SpinnerWave from "$lib/components/SpinnerWave.svelte";
 
     // Function to handle button clicks
     const default_setup = async () => {
@@ -11,9 +16,31 @@
         goto('/avatar');
     };
 
-    const advanced_setup = () => {
-        console.log("Button 2 clicked");
-    };
+    onMount(async () => {
+
+        const input = document.getElementById('file_import') as HTMLInputElement;
+            input.addEventListener('change', async (event) => {
+                welcome_state.set('spinner')
+                const file = (event.target as HTMLInputElement).files?.[0];
+                if (!file) {
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const data = event.target?.result;
+                    const object = JSON.parse(data as string);
+                    signer_key?.set(object.signer_key);
+                    safe_addresses?.set(object.safe_addresses);
+                    await initApp();
+                    welcome_state.set('')
+                    goto('/avatar');
+
+                };
+                reader.readAsText(file);
+                
+        });
+    });
+    
 </script>
 
 <style global lang="scss">
@@ -35,14 +62,34 @@
     h2 {
         margin-bottom: 3rem;
     }
+
+    .centered {
+        margin-top: 3rem;
+    }
+
+    input#file_import {
+        max-width: 230px;
+    }
 </style>
 
 <h2>Welcome!</h2>
 
 <article>
-    <label>Click the button to create a private key, deploy a safe on the Gnosis chain and register a circles avatar with the safe address.</label>
- <button class="button" on:click={default_setup}>Do it!</button>
- <!-- <label>advanced: (requires configuring)</label>
- <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button> -->
+
+    {#if $welcome_state == "spinner"}
+
+        <SpinnerWave></SpinnerWave>
+
+    {:else}
+
+        <label>Click the button to create a private key, deploy a safe on the Gnosis chain and register a circles avatar with the safe address.</label>
+        <button class="button" on:click={default_setup}>Do it!</button>
+        <!-- <label>advanced: (requires configuring)</label>
+        <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button> -->
+        <div class="centered">
+            <label>.. or restore from backup</label>
+            <input class="button" id="file_import" type="file" accept=".json">
+        </div>
+    {/if}
 </article>
 

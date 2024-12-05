@@ -1,5 +1,6 @@
 
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import CopyAddress from '$lib/components/CopyAddress.svelte';
     import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
@@ -64,6 +65,7 @@
                 safe_addresses?.set(object.safe_addresses);
             };
             reader.readAsText(file);
+            goto('/avatar');
         });
         // input.click();
     })

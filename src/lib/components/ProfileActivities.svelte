@@ -6,6 +6,8 @@
     import { circles_addresses, safe_addresses, safe_store } from "$lib/safe.store";
     import { activities } from "$lib/activities.store";
     import { ethers, EtherscanPlugin } from "ethers";
+    import SpinnerWave from "./SpinnerWave.svelte";
+    import { activity_state } from "$lib/state.store";
 
     const dispatch = createEventDispatcher();
 
@@ -48,6 +50,10 @@
     })
 
     circles_addresses.subscribe((addresses) => {
+
+        if($activity.length < 1) {
+            activity_state.set("spinner");
+        }
         
         const srv = $safe_store["gnosis"];
         
@@ -89,6 +95,7 @@
 
             activity.set(txs);  
             activities?.set(JSON.stringify(txs));
+            activity_state.set("");
             
         });
     });
@@ -113,6 +120,11 @@
 <section class="scrolltainer">
 
 <article>
+
+
+    {#if $activity_state == 'spinner'}
+        <SpinnerWave></SpinnerWave>
+    {/if}
 
     {#each $activity as a}
 
