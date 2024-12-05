@@ -74,7 +74,7 @@
                 safeService.subscribe(async (srv) => {
 
                     const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
-                    console.log("friend", $friend_address)
+                    // console.log("friend", $friend_address)
 
                     if($friend_address != "" && friend_address != undefined) {
                         console.log("registering");

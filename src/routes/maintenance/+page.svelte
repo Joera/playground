@@ -1,7 +1,7 @@
 
 <script lang="ts">
     import CopyAddress from '$lib/components/CopyAddress.svelte';
-import SignerForm from '$lib/components/SignerForm.svelte';
+    import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/eth.factory';
     import { signer_key  } from '$lib/key.store';
@@ -88,7 +88,9 @@ import SignerForm from '$lib/components/SignerForm.svelte';
 
             <div>
                 <h3>Signer</h3>
-                <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
+                {#if $signer_key}
+                    <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
+                {/if}
             </div>
 
             <div>

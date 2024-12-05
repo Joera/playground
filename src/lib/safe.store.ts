@@ -17,7 +17,7 @@ export const addSafe = async (chain: string) : Promise<void> => {
         const srv = await SafeService.create(chain, key, "");
         
         safe_store.update((safes) => { 
-            safes[srv.safe_address] = writable(srv); 
+            safes[chain] = writable(srv); 
             return safes; 
         });
 
@@ -85,7 +85,7 @@ export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, W
     return new Promise(resolve => {
         const intervalId = setInterval(() => {
             const safes = Object.keys(safe_store);
-            if (safes.length === safe_addresses.length) {
+            if (safes.length === 2) {
                 clearInterval(intervalId);
                 resolve();
             }

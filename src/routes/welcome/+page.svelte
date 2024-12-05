@@ -6,7 +6,8 @@
     // Function to handle button clicks
     const default_setup = async () => {
         await initPK();
-        await addSafe(0);
+        await addSafe("gnosis");
+        await addSafe("base");
         goto('/avatar');
     };
 

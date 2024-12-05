@@ -70,9 +70,12 @@
             }
         })
 
+        console.log(0);
+
         owner_address.set($safe_addresses[0])
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
+        console.log(0.5);
         await waitForSubscriptions($safe_store, safesWithAvatars);
 
         // if (safesWithAvatars.length == 0) {
@@ -84,17 +87,23 @@
 
         // } else {
 
+        console.log(1);
+
         srv = $safe_store["gnosis"];
         //     if ($srv) {
         //         owner_address.set($srv.safe_address);
         //     }
         // }
 
-        
+        console.log($safe_store);
 
         if ($srv) {
 
+            console.log(2);
+
             if ($profile.name == "" || $profile.name == undefined) {
+
+                console.log(3);
                 const p = await getProfile($srv);
                 console.log('p',p);
                 profile.set(p);
