@@ -74,6 +74,8 @@
         });
 
         if (regenton_response.status !== 200) {
+
+            console.log(regenton_response);
             throw new Error(`Error calling regenton metrics: ${regenton_response.statusText}`);
         }
 
