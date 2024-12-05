@@ -33,7 +33,7 @@
 
         activeContact.set(contact);
 
-        if (contact.relation === "trusts") {
+        if (contact.relation === "trustedBy") {
             contacts_state.set("reciprocate")
         } else if (contact.relation === "mutuallyTrusts") {
             contacts_state.set("revoke")
