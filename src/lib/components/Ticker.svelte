@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { events } from "$lib/event.store";
+    import { events } from "$lib/store/event.store";
     import { createEventDispatcher } from "svelte";
 
 

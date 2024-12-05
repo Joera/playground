@@ -1,10 +1,10 @@
 <!-- src/components/SafeOverview.svelte -->
 <script lang="ts">
-    import { displayAddress, displaySafeAddress, roundBalance } from '$lib/eth.factory.js';
+    import { displayAddress, displaySafeAddress, roundBalance } from '$lib/factory/eth.factory.js';
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
-    import type { IToken } from '$lib/token.factory';
+    import type { IToken } from '$lib/factory/token.factory';
     import Spinner from './Spinner.svelte';
     import SignerForm from './SignerForm.svelte';
     import SpinnerWave from './SpinnerWave.svelte';

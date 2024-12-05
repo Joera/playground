@@ -1,13 +1,13 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { displayAddress, fixSafeAddress } from "$lib/eth.factory";
+    import { displayAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher } from 'svelte';
-    import { circles_addresses, safe_addresses, safe_store } from "$lib/safe.store";
-    import { activities } from "$lib/activities.store";
+    import { circles_addresses, safe_addresses, safe_store } from "$lib/store/safe.store";
+    import { activities } from "$lib/store/activities.store";
     import { ethers, EtherscanPlugin } from "ethers";
     import SpinnerWave from "./SpinnerWave.svelte";
-    import { activity_state } from "$lib/state.store";
+    import { activity_state } from "$lib/store/state.store";
 
     const dispatch = createEventDispatcher();
 

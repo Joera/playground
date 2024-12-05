@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { displayShortAddress, displayShorterAddress } from '$lib/eth.factory';
+    import { displayShortAddress, displayShorterAddress } from '$lib/factory/eth.factory';
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
 

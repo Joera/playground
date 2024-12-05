@@ -1,9 +1,9 @@
 
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { displayAddress, displayShortAddress } from '$lib/eth.factory';
-    import { signer_key } from '$lib/key.store';
-    import { safe_addresses } from '$lib/safe.store';
+    import { displayAddress, displayShortAddress } from '$lib/factory/eth.factory';
+    import { signer_key } from '$lib/store/key.store';
+    import { safe_addresses } from '$lib/store/safe.store';
     import { Wallet } from 'ethers';
 
     function addressFromKey(privateKey: string) {

@@ -1,6 +1,6 @@
 <script lang="ts">
     import SafeOverview from '$lib/components/SafeOverview.svelte';
-    import { safe_store, addSafe } from '$lib/safe.store';
+    import { safe_store, addSafe } from '$lib/store/safe.store';
 
     $: safeEntries = Object.entries($safe_store);
 

@@ -4,11 +4,11 @@
     import { writable, type Writable } from "svelte/store";
     import SpinnerWave from "./SpinnerWave.svelte";
     import type { Profile } from "@circles-sdk/profiles";
-    import { expiryTimeHex, fixSafeAddress } from "$lib/eth.factory";
-    import { circles_addresses, safe_store } from "$lib/safe.store";
+    import { expiryTimeHex, fixSafeAddress } from "$lib/factory/eth.factory";
+    import { circles_addresses, safe_store } from "$lib/store/safe.store";
     import { cidV0ToUint8Array } from "@circles-sdk/utils";
-    import { ipfs_add } from "$lib/ipfs.factory";
-    import { profile_state } from "$lib/state.store";
+    import { ipfs_add } from "$lib/factory/ipfs.factory";
+    import { profile_state } from "$lib/store/state.store";
     import { HUBV2ADDRESS } from "$lib/constants";
     import { hubv2_abi } from "$lib/circles_hub_v2";
 

@@ -4,10 +4,10 @@
     import CopyAddress from '$lib/components/CopyAddress.svelte';
     import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
-    import { addressFromKey } from '$lib/eth.factory';
-    import { signer_key  } from '$lib/key.store';
-    import { circles_addresses, safe_addresses, safe_store } from '$lib/safe.store';
-    import { maintenance_state } from '$lib/state.store';
+    import { addressFromKey } from '$lib/factory/eth.factory';
+    import { signer_key  } from '$lib/store/key.store';
+    import { circles_addresses, safe_addresses, safe_store } from '$lib/store/safe.store';
+    import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
 
     const handleSave = () => {

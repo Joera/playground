@@ -1,8 +1,8 @@
 <script lang="ts">
 
-    import { displayAddress } from '$lib/eth.factory.js';
+    import { displayAddress } from '$lib/factory/eth.factory.js';
     import { Wallet } from 'ethers';
-    import { signer_key } from '$lib/key.store.js';
+    import { signer_key } from '$lib/store/key.store.js';
     
 
     // export let data;

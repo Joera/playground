@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated, waitForSubscriptions } from '$lib/safe.store';
+    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated, waitForSubscriptions } from '$lib/store/safe.store';
     import { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
     import { onMount } from 'svelte';
@@ -8,11 +8,11 @@
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
     import ProfileContacts from '$lib/components/ProfileContacts.svelte';
     import Spinner from '$lib/components/Spinner.svelte';
-    import { getProfile } from '$lib/profile.factory';
+    import { getProfile } from '$lib/factory/profile.factory';
     import ProfileActivities from '$lib/components/ProfileActivities.svelte';
-    import { friend_address } from '$lib/contacts.store';
-    import { avatar_state, contacts_state, profile_state } from '$lib/state.store';
-    import { profile_store } from '$lib/profile.store';
+    import { friend_address } from '$lib/store/contacts.store';
+    import { avatar_state, contacts_state, profile_state } from '$lib/store/state.store';
+    import { profile_store } from '$lib/store/profile.store';
 
     let safesWithAvatars: string[] = [];
     let srv: Writable<SafeService> = writable();

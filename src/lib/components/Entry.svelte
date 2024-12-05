@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { hasKey } from '$lib/key.store';
+    import { hasKey } from '$lib/store/key.store';
     
     onMount( async () => {
 

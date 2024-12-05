@@ -1,9 +1,9 @@
 <script lang="ts">
     import { hubv2_abi } from "$lib/circles_hub_v2";
     import { HUBV2ADDRESS } from "$lib/constants";
-    import { addressToUint256, fixSafeAddress } from "$lib/eth.factory";
-    import { circles_addresses, safe_store } from "$lib/safe.store";
-    import { avatar_state, transfer_state } from "$lib/state.store";
+    import { addressToUint256, fixSafeAddress } from "$lib/factory/eth.factory";
+    import { circles_addresses, safe_store } from "$lib/store/safe.store";
+    import { avatar_state, transfer_state } from "$lib/store/state.store";
     import { ethers } from "ethers";
     import Spinner from "./Spinner.svelte";
 

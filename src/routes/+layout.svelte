@@ -6,9 +6,9 @@
     import Nav from '$lib/components/Nav.svelte';
     import Signer from '$lib/components/Signer.svelte';
     import Ticker from '$lib/components/Ticker.svelte';
-    import {reciprocateTrust, trustChange } from '$lib/contact.factory.js';
-    import {friend_address} from '$lib/contacts.store.js';
-    import {hasAvatar} from '$lib/safe.store.js';
+    import {reciprocateTrust, trustChange } from '$lib/factory/contact.factory.js';
+    import {friend_address} from '$lib/store/contacts.store.js';
+    import {hasAvatar} from '$lib/store/safe.store.js';
 	export let data;
 
 	const vh = window.innerHeight * 0.01;
@@ -58,7 +58,7 @@
 
 	<h1>Playground</h1>
 	
-	<Entry {data} />
+	<Entry  />
 
 	<section class="container">
 		<slot />

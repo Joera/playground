@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { displayShorterAddress, fixSafeAddress } from "$lib/eth.factory";
+    import { displayShorterAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import Spinner from "./Spinner.svelte";
-    import { contacts, hidden_contacts } from "$lib/contacts.store";
+    import { contacts, hidden_contacts } from "$lib/store/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
-    import { trustChange, updateContacts, type Contact } from "$lib/contact.factory";
-    import { contacts_state } from "$lib/state.store";
+    import { trustChange, updateContacts, type Contact } from "$lib/factory/contact.factory";
+    import { contacts_state } from "$lib/store/state.store";
     import Transfer from "./Transfer.svelte";
     import SpinnerWave from "./SpinnerWave.svelte";
     import { ethers } from "ethers";

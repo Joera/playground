@@ -5,19 +5,19 @@ import { writable, type Writable } from 'svelte/store';
 import Safe from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
-import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress } from "./eth.factory";
-import { tokenList, type IToken } from './token.factory';
-import { fromStore } from './store.factory';
+import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress } from "./factory/eth.factory";
+import { tokenList, type IToken } from './factory/token.factory';
+import { fromStore } from './factory/store.factory';
 import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
-import { GnosisChainConfig } from './circles.factory';
+import { GnosisChainConfig } from './factory/circles.factory';
 import { hubv2_abi } from './circles_hub_v2';
 import { CirclesData, CirclesRpc } from '@circles-sdk/data';
-import { ipfs_cat } from './ipfs.factory';
+import { ipfs_cat } from './factory/ipfs.factory';
+import { HUBV2ADDRESS } from './constants';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
 const migrationModuleAddress = "0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6";
-const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
 
 
 export interface ISafeService {
@@ -151,7 +151,7 @@ export class SafeService implements ISafeService {
     async checkAvatar() {
         
         try {
-            const avatar = await this.genericCall(hubv2Address,hubv2_abi,"avatars",[this.safe_address]);
+            const avatar = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"avatars",[this.safe_address]);
             // console.log("avatar",avatar);
             this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
             return this.hasAvatar;
@@ -166,7 +166,7 @@ export class SafeService implements ISafeService {
         try {
 
             const balances = await this.circles_data?.getTokenBalances(this.safe_address);
-            const issuance = await this.genericCall(hubv2Address,hubv2_abi,"calculateIssuance",[this.safe_address]);
+            const issuance = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"calculateIssuance",[this.safe_address]);
             const mintable = ethers.formatUnits(issuance.split(",")[0], 18);
 
             function addressToUint256(address: string): string {
@@ -205,7 +205,7 @@ export class SafeService implements ISafeService {
 
     async mintCircles() {
 
-        await this.genericTx(hubv2Address, hubv2_abi, "personalMint",[], false);
+        await this.genericTx(HUBV2ADDRESS, hubv2_abi, "personalMint",[], false);
 
         return
 

@@ -1,11 +1,11 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { initPK, signer_key } from "$lib/key.store";
-    import { addSafe, safe_addresses } from "$lib/safe.store";
+    import { initPK, signer_key } from "$lib/store/key.store";
+    import { addSafe, safe_addresses } from "$lib/store/safe.store";
     import { onMount } from "svelte";
 
-    import { welcome_state } from "$lib/state.store";
-    import { initApp } from "$lib/app.factory";
+    import { welcome_state } from "$lib/store/state.store";
+    import { initApp } from "$lib/factory/app.factory";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
 
     // Function to handle button clicks

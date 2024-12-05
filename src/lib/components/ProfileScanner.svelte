@@ -1,14 +1,14 @@
 <script lang="ts">
  
-    import { displayAddress, expiryTimeHex } from '$lib/eth.factory';
+    import { displayAddress, expiryTimeHex } from '$lib/factory/eth.factory';
 
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { createEventDispatcher, onMount } from 'svelte';
     import { writable } from 'svelte/store';
     import Spinner from './Spinner.svelte';
-    import { circles_addresses, safe_store } from '$lib/safe.store';
+    import { circles_addresses, safe_store } from '$lib/store/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
-    import { GnosisChainConfig } from '$lib/circles.factory';
+    import { GnosisChainConfig } from '$lib/factory/circles.factory';
 
     let videoElement: any;
     let logMessage = '';

@@ -1,11 +1,11 @@
 <script lang="ts">
 
     import { fromStore, writable, type Writable } from "svelte/store";
-    import { safe_store, addSafe, waitForSafeStoreToBePopulated, waitForSubscriptions, safe_addresses } from '$lib/safe.store';
+    import { safe_store, addSafe, waitForSafeStoreToBePopulated, waitForSubscriptions, safe_addresses } from '$lib/store/safe.store';
     import type { SafeService } from "$lib/safe.service";
     import { regenton_abi } from "$lib/regenton_abi";
     import { onMount } from "svelte";
-    import { displayAddress } from "$lib/eth.factory";
+    import { displayAddress } from "$lib/factory/eth.factory";
     import Spinner from "$lib/components/Spinner.svelte";
     import { validators_api } from "$lib/apis";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
