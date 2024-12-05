@@ -46,7 +46,7 @@
         circles_addresses.subscribe( (addresses) => {
             safe_store.subscribe(async (store) => {
 
-                const safeService = (await store)[addresses[0]];
+                const safeService = (await store)["gnosis"];
                 
                 safeService.subscribe(async (srv) => {
                     spinner.set(true);
@@ -75,11 +75,11 @@
       <video bind:this={videoElement} autoplay></video>
     {:else}
       <div>
-        <h3>Do you trust ... </h3>
+        <h3>do you trust?</h3>
         { displayAddress("gno", $newby_address)}</div>
 
         <!--check crc balance - shoud be > 96 --> 
-        <button on:click={inviteHandler}>yes!</button>
+        <button class="button" on:click={inviteHandler}>yes!</button>
     {/if}
 
   {/if}
