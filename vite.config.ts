@@ -45,6 +45,11 @@ export default defineConfig({
 			target: 'https://validators.autonomous-times.com',
 			changeOrigin: true,	
 			rewrite: (path) => path.replace(/^\/rgntn/, '')
+		},
+		'/circles': {
+			target: 'https://rpc.aboutcircles.com',
+			changeOrigin: true,	
+			rewrite: (path) => path.replace(/^\/circles/, '')
 		}
 	  }
 	}	

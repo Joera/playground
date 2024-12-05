@@ -8,8 +8,7 @@ import { type Signer, type Provider, type Contract, ethers } from "ethers";
 import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress } from "./factory/eth.factory";
 import { tokenList, type IToken } from './factory/token.factory';
 import { fromStore } from './factory/store.factory';
-import { type CirclesConfig, Sdk } from '@circles-sdk/sdk';
-import { GnosisChainConfig } from './factory/circles.factory';
+// import { Sdk } from '@circles-sdk/sdk';
 import { hubv2_abi } from './circles_hub_v2';
 import { CirclesData, CirclesRpc } from '@circles-sdk/data';
 import { ipfs_cat } from './factory/ipfs.factory';
@@ -29,7 +28,6 @@ export interface ISafeService {
     signer_address?: Writable<string>;
     signers: Writable<string[]>;
     kit?: Safe4337Pack | Safe;
-    circles_sdk?: Sdk;
     provider: Provider;
     version: Writable<string>;
     deployed: Writable<boolean>;
@@ -105,7 +103,7 @@ export class SafeService implements ISafeService {
         this.provider = getProvider(chain, alchemy_key);
 
         if (chain == "gnosis") {
-            const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
+            const circlesRpc = new CirclesRpc("/circles");
             this.circles_data = new CirclesData(circlesRpc);
         }
     }
@@ -213,12 +211,10 @@ export class SafeService implements ISafeService {
 
     async transferCircles(to: string, id: string, value: number) {
 
-        const hubv2Address = GnosisChainConfig.v2HubAddress != undefined ? GnosisChainConfig.v2HubAddress : "";
-
         const from = this.safe_address;
         const data = "";
 
-        await this.genericTx(hubv2Address, hubv2_abi, "safeTransferFrom",[from, to, id, value, data], false);
+        await this.genericTx(HUBV2ADDRESS, hubv2_abi, "safeTransferFrom",[from, to, id, value, data], false);
 
         return
 
