@@ -9,6 +9,10 @@ export const circles_addresses = writable<string[]>([]);
 export const hasAvatar = writable(false);
 export const chain_array = ['base','gnosis'];
 
+export const clearSafeStore = () => {
+    safe_store.set({});
+}
+
 export const addSafe = async (chain: string) : Promise<void> => {
 
     const key = await hasKey()

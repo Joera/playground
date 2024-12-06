@@ -29,8 +29,11 @@
                 reader.onload = async (event) => {
                     const data = event.target?.result;
                     const object = JSON.parse(data as string);
+                    console.log(object);
                     signer_key?.set(object.signer_key);
+                    console.log(1)
                     safe_addresses?.set(object.safe_addresses);
+                    console.log(2)
                     await initApp();
                     welcome_state.set('')
                     goto('/avatar');

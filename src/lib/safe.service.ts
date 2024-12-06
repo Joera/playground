@@ -48,7 +48,6 @@ export interface ISafeService {
 
 }
 
- 
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
 const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
 const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;

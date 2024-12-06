@@ -6,7 +6,7 @@
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/factory/eth.factory';
     import { signer_key  } from '$lib/store/key.store';
-    import { circles_addresses, safe_addresses, safe_store } from '$lib/store/safe.store';
+    import { circles_addresses, clearSafeStore, safe_addresses, safe_store } from '$lib/store/safe.store';
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
 
@@ -50,6 +50,7 @@
     const handleClear = async () => {
         
         localStorage.clear();
+        clearSafeStore();
         goto('/');
     }
 
