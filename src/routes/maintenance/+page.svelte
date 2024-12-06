@@ -148,7 +148,7 @@
 
             <div>
                 <h3>Restore from backup</h3>
-                <input class="button" id="file_import" type="file" accept=".json,.txt">
+                <input class="button" id="file_import" type="file" accept=".png">
             </div>
 
             <div>
