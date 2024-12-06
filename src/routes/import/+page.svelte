@@ -11,7 +11,6 @@
     // Automatically updates if the URL changes
     $: query = $page.url?.searchParams?.get('key');
 
-   
 
     const handlePassword = async (event: any) => {
 
