@@ -20,7 +20,7 @@
 
         const input = document.getElementById('file_import') as HTMLInputElement;
             input.addEventListener('change', async (event) => {
-                welcome_state.set('spinner')
+                
                 const file = (event.target as HTMLInputElement).files?.[0];
                 console.log(file);
                 if (!file) {
@@ -36,12 +36,16 @@
                     console.log(1)
                     safe_addresses?.set(object.safe_addresses);
                     console.log(2)
+                    welcome_state.set('spinner');
                     await initApp();
                     welcome_state.set('')
                     goto('/avatar');
 
                 };
                 reader.readAsText(file);
+                reader.onerror = (error) => {
+                    console.error('Error reading file:', error);
+                };
                 
         });
     });
