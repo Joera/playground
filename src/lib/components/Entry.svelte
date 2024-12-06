@@ -8,9 +8,9 @@
 
     onMount( async () => {
 
-      console.log(query);
+      console.log(query.pathname);
      
-      if ( await(hasKey()) == false) {
+      if ( query.pathname != "/import" && await(hasKey()) == false) {
           goto('/welcome');
       } 
     });

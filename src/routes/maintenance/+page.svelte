@@ -11,6 +11,22 @@
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
     import CryptoJS from 'crypto-js';
+    import QRCode from "qrcode";
+
+    const generateQRCode = async (import_url: string) => {
+
+        try {
+            const qrCodeUrl = await QRCode.toDataURL(import_url); // Generate QR code as Data URL
+
+            // Automatically download the image
+            const link = document.createElement("a");
+            link.href = qrCodeUrl;
+            link.download = `plg_${$safe_addresses[0]}.png`;
+            link.click(); // Trigger download
+        } catch (err) {
+            console.error("Error generating QR Code:", err);
+        }
+    };
 
     const handlePassword = async (event: any) => {
 
@@ -25,6 +41,8 @@
         const url = `https://app.playground.amsterdam/import?key=${encodeURIComponent(encrypted)}`;
 
         console.log(url);
+        let qrcode = await generateQRCode(url);
+
 
     }
 
