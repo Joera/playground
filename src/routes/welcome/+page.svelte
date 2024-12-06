@@ -7,6 +7,7 @@
     import { welcome_state } from "$lib/store/state.store";
     import { initApp } from "$lib/factory/app.factory";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
+    import { processImage } from "$lib/factory/qr.factory";
 
     // Function to handle button clicks
     const default_setup = async () => {
@@ -26,26 +27,9 @@
                 if (!file) {
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    console.log(event)
-                    const data = event.target?.result;
-                    const object = JSON.parse(data as string);
-                    console.log(object);
-                    signer_key?.set(object.signer_key);
-                    console.log(1)
-                    safe_addresses?.set(object.safe_addresses);
-                    console.log(2)
-                    welcome_state.set('spinner');
-                    await initApp();
-                    welcome_state.set('')
-                    goto('/avatar');
-
-                };
-                reader.readAsText(file);
-                reader.onerror = (error) => {
-                    console.error('Error reading file:', error);
-                };
+            
+                const url = await processImage(file);
+                console.log(url);
                 
         });
     });
