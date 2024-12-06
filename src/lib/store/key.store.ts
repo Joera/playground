@@ -15,6 +15,10 @@ export const initPK = async () : Promise<void> => {
     }
 }
 
+export const clearPK = async () : Promise<void> => {
+    signer_key?.set(""); 
+}
+
 const _generatePK = () => {
     const w = ethers.Wallet.createRandom();
     return w.privateKey;

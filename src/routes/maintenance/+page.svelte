@@ -5,7 +5,7 @@
     import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/factory/eth.factory';
-    import { signer_key  } from '$lib/store/key.store';
+    import { clearPK, signer_key  } from '$lib/store/key.store';
     import { circles_addresses, clearSafeStore, safe_addresses, safe_store } from '$lib/store/safe.store';
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
@@ -22,7 +22,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `plg_${$safe_addresses[0]}.json`;
+        a.download = `_plg_${$safe_addresses[0]}.txt`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -51,6 +51,7 @@
         
         localStorage.clear();
         clearSafeStore();
+        clearPK();
         goto('/');
     }
 
@@ -60,11 +61,13 @@
         const input = document.getElementById('file_import') as HTMLInputElement;
         input.addEventListener('change', (event) => {
             const file = (event.target as HTMLInputElement).files?.[0];
+            console.log(file);
             if (!file) {
                 return;
             }
             const reader = new FileReader();
             reader.onload = (event) => {
+                console.log(event)
                 const data = event.target?.result;
                 const object = JSON.parse(data as string);
                 signer_key?.set(object.signer_key);
@@ -113,7 +116,7 @@
 
             <div>
                 <h3>Restore from backup</h3>
-                <input class="button" id="file_import" type="file" accept=".json">
+                <input class="button" id="file_import" type="file" accept=".json,.txt">
             </div>
 
             <div>

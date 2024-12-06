@@ -97,7 +97,7 @@
         <button class="button" on:click={advanced_setup}>Existing Safe & Circles avatar</button> -->
         <div class="centered">
             <label>.. or restore from backup</label>
-            <input class="button" id="file_import" type="file" accept=".json">
+            <input class="button" id="file_import" type="file" accept=".json,.txt">
         </div>
     {/if}
 </article>
