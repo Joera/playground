@@ -2,6 +2,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import CopyAddress from '$lib/components/CopyAddress.svelte';
+    import PasswordForm from '$lib/components/PasswordForm.svelte';
     import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/factory/eth.factory';
@@ -9,22 +10,35 @@
     import { circles_addresses, clearSafeStore, safe_addresses, safe_store } from '$lib/store/safe.store';
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
+    import CryptoJS from 'crypto-js';
 
-    const handleSave = () => {
-        
+    const handlePassword = async (event: any) => {
+
         const object = {
             signer_key: $signer_key,
             safe_addresses: $safe_addresses
         };
 
-        const data = JSON.stringify(object);
-        const blob = new Blob([data], { type: 'text/plain' }); // {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `_plg_${$safe_addresses[0]}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const jsonString = JSON.stringify(object);
+        const password = event.detail;
+        const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
+        const url = `https://app.playground.amsterdam?key=${encrypted}`;
+
+        console.log(url);
+
+    }
+
+    const handleSave = () => {
+
+
+        maintenance_state.set("password");
+        // const blob = new Blob([data], { type: 'text/plain' }); // {type: 'application/json'});
+        // const url = URL.createObjectURL(blob);
+        // const a = document.createElement('a');
+        // a.href = url;
+        // a.download = `_plg_${$safe_addresses[0]}.txt`;
+        // a.click();
+        // URL.revokeObjectURL(url);
     }
 
     const handleRemoteSigner = async () => {
@@ -91,6 +105,10 @@
         {#if $maintenance_state == "spinner"}
 
             <SpinnerWave></SpinnerWave>
+
+        {:else if $maintenance_state == "password"}
+
+            <PasswordForm on:password_event={handlePassword}></PasswordForm>
 
         {:else if $maintenance_state == "remotesigner"}
 

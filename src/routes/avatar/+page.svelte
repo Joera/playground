@@ -73,8 +73,11 @@
 
         owner_address.set($safe_addresses[0])
 
+        console.log(1);
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
+        console.log(2);
         await waitForSubscriptions($safe_store, safesWithAvatars);
+        console.log(3);
 
         srv = $safe_store["gnosis"];
 
