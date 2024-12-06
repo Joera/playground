@@ -6,7 +6,7 @@
     import SignerForm from '$lib/components/SignerForm.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/factory/eth.factory';
-    import { clearPK, signer_key  } from '$lib/store/key.store';
+    import { clearPK, hasKey, signer_key  } from '$lib/store/key.store';
     import { circles_addresses, clearSafeStore, safe_addresses, safe_store } from '$lib/store/safe.store';
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
@@ -32,11 +32,12 @@
     const handlePassword = async (event: any) => {
 
         const object = {
-            signer_key: $signer_key,
+            signer_key: await hasKey(),
             safe_addresses: $safe_addresses
         };
 
         const jsonString = JSON.stringify(object);
+        console.log(jsonString);
         const password = event.detail;
         const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
         const url = `https://app.playground.amsterdam/import?key=${encodeURIComponent(encrypted)}`;
