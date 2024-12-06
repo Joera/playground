@@ -60,6 +60,7 @@
         
         const input = document.getElementById('file_import') as HTMLInputElement;
         input.addEventListener('change', (event) => {
+            console.log(event)
             const file = (event.target as HTMLInputElement).files?.[0];
             console.log(file);
             if (!file) {
