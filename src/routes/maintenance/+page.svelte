@@ -18,7 +18,7 @@
         };
 
         const data = JSON.stringify(object);
-        const blob = new Blob([data], {type: 'application/json'});
+        const blob = new Blob([data], { type: 'text/plain' }); // {type: 'application/json'});
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
