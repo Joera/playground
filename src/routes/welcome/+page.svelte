@@ -22,11 +22,13 @@
             input.addEventListener('change', async (event) => {
                 welcome_state.set('spinner')
                 const file = (event.target as HTMLInputElement).files?.[0];
+                console.log(file);
                 if (!file) {
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = async (event) => {
+                    console.log(event)
                     const data = event.target?.result;
                     const object = JSON.parse(data as string);
                     console.log(object);
