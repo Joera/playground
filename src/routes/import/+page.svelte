@@ -24,7 +24,7 @@
             let decryptedObject;
             try {
                 decryptedObject = JSON.parse(decryptedJsonString);
-
+                console.log(decryptedObject);
                 clearApp();
                 signer_key?.set(decryptedObject.signer_key);
                 safe_addresses?.set(decryptedObject.safe_addresses);
