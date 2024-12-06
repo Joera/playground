@@ -30,10 +30,7 @@
         }
     }
 
-    onMount( async () => { 
-
-        console.log($page.url.searchParams);     
-        console.log(query)
+    onMount( async () => {     
 
     });
 

@@ -22,7 +22,7 @@
         const jsonString = JSON.stringify(object);
         const password = event.detail;
         const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
-        const url = `https://app.playground.amsterdam/import?key=${encrypted}`;
+        const url = `https://app.playground.amsterdam/import?key=${encodeURIComponent(encrypted)}`;
 
         console.log(url);
 
