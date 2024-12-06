@@ -52,7 +52,7 @@
         localStorage.clear();
         clearSafeStore();
         clearPK();
-        goto('/');
+        goto('/welcome');
     }
 
 
