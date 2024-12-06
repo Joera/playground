@@ -13,6 +13,7 @@
     import CryptoJS from 'crypto-js';
     import QRCode from "qrcode";
     import { clearApp } from '$lib/factory/app.factory';
+    import { processImage } from '$lib/factory/qr.factory';
 
     const generateQRCode = async (import_url: string) => {
 
@@ -88,28 +89,22 @@
     }
 
 
-    onMount(() => {
+    onMount( async() => {
         
         const input = document.getElementById('file_import') as HTMLInputElement;
-        input.addEventListener('change', (event) => {
-            console.log(event)
+        input.addEventListener('change', async (event) => {
+
             const file = (event.target as HTMLInputElement).files?.[0];
             console.log(file);
             if (!file) {
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                console.log(event)
-                const data = event.target?.result;
-                const object = JSON.parse(data as string);
-                signer_key?.set(object.signer_key);
-                safe_addresses?.set(object.safe_addresses);
-            };
-            reader.readAsText(file);
+           
+            const url = await processImage(file);
+            console.log(url);
+        
             goto('/avatar');
         });
-        // input.click();
     })
 
 </script>
