@@ -41,7 +41,7 @@
     }
 
     onMount( async () => {     
-
+            console.log('import');
     });
 
 </script>
