@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import { signer_key } from "$lib/store/key.store";
     import { safe_addresses } from "$lib/store/safe.store";
-    import { initApp } from "$lib/factory/app.factory";
+    import { clearApp, initApp } from "$lib/factory/app.factory";
     import { goto } from "$app/navigation";
 
     // Automatically updates if the URL changes
@@ -24,6 +24,7 @@
             let decryptedObject;
             try {
                 decryptedObject = JSON.parse(decryptedJsonString);
+                clearApp();
                 signer_key?.set(decryptedObject.privateKey);
                 safe_addresses?.set(decryptedObject.safe_addresses);
                 await initApp();

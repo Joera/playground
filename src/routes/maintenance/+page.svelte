@@ -12,6 +12,7 @@
     import { onMount } from 'svelte';
     import CryptoJS from 'crypto-js';
     import QRCode from "qrcode";
+    import { clearApp } from '$lib/factory/app.factory';
 
     const generateQRCode = async (import_url: string) => {
 
@@ -81,9 +82,7 @@
 
     const handleClear = async () => {
         
-        localStorage.clear();
-        clearSafeStore();
-        clearPK();
+        clearApp();
         goto('/welcome');
     }
 
