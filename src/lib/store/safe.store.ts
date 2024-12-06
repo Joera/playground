@@ -11,8 +11,8 @@ export const chain_array = ['base','gnosis'];
 
 export const clearSafeStore = () => {
     safe_store.set({});
-    safe_addresses?.set('[]');
-    
+    safe_addresses?.set('');
+
 }
 
 export const addSafe = async (chain: string) : Promise<void> => {
