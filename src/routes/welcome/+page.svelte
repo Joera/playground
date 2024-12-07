@@ -5,32 +5,66 @@
     import { onMount } from "svelte";
 
     import { welcome_state } from "$lib/store/state.store";
-    import { initApp } from "$lib/factory/app.factory";
+    import { clearApp, initApp } from "$lib/factory/app.factory";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
     import { processImage } from "$lib/factory/qr.factory";
+    import CryptoJS from 'crypto-js';
+    import { type Writable, writable } from "svelte/store";
+    import PasswordForm from "$lib/components/PasswordForm.svelte";
 
     // Function to handle button clicks
     const default_setup = async () => {
         await initPK();
-        await addSafe("gnosis");
-        await addSafe("base");
+        await initApp();
+        // await addSafe("gnosis");
+        // await addSafe("base");
         goto('/avatar');
     };
+
+    const encrypted_string: Writable<string> = writable('')
+
+    const handleDecrypt = async (event: any) => {
+
+        const password = event.detail;
+        const bytes = CryptoJS.AES.decrypt($encrypted_string, password);
+        const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
+        console.log(decryptedJsonString)
+        // Convert the decrypted string back to a JSON object
+        let decryptedObject;
+        try {
+            decryptedObject = JSON.parse(decryptedJsonString);
+            console.log(decryptedObject);
+            clearApp();
+            signer_key?.set(decryptedObject.signer_key);
+            safe_addresses?.set(decryptedObject.safe_addresses);
+            await initApp();
+            goto('/')
+        }   catch (error) {
+            console.error('Error parsing JSON:', error);
+            
+        }
+    }
 
     onMount(async () => {
 
         const input = document.getElementById('file_import') as HTMLInputElement;
-            input.addEventListener('change', async (event) => {
-                
-                const file = (event.target as HTMLInputElement).files?.[0];
-                console.log(file);
-                if (!file) {
-                    return;
-                }
+        input.addEventListener('change', async (event) => {
             
-                const url = await processImage(file);
-                console.log(url);
-                
+            const file = (event.target as HTMLInputElement).files?.[0];
+            console.log(file);
+            if (!file) {
+                return;
+            }
+        
+            const url = await processImage(file);
+            const parsedUrl = new URL(url);
+            // Get the 'key' parameter value
+            let keyValue = parsedUrl.searchParams.get("key");
+            console.log("Extracted key:", keyValue);
+            if (keyValue) {
+                encrypted_string.set(keyValue);
+                welcome_state.set("password");
+            }
         });
     });
     
@@ -72,6 +106,10 @@
     {#if $welcome_state == "spinner"}
 
         <SpinnerWave></SpinnerWave>
+
+    {:else if $welcome_state == "password"}
+
+        <PasswordForm on:password_event={handleDecrypt}></PasswordForm>
 
     {:else}
 
