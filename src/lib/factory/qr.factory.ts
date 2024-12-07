@@ -4,7 +4,7 @@ const decodeQRCode = async (imageData: ImageData) : Promise<string> => {
     const qrCodeData = jsQR(imageData.data, imageData.width, imageData.height);
     if (qrCodeData) {
         console.log("QR Code Content:", qrCodeData.data);
-        return qrCodeData.toString();
+        return qrCodeData.data;
     } else {
         console.error("No QR code found in the image.");
         return "";
@@ -26,8 +26,6 @@ export const processImage = async (file: File) : Promise<string> => {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         s = await decodeQRCode(imageData);
     }
-
-    console.log("s",s);
 
     return s;
 };

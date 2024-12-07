@@ -6,9 +6,8 @@
     import { writable, type Writable } from 'svelte/store';
     import type { IToken } from '$lib/factory/token.factory';
     import SpinnerWave from './SpinnerWave.svelte';
-    import { safe_state } from '$lib/store/state.store';
-
-
+    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
+   
     export let safeSrv: Writable<SafeService>;
 
     // Reactive values
@@ -21,18 +20,15 @@
     $: signers = $safeSrv.signers;
     $: modules = $safeSrv.modules;
 
+    const state = writable("");
+
 
     const tokenId = writable("");
     const tokenBalance = writable(0);
     const mintable = writable(0);
 
     // Optionally, fetch initial data on mount if needed
-    onMount(async () => {
-
-        safeSrv.subscribe((srv: SafeService) => {
-            srv.getVersion();
-        })
-    });
+   
 
     const handleUpgrade = async () => {
         safeSrv.subscribe((srv: SafeService) => {
@@ -49,11 +45,11 @@
 
     const handleMint = async () => {
         safeSrv.subscribe( async (srv: SafeService) => {
-            safe_state.set("spinner");
+            state.set("spinner");
             await srv.mintCircles();
             // display link to tx on scan? (txs page?? )
             await srv.getCircles();
-            safe_state.set("");
+            state.set("");
             
         })
     }
@@ -75,31 +71,40 @@
         if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
             mintable.set(parseFloat(token.mintable));
         }
-        safe_state.set("token");
+        state.set("token");
     }
 
     const handleTokenInfo = async (address: string, token: IToken) => {
         tokenId.set(address);
         tokenBalance.set(parseFloat(token.balance));
        
-        safe_state.set("token");
+        state.set("token");
     }
 
     const handleBack = async () => {
-        safe_state.set("");
-    }   
+        state.set("");
+    } 
+    
+    onMount(async () => {
+
+        state.set("spinner");
+        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
+
+        // safeSrv.subscribe((srv: SafeService) => {
+        //     srv.getVersion();
+        state.set("");
+    });
 
 </script>
 
 <article>
     <div class="safe_container">
 
-
-        {#if $safe_state == "spinner"} 
+        {#if $state == "spinner"} 
 
             <SpinnerWave></SpinnerWave>
 
-        {:else if $safe_state == "token"} 
+        {:else if $state == "token"} 
 
             <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
             
