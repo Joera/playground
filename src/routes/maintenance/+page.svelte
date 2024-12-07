@@ -12,8 +12,11 @@
     import { onMount } from 'svelte';
     import CryptoJS from 'crypto-js';
     import QRCode from "qrcode";
-    import { clearApp } from '$lib/factory/app.factory';
+    import { clearApp, initApp } from '$lib/factory/app.factory';
     import { processImage } from '$lib/factory/qr.factory';
+    import { writable, type Writable } from 'svelte/store';
+
+    const encrypted_string: Writable<string> = writable('');
 
     const generateQRCode = async (import_url: string) => {
 
@@ -29,6 +32,28 @@
             console.error("Error generating QR Code:", err);
         }
     };
+
+    const handleDecrypt = async (event: any) => {
+
+        const password = event.detail;
+        const bytes = CryptoJS.AES.decrypt($encrypted_string, password);
+        const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
+        console.log(decryptedJsonString)
+        // Convert the decrypted string back to a JSON object
+        let decryptedObject;
+        try {
+            decryptedObject = JSON.parse(decryptedJsonString);
+            console.log(decryptedObject);
+            clearApp();
+            signer_key?.set(decryptedObject.signer_key);
+            safe_addresses?.set(decryptedObject.safe_addresses);
+            await initApp();
+            goto('/')
+        }   catch (error) {
+            console.error('Error parsing JSON:', error);
+            
+        }
+    }
 
     const handlePassword = async (event: any) => {
 
@@ -50,16 +75,7 @@
     }
 
     const handleSave = () => {
-
-
-        maintenance_state.set("password");
-        // const blob = new Blob([data], { type: 'text/plain' }); // {type: 'application/json'});
-        // const url = URL.createObjectURL(blob);
-        // const a = document.createElement('a');
-        // a.href = url;
-        // a.download = `_plg_${$safe_addresses[0]}.txt`;
-        // a.click();
-        // URL.revokeObjectURL(url);
+        maintenance_state.set("passwordForEncryption");
     }
 
     const handleRemoteSigner = async () => {
@@ -101,9 +117,12 @@
             }
            
             const url = await processImage(file);
-            console.log(url);
-        
-            goto('/avatar');
+            const parsedUrl = new URL(url);
+            let keyValue = parsedUrl.searchParams.get("key");
+            if (keyValue) {
+                encrypted_string.set(keyValue);
+                maintenance_state.set("passwordForDecryption");
+            }
         });
     })
 
@@ -118,8 +137,12 @@
         {#if $maintenance_state == "spinner"}
 
             <SpinnerWave></SpinnerWave>
+        
+        {:else if $maintenance_state == "passwordForDecryption"}
 
-        {:else if $maintenance_state == "password"}
+            <PasswordForm on:password_event={handleDecrypt}></PasswordForm>
+
+        {:else if $maintenance_state == "passwordForEncryption"}
 
             <PasswordForm on:password_event={handlePassword}></PasswordForm>
 

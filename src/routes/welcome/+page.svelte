@@ -21,7 +21,7 @@
         goto('/avatar');
     };
 
-    const encrypted_string: Writable<string> = writable('')
+    const encrypted_string: Writable<string> = writable('');
 
     const handleDecrypt = async (event: any) => {
 
@@ -58,9 +58,7 @@
         
             const url = await processImage(file);
             const parsedUrl = new URL(url);
-            // Get the 'key' parameter value
             let keyValue = parsedUrl.searchParams.get("key");
-            console.log("Extracted key:", keyValue);
             if (keyValue) {
                 encrypted_string.set(keyValue);
                 welcome_state.set("password");

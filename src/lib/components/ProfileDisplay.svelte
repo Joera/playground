@@ -11,6 +11,7 @@
     import { profile_state } from "$lib/store/state.store";
     import { HUBV2ADDRESS } from "$lib/constants";
     import { hubv2_abi } from "$lib/circles_hub_v2";
+    import { profile_store } from '$lib/store/profile.store';
 
     export let profile: any;
     export let friend_address: Writable<string>;
@@ -88,7 +89,7 @@
                         const r = await srv.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
                         console.log(r);
                     }
-
+                    profile_store?.set(JSON.stringify(newProfile));
                     profile_state.set("")
                 })
             })
