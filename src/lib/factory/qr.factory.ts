@@ -27,5 +27,7 @@ export const processImage = async (file: File) : Promise<string> => {
         s = await decodeQRCode(imageData);
     }
 
+    console.log("s",s);
+
     return s;
 };
