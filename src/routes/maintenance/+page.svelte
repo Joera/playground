@@ -48,6 +48,7 @@
             signer_key?.set(decryptedObject.signer_key);
             safe_addresses?.set(decryptedObject.safe_addresses);
             await initApp();
+            maintenance_state.set("");
             goto('/')
         }   catch (error) {
             console.error('Error parsing JSON:', error);

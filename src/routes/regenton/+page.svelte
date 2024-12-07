@@ -76,7 +76,7 @@
         if (regenton_response.status !== 200) {
 
             console.log(regenton_response);
-            throw new Error(`Error calling regenton metrics: ${regenton_response.statusText}`);
+           // throw new Error(`Error calling regenton metrics: ${regenton_response.statusText}`);
         }
 
         return regenton_response.data;
