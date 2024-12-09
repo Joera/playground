@@ -19,7 +19,7 @@
 </script>
 
 
-{#if $signer_key != ""}
+{#if $safe_addresses[0] != ""}
 
     <button id="signer" on:click={handleMaintenance}>
 
