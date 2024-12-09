@@ -12,6 +12,7 @@ export const chain_array = ['base','gnosis'];
 export const clearSafeStore = () => {
     safe_store.set({});
     safe_addresses?.set('');
+    circles_addresses.set([]);
 
 }
 
