@@ -143,6 +143,7 @@ export class SafeService implements ISafeService {
     async new() {
 
         this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
+        
     }
 
     async checkAvatar() {

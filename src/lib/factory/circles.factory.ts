@@ -22,7 +22,9 @@ export const setCirclesListener = () => {
 
     circles_addresses.subscribe(async (addresses) => {
 
-        if (!listening && addresses.length > 0) {
+        if (!listening && addresses.length > 0 && addresses[0] != undefined) {
+
+            console.log("circles_addresses", addresses);
 
             safe_store.subscribe(async (stores) => {
 

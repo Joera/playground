@@ -22,7 +22,6 @@
         name: "",
         description: ""
     });
-    let owner_address: Writable<string> = writable("");
 
     const handleProfile = async () => {
         profile_state.set("");
@@ -71,8 +70,6 @@
         })
 
 
-        owner_address.set($safe_addresses[0])
-
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         await waitForSubscriptions($safe_store, safesWithAvatars);
 
@@ -97,7 +94,7 @@
 
     <h2>circles avatar</h2>
 
-        <ProfileDisplay profile={profile} owner_address={owner_address} friend_address={friend_address}></ProfileDisplay>
+        <ProfileDisplay profile={profile} friend_address={friend_address}></ProfileDisplay>
 
     {:else if $avatar_state == 'scanner'}
 

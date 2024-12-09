@@ -13,7 +13,7 @@ export const kubo_api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 5000
+    timeout: 7500
 });
 
 export const cluster_api = axios.create({

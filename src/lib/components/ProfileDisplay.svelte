@@ -5,7 +5,7 @@
     import SpinnerWave from "./SpinnerWave.svelte";
     import type { Profile } from "@circles-sdk/profiles";
     import { expiryTimeHex, fixSafeAddress } from "$lib/factory/eth.factory";
-    import { circles_addresses, safe_store } from "$lib/store/safe.store";
+    import { circles_addresses, safe_addresses, safe_store } from "$lib/store/safe.store";
     import { cidV0ToUint8Array } from "@circles-sdk/utils";
     import { ipfs_add } from "$lib/factory/ipfs.factory";
     import { profile_state } from "$lib/store/state.store";
@@ -158,12 +158,12 @@
                 <!-- {/if} -->
             {/if}
 
-            {#if $owner_address != ""}
+            {#if $safe_addresses[0] != "" && $safe_addresses[0] != undefined }
                 <div class="centered">
                     {#if $friend_address == "" && $profile.name == ""}
                         <p>You are not yet trusted by circles to be a human. Ask a (new) friend to scan this and invite you. </p>
                     {/if}
-                    <QRCode data="{$owner_address}" backgroundColor="transparent" />
+                    <QRCode data="{$safe_addresses[0]}" backgroundColor="transparent" />
                 </div>
             {/if}
 
