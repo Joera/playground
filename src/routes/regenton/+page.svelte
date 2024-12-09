@@ -36,6 +36,12 @@
     }
 
     async function init() {
+
+        regenton.set(
+            await fetchMetrics()
+        );
+
+
         let balance = 0;
         // for (let [safe_address, srv] of Object.entries($safe_store)) {
 
@@ -45,7 +51,7 @@
 
         srv.subscribe((srv: SafeService) => {
             srv.tokens.subscribe((tokens) => {
-                console.log(tokens)
+                // console.log(tokens)
                 for (let [address, token] of tokens) {
              
                     if (token.name == "GNO") {
@@ -86,13 +92,6 @@
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         await waitForSubscriptions($safe_store, safesWithAvatars);
-
-        regenton.set(
-            await fetchMetrics()
-        );
-
-        
-        
         init();
     })
 
@@ -108,6 +107,7 @@
             state.set("spinner");
             await srv.genericTx(TOKENADDRESS, regenton_abi, "approve", [safe_address,1], false);
             await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false);
+            init();
             state.set("");
         });
     }

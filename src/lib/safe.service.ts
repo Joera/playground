@@ -373,6 +373,8 @@ export class SafeService implements ISafeService {
                 safeOperation?.data.callData as `0x{string}`,
                 identifier
             ]).toString()
+
+            console.log(safeOperation);
                 
             const identifiedSafeOperation = await this.kit.getEstimateFee({
                 safeOperation
