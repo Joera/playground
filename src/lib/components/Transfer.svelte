@@ -6,6 +6,7 @@
     import { avatar_state, transfer_state } from "$lib/store/state.store";
     import { ethers } from "ethers";
     import Spinner from "./Spinner.svelte";
+    import SpinnerWave from "./SpinnerWave.svelte";
 
     export let toAddress;
 
@@ -15,7 +16,7 @@
      
         circles_addresses.subscribe((addresses) => {
             safe_store.subscribe((safes) => {
-                const srv = safes[addresses[0]];
+                const srv = safes["gnosis"];
                 srv.subscribe(async (srv) => {
 
                     transfer_state.set("spinner");
@@ -59,7 +60,7 @@
         />
 
         {#if $transfer_state == "spinner"}
-            <Spinner></Spinner>
+            <SpinnerWave></SpinnerWave>
         {:else}
             <button class="button"type="submit">Transfer</button>
         {/if}

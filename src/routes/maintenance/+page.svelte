@@ -15,6 +15,7 @@
     import { clearApp, initApp } from '$lib/factory/app.factory';
     import { processImage } from '$lib/factory/qr.factory';
     import { writable, type Writable } from 'svelte/store';
+    import CopyAddressAndLink from '$lib/components/CopyAddressAndLink.svelte';
 
     const encrypted_string: Writable<string> = writable('');
 
@@ -162,7 +163,7 @@
 
             <div>
                 <h3>Safes</h3>
-                <CopyAddress address={$safe_addresses[0]}></CopyAddress>
+                <CopyAddressAndLink address={$safe_addresses[0]}></CopyAddressAndLink>
             </div>
 
             <div>

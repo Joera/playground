@@ -15,7 +15,6 @@
 
     export let profile: any;
     export let friend_address: Writable<string>;
-    export let owner_address: Writable<string>;
 
     const handleProfile = async (event: any) => {
 

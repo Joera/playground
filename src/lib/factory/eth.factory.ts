@@ -165,10 +165,8 @@ export const displayShorterAddress = (address: string) => {
 }
 
 
-
-
-export const displaySafeAddress = (chain: string,address: string) => {
-    return `<a href="https://app.safe.global/apps?safe=${chain}:${address}" target="_blank">${displayAddress(chain, address)}</a>`
+export const displaySafeLink = (chain: string, address: string) => {
+    return `<a href="https://app.safe.global/apps?safe=${chain}:${address}" target="_blank">${displayShortAddress(address)}</a>`
 }
 
 export const isValidEthereumAddress = (address: string) => {

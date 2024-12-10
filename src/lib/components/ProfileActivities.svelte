@@ -95,6 +95,9 @@
 
             }
 
+            // console.log(txs);
+            // console.log($circles_addresses)
+
             activity.set(txs);  
             activities?.set(JSON.stringify(txs));
             activity_state.set("");
@@ -138,23 +141,23 @@
             <div class="activity_bottom">
                 {#if a.type == "CrcV2_TransferSingle" } 
 
-                    {#if a.from == "0x0000000000000000000000000000000000000000" && ethers.getAddress(a.to) == $circles_addresses[0]}
+                    {#if a.from == "0x0000000000000000000000000000000000000000" && ethers.getAddress(a.to) == ethers.getAddress($circles_addresses[0])}
                         <span>minted</span>
                         <span> { '+' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == $circles_addresses[0] && a.to == "0x0000000000000000000000000000000000000000" && a.circles == 96}
-                        <span>onboarded {a.toName}</span> 
+                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0]) && a.to == "0x0000000000000000000000000000000000000000" && a.circles == 96}
+                        <span>onboarded {#if a.toName}{a.toName}{:else}..{a.operator.slice(a.to.length - 5, a.to.length -1)}{/if}</span> 
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == $circles_addresses[0] && a.to == "0x0000000000000000000000000000000000000000"}
+                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0]) && a.to == "0x0000000000000000000000000000000000000000"}
                         <span>taxes</span>
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == $circles_addresses[0]}
+                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0])}
                         {#if a.toName}
                             <span>to: {a.toName}</span>
                         {:else}
                             <span>to: {'.' + a.to.slice(a.to.length - 5, a.to.length -1)}</span>
                         {/if}
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.to) == $circles_addresses[0]}
+                    {:else if ethers.getAddress(a.to) == ethers.getAddress($circles_addresses[0])}
                         {#if a.toName}
                             <span>from: {a.toName}</span>
                         {:else}

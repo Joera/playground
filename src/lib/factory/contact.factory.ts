@@ -37,15 +37,12 @@ export const trustChange = async (contact: Contact) : Promise<void> => {
         
         circles_addresses.subscribe((addresses) => {
             safe_store.subscribe((safes) => {
-                const srv = safes[addresses[0]];
+                const srv = safes["gnosis"];
                 srv.subscribe(  async (srv) => {
                 
                     const expiryTime = 
                     (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
                     ? expiredTimeHex() : expiryTimeHex();
-
-                    // console.log(2, expiryTime);
-                    // console.log(3, contact.objectAvatar);
                     const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
                     console.log(r)
                     await updateContacts();
@@ -73,6 +70,9 @@ export const updateContacts = async () :Promise<Contact[]> => {
         });
 
         circles_addresses.subscribe((addresses) => {
+
+            const address = ethers.getAddress(addresses[0]);
+
             safe_store.subscribe((safes) => {
                 const srv = safes["gnosis"];
                 srv.subscribe(  async (srv) => {
@@ -94,13 +94,13 @@ export const updateContacts = async () :Promise<Contact[]> => {
                     const trustBucket : any = {};
                     trustListRows.forEach( (row: any) => {
 
-                        if (ethers.getAddress(row.truster) !== addresses[0]) {
+                        if (ethers.getAddress(row.truster) !== address) {
                             trustBucket[row.truster] = trustBucket[row.truster] || [];
                             if (row.trustee !== row.truster) {
                                 trustBucket[row.truster].push(row);
                             }
                         }
-                        if (ethers.getAddress(row.trustee) !== addresses[0]) {
+                        if (ethers.getAddress(row.trustee) !== address) {
                             trustBucket[row.trustee] = trustBucket[row.trustee] || [];
                             if (row.trustee !== row.truster) {
                                 trustBucket[row.trustee].push(row);
@@ -114,7 +114,7 @@ export const updateContacts = async () :Promise<Contact[]> => {
                         
                         await Promise.all(
                             Object.entries(trustBucket)
-                            .filter(([avatar]) => ethers.getAddress(avatar) !== addresses[0])
+                            .filter(([avatar]) => ethers.getAddress(avatar) !== address)
                             .filter(([avatar]) => ethers.isAddress(avatar))
                             .map( async ([avatar, rows]) => {
 
@@ -124,10 +124,10 @@ export const updateContacts = async () :Promise<Contact[]> => {
                                 if ((rows as any[]).length === 2) {
                                     relation = 'mutuallyTrusts';
                                 }
-                                else if (ethers.getAddress((rows as any[])[0].trustee) === addresses[0]) {
+                                else if (ethers.getAddress((rows as any[])[0].trustee) === address) {
                                     relation = 'trustedBy';
                                 }
-                                else if (ethers.getAddress((rows as any[])[0].truster) === addresses[0]) {
+                                else if (ethers.getAddress((rows as any[])[0].truster) === address) {
                                     relation = 'trusts';
                                 }
                                 else {
