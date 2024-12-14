@@ -4,9 +4,12 @@
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
-    import type { IToken } from '$lib/factory/token.factory';
+    import { tokenList, type IToken } from '$lib/factory/token.factory';
     import SpinnerWave from './SpinnerWave.svelte';
     import { safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
+    import { ethers } from 'ethers';
+    import { oft_abi } from '$lib/oft_abi';
+    import { oftBridgeTx } from '$lib/factory/oft.factory';
    
     export let safeSrv: Writable<SafeService>;
 
@@ -91,6 +94,23 @@
         state.set("");
     }
 
+    const handleOFTBridge = async () => {
+        state.set("spinner");
+
+        const amount = 10;
+        const toAddress = "0x0000000000000000000000000000000000000000";
+        const destination_chain = 100;
+
+        let token = tokenList[$safeSrv.chain].find((token: IToken) => token.symbol === "LLL");
+        if (token) {
+            const oftContract = new ethers.Contract(token.address || "", oft_abi, $safeSrv.signer);
+            const args = await oftBridgeTx(oftContract, $safeSrv.safe_address, toAddress, destination_chain, amount);
+            await $safeSrv.genericTx(token.address || "", oft_abi, "sendFrom", args, false);
+        }
+
+        state.set("");
+    }
+
     safeSrv.subscribe( async (srv: SafeService) => {
         deployed.set(await srv.getDeployed());
     })
@@ -116,6 +136,9 @@
             <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
             
             <button class="button">transfer</button>
+
+            <button class="button" on:click={handleOFTBridge}>bridge</button>
+
             {#if $mintable > 0}
                 <label>Mintable: <span>{$mintable.toFixed(2)}</span></label>   
                 <button class="button" on:click={handleMint}>mint</button>

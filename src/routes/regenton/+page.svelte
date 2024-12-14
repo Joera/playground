@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { fromStore, writable, type Writable } from "svelte/store";
-    import { safe_store, addSafe, waitForSafeStoreToBePopulated, safe_addresses, hasGnosisSafeAddress, parseSafeAddress } from '$lib/store/safe.store';
+    import { safe_store, addSafe, waitForSafeStoreToBePopulated, safe_addresses, hasGnosisSafeAddress, parseSafeAddress, findAddressByChain, findSrvByChain } from '$lib/store/safe.store';
     import type { SafeService } from "$lib/safe.service";
     import { regenton_abi } from "$lib/regenton_abi";
     import { onMount } from "svelte";
@@ -22,16 +22,15 @@
         return await srv.genericCall(regentonContract, regenton_abi, "balanceOf", [safe_address]);
     }
 
-    async function getInfo(safe_address: string, srv: Writable<SafeService>) : Promise<number> {
+    async function getInfo(safe_address: string, srv: SafeService) : Promise<number> {
 
         return new Promise(async (resolve) => {
-            
-            srv.subscribe( async (srv: SafeService) => {
-                if (await fromStore(srv.deployed)) {
+           
+                // if (await srv.getDeployed())) {
                     const r = await getStake(safe_address, srv);
                     resolve(parseFloat(r))
-                }
-            })
+                // }
+            
         })
     }
 
@@ -43,18 +42,16 @@
 
 
         let balance = 0;
-        let gnosis_address = await hasGnosisSafeAddress();
+        // let gnosis_address = await hasGnosisSafeAddress();
         // for (let [safe_address, srv] of Object.entries($safe_store)) {
 
-        if (gnosis_address) {
+        const srv = await findSrvByChain("gnosis");
+
+        if (srv) {
             
-            const srv = $safe_store[gnosis_address];
+            balance += await getInfo(srv.safe_address, srv);
 
-            const { chain, address } = parseSafeAddress(gnosis_address);
-                
-            balance += await getInfo(address, srv);
-
-            srv.subscribe((srv: SafeService) => {
+         
                 srv.tokens.subscribe((tokens) => {
                     // console.log(tokens)
                     for (let [address, token] of tokens) {
@@ -71,7 +68,7 @@
                     }
                     
                 })
-            }) 
+            
         }  
      
         currentStake.set(balance);
