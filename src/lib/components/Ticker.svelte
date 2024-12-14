@@ -3,7 +3,6 @@
     import { events } from "$lib/store/event.store";
     import { createEventDispatcher } from "svelte";
 
-
     const dispatch = createEventDispatcher();
 
     const handleClick = (event: any) => {

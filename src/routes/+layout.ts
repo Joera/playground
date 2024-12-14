@@ -10,13 +10,9 @@ import { hasKey, signer_key } from '$lib/store/key.store';
 
 export const load = async () => {
 
-    console.log('layout 1')
     if(await hasKey()) {
         await initApp();
-    }
-    console.log('layout 2')
-    
-   
+    }   
 }   
 
 

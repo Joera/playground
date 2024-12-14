@@ -2,7 +2,7 @@
     import SafeOverview from '$lib/components/SafeOverview.svelte';
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import type { SafeService } from '$lib/safe.service';
-    import { safe_store, safe_addresses, waitForSafeStoreToBePopulated, chain_array} from '$lib/store/safe.store';
+    import { safe_store, safe_addresses, waitForSafeStoreToBePopulated, chain_array, findAddressByChain, findSrvByChain} from '$lib/store/safe.store';
     import { onMount } from 'svelte';
     import { writable, type Writable } from 'svelte/store';
 
@@ -11,10 +11,15 @@
     let chain: Writable<string> = writable("");
 
     const handleChain = async (c: string) => {
-        $safe_store[c].subscribe(async (srv) => {
+
+        console.log("---------------")
+
+        const srv = await findSrvByChain(c);
+
+        if(srv) {   
             safeSrv.set(srv);
             chain.set(c);
-        })
+        }
     }
 
     onMount(async () => {

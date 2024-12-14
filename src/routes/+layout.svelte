@@ -9,15 +9,18 @@
     import {reciprocateTrust, trustChange } from '$lib/factory/contact.factory.js';
     import {friend_address} from '$lib/store/contacts.store.js';
     import {hasAvatar} from '$lib/store/safe.store.js';
+    import { avatar_state, profile_state } from '$lib/store/state.store.js';
 	export let data;
 
 	const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 
 	const handleInviteRequested = async (event: any) => {
+
  
 		if (!$hasAvatar) {
 			friend_address.set(event.detail);
+			avatar_state.set('profile');
         	goto('/avatar')
 		} else {
 			// reciprocate 

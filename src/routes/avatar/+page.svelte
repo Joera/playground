@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated, waitForSubscriptions } from '$lib/store/safe.store';
+    import { findSrvByChain, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
     import { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
     import { onMount } from 'svelte';
@@ -14,8 +14,7 @@
     import { avatar_state, contacts_state, profile_state } from '$lib/store/state.store';
     import { profile_store } from '$lib/store/profile.store';
 
-    let safesWithAvatars: string[] = [];
-    let srv: Writable<SafeService> = writable();
+    // let safesWithAvatars: string[] = [];
 
     avatar_state.set("profile");
     let profile : Writable<any> = writable({
@@ -40,6 +39,7 @@
     const handleInviteRequested = async (event: any) => {
         friend_address.set(event.detail);
         avatar_state.set('profile');
+        profile_state.set("edit");
     }
 
     const handleInviteApproved = async (event: any) => {
@@ -69,18 +69,16 @@
             }
         })
 
-
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
-        await waitForSubscriptions($safe_store, safesWithAvatars);
-
-        srv = $safe_store["gnosis"];
-
-        if ($srv) {
-            if ($profile.name == "" || $profile.name == undefined) {
-                const p = await getProfile($srv);
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+            if (await srv.getDeployed()) {
+                const p = await getProfile(srv);
                 profile.set(p);
                 profile_store?.set(JSON.stringify(p));
                 profile_state.set("");
+            } else {
+                profile_state.set("edit");
             }
         }
     })

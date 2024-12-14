@@ -2,7 +2,7 @@
     import { hubv2_abi } from "$lib/circles_hub_v2";
     import { HUBV2ADDRESS } from "$lib/constants";
     import { addressToUint256, fixSafeAddress } from "$lib/factory/eth.factory";
-    import { circles_addresses, safe_store } from "$lib/store/safe.store";
+    import { findSrvByChain, safe_store } from "$lib/store/safe.store";
     import { avatar_state, transfer_state } from "$lib/store/state.store";
     import { ethers } from "ethers";
     import Spinner from "./Spinner.svelte";
@@ -12,30 +12,26 @@
 
     const handleSubmit = async (event: any) => {
 
+        const srv = await findSrvByChain("gnosis");
 
-     
-        circles_addresses.subscribe((addresses) => {
-            safe_store.subscribe((safes) => {
-                const srv = safes["gnosis"];
-                srv.subscribe(async (srv) => {
+        if (srv) {
 
-                    transfer_state.set("spinner");
+            transfer_state.set("spinner");
 
-                    const r = await srv.genericTx(HUBV2ADDRESS,hubv2_abi,"safeTransferFrom", [
-                        fixSafeAddress(srv.safe_address),
-                        fixSafeAddress(toAddress), 
-                        addressToUint256(srv.safe_address),
-                        ethers.parseUnits(event.target.amount.value, "ether"), 
-                        "0x"
-                        ], 
-                        false
-                    );
-                    console.log(r);
-                    transfer_state.set("");
-                    avatar_state.set("activities");
-                });
-            });
-        });
+            const r = await srv.genericTx(HUBV2ADDRESS,hubv2_abi,"safeTransferFrom", [
+                fixSafeAddress(srv.safe_address),
+                fixSafeAddress(toAddress), 
+                addressToUint256(srv.safe_address),
+                ethers.parseUnits(event.target.amount.value, "ether"), 
+                "0x"
+                ], 
+                false
+            );
+            console.log(r);
+            transfer_state.set("");
+            avatar_state.set("activities");
+        }
+       
     }
     
 </script>

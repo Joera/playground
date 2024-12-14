@@ -2,12 +2,13 @@
     import { goto } from "$app/navigation";
     import { displayAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
-    import { createEventDispatcher } from 'svelte';
-    import { circles_addresses, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from "$lib/store/safe.store";
+    import { createEventDispatcher, onMount } from 'svelte';
+    import { findAddressByChain, findSrvByChain, parseSafeAddress, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from "$lib/store/safe.store";
     import { activities } from "$lib/store/activities.store";
     import { ethers, EtherscanPlugin } from "ethers";
     import SpinnerWave from "./SpinnerWave.svelte";
     import { activity_state } from "$lib/store/state.store";
+    import { fetchActivities, formatDate } from "$lib/factory/activities.factory";
 
     const dispatch = createEventDispatcher();
 
@@ -42,83 +43,35 @@
 
     const activity: Writable<Activity[]> = writable([])
 
+    $: safe_address = "";
+
     // prefill from local storage
-    activities?.subscribe((activities) => {
+
+    // shouldnt we bind this straight to store and LS? 
+
+    onMount(async () => {
+
+        const prefixed_address = await findAddressByChain("gnosis") || "";
+        const { chain, address } = parseSafeAddress(prefixed_address);
+        safe_address = address;
+        
+        activities?.subscribe((activities) => {
         if (activities != "") {
             activity.set(JSON.parse(activities))
         }
-    })
-
-    circles_addresses.subscribe( async (addresses) => {
+        })
 
         if($activity.length < 1) {
             activity_state.set("spinner");
         }
 
-        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
-        
-        const srv = $safe_store["gnosis"];
-        
-        srv.subscribe(  async (srv) => {
-
-            const txs_query = await srv.getCircleTxs();
-
-            const txs = [];
-            while (await txs_query.queryNextPage()) {
-                const resultRows = txs_query.currentPage?.results ?? [];
-                if (resultRows.length === 0)
-                    break;
-                txs.push(...resultRows);
-                if (resultRows.length < 1000)
-                    break;
-            }
-
-            // console.log(txs);
-
-            for (let tx of txs) {
-
-                delete tx.attoCircles;
-                delete tx.attoCrc;
-                delete tx.staticAttoCircles;
-                
-                if (tx.to != "0x0000000000000000000000000000000000000000" && ethers.getAddress(tx.to) != $circles_addresses[0]){  
-                    tx.toName = await srv.getAvatarName(tx.to)
-                }
-
-                else if (ethers.getAddress(tx.from) == $circles_addresses[0] && tx.to == "0x0000000000000000000000000000000000000000" && tx.circles == 96) {
-                    tx.toName = await srv.getAvatarName(tx.operator)
-                }
-
-                else if (ethers.getAddress(tx.to) == $circles_addresses[0]) {
-                    tx.toName = await srv.getAvatarName(tx.to)
-                }
-
-            }
-
-            // console.log(txs);
-            // console.log($circles_addresses)
-
-            activity.set(txs);  
-            activities?.set(JSON.stringify(txs));
+        fetchActivities().then((activities) => {
+            activity.set(activities);
             activity_state.set("");
-            
         });
-    });
+    })
 
-    const formatDate = (timestamp:  number) => {
-
-        const date = new Date(timestamp * 1000);
-
-        return new Intl.DateTimeFormat('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-        }).format(date);
-    }
+    
 
 </script>
 
@@ -141,23 +94,23 @@
             <div class="activity_bottom">
                 {#if a.type == "CrcV2_TransferSingle" } 
 
-                    {#if a.from == "0x0000000000000000000000000000000000000000" && ethers.getAddress(a.to) == ethers.getAddress($circles_addresses[0])}
+                    {#if a.from == "0x0000000000000000000000000000000000000000" && ethers.getAddress(a.to) == safe_address}
                         <span>minted</span>
                         <span> { '+' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0]) && a.to == "0x0000000000000000000000000000000000000000" && a.circles == 96}
+                    {:else if ethers.getAddress(a.from) == safe_address && a.to == "0x0000000000000000000000000000000000000000" && a.circles == 96}
                         <span>onboarded {#if a.toName}{a.toName}{:else}..{a.operator.slice(a.to.length - 5, a.to.length -1)}{/if}</span> 
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0]) && a.to == "0x0000000000000000000000000000000000000000"}
+                    {:else if ethers.getAddress(a.from) == safe_address && a.to == "0x0000000000000000000000000000000000000000"}
                         <span>taxes</span>
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.from) == ethers.getAddress($circles_addresses[0])}
+                    {:else if ethers.getAddress(a.from) == safe_address}
                         {#if a.toName}
                             <span>to: {a.toName}</span>
                         {:else}
                             <span>to: {'.' + a.to.slice(a.to.length - 5, a.to.length -1)}</span>
                         {/if}
                         <span> { '-' + a.circles.toFixed(2) }</span>
-                    {:else if ethers.getAddress(a.to) == ethers.getAddress($circles_addresses[0])}
+                    {:else if ethers.getAddress(a.to) == safe_address}
                         {#if a.toName}
                             <span>from: {a.toName}</span>
                         {:else}

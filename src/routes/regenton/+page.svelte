@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { fromStore, writable, type Writable } from "svelte/store";
-    import { safe_store, addSafe, waitForSafeStoreToBePopulated, waitForSubscriptions, safe_addresses } from '$lib/store/safe.store';
+    import { safe_store, addSafe, waitForSafeStoreToBePopulated, safe_addresses, hasGnosisSafeAddress, parseSafeAddress } from '$lib/store/safe.store';
     import type { SafeService } from "$lib/safe.service";
     import { regenton_abi } from "$lib/regenton_abi";
     import { onMount } from "svelte";
@@ -14,7 +14,7 @@
     const regenton: any = writable({});
     const currentStake = writable(0);
     const availableGNO: Writable<Record<string, number>> = writable({});
-    let safesWithAvatars: string[] = [];
+    // let safesWithAvatars: string[] = [];
 
     const regentonContract = "0x05456E26dF26ef77f6A2DA6f14E8cCbd96b10c3E";
 
@@ -43,30 +43,36 @@
 
 
         let balance = 0;
+        let gnosis_address = await hasGnosisSafeAddress();
         // for (let [safe_address, srv] of Object.entries($safe_store)) {
 
-        const srv = $safe_store["gnosis"];
+        if (gnosis_address) {
             
-        balance += await getInfo($safe_addresses[0], srv);
+            const srv = $safe_store[gnosis_address];
 
-        srv.subscribe((srv: SafeService) => {
-            srv.tokens.subscribe((tokens) => {
-                // console.log(tokens)
-                for (let [address, token] of tokens) {
-             
-                    if (token.name == "GNO") {
-                        if (token && parseFloat(token.balance) > 0) {
-                        
-                            availableGNO.update((available) => {
-                                available[$safe_addresses[0]] = parseFloat(token.balance);
-                                return available;
-                            });
+            const { chain, address } = parseSafeAddress(gnosis_address);
+                
+            balance += await getInfo(address, srv);
+
+            srv.subscribe((srv: SafeService) => {
+                srv.tokens.subscribe((tokens) => {
+                    // console.log(tokens)
+                    for (let [address, token] of tokens) {
+                
+                        if (token.name == "GNO") {
+                            if (token && parseFloat(token.balance) > 0) {
+                            
+                                availableGNO.update((available) => {
+                                    available[address] = parseFloat(token.balance);
+                                    return available;
+                                });
+                            }
                         }
                     }
-                }
-                
-            })
-        })   
+                    
+                })
+            }) 
+        }  
      
         currentStake.set(balance);
     }
@@ -91,7 +97,7 @@
     onMount(async () => {
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
-        await waitForSubscriptions($safe_store, safesWithAvatars);
+        // await waitForSubscriptions($safe_store, safesWithAvatars);
         init();
     })
 

@@ -1,6 +1,63 @@
 import { ethers, type Provider } from "ethers";
 import { writable, type Writable } from "svelte/store";
 
+const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
+
+
+export const getPaymasterOptions = (chain: string) => {
+
+    switch (chain) {
+
+        // pimlico on gnosis requires extra token bundle @ 100 p.m. 
+
+        case 'gnosis':
+            return {
+                // 0x29b75b68551F2D2B3f298d327A20ac2289f0bb36
+                paymasterAddress: "0x29b75b68551F2D2B3f298d327A20ac2289f0bb36",
+                paymasterTokenAddress: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                // isSponsored: true,
+                // paymasterUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
+                // paymasterAddress: '0x00000000000000fb866daaa79352cc568a005d96',
+                // paymasterTokenAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+                // sponsorshipPolicyId : "sp_lethal_king_cobra"
+            }   
+
+        case 'base':
+            return {
+              //  paymasterAddress: "0x7B3f21F0284b4dc08E01Fa7e16b9b47249985F88",
+                // 0x29b75b68551F2D2B3f298d327A20ac2289f0bb36
+                paymasterAddress: "0x29b75b68551F2D2B3f298d327A20ac2289f0bb36",
+                paymasterTokenAddress: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+                // isSponsored: true,
+                // paymasterUrl: `https://api.pimlico.io/v2/8453/rpc?apikey=${pimlico_key}`,
+                // paymasterAddress: '0x00000000000000fb866daaa79352cc568a005d96',
+                // paymasterTokenAddress: '0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83',
+                // sponsorshipPolicyId : "sp_lethal_king_cobra"
+            }
+    }
+ }
+
+export const getBundlerUrl = (chain: string) => {
+
+    switch (chain) {
+
+        case 'base':
+
+            return `https://api.pimlico.io/v2/8453/rpc?apikey=pim_mDc8aW5VLSFczkXhVHp2gW`;
+
+        case 'gnosis':
+
+            return `https://api.pimlico.io/v2/100/rpc?apikey=pim_B9EiWd9e25ykuWi1xFpA8n`;
+
+        default:
+
+            return `https://api.pimlico.io/v2/100/rpc?apikey=pim_B9EiWd9e25ykuWi1xFpA8n`;
+
+
+    }
+
+}
+
 export const getRPC = (chain: string, alchemy_key: string) => {
 
     let rpc;

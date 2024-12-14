@@ -14,14 +14,14 @@
     $: chain = $safeSrv.chain
     $: signer_address = $safeSrv.signer_address;
     $: version = $safeSrv.version;
-    $: deployed = $safeSrv.deployed;
     $: tokens = $safeSrv.tokens;
     $: circles = $safeSrv.circles;
     $: signers = $safeSrv.signers;
     $: modules = $safeSrv.modules;
 
-    const state = writable("");
 
+    const state = writable("");
+    const deployed = writable(false);
 
     const tokenId = writable("");
     const tokenBalance = writable(0);
@@ -48,7 +48,7 @@
             state.set("spinner");
             await srv.mintCircles();
             // display link to tx on scan? (txs page?? )
-            await srv.getCircles();
+         //   await srv.getCircles();
             state.set("");
             
         })
@@ -84,14 +84,21 @@
     const handleBack = async () => {
         state.set("");
     } 
+
+    const handleMintBaseNFT = async () => {
+        state.set("spinner");
+        $safeSrv.mintNFT();
+        state.set("");
+    }
+
+    safeSrv.subscribe( async (srv: SafeService) => {
+        deployed.set(await srv.getDeployed());
+    })
     
     onMount(async () => {
 
         state.set("spinner");
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
-
-        // safeSrv.subscribe((srv: SafeService) => {
-        //     srv.getVersion();
         state.set("");
     });
 
@@ -143,6 +150,9 @@
                 {/if}
             {:else}
                 <div>not yet deployed</div>
+                {#if $safeSrv.chain == "base"}
+                    <button class="button" on:click={handleMintBaseNFT}>deploy</button>
+                {/if}
             {/if}
         {/if}
         
@@ -157,12 +167,12 @@
     </div>
     <div class="actions">
        
-        {#if $deployed && $version == "1.3.0"} 
+        <!-- {#if $deployed && $version == "1.3.0"} 
             <button on:click={handleUpgrade}>upgrade</button>
         {/if}
         {#if  $deployed && !$modules.includes("0xa581c4A4DB7175302464fF3C06380BC3270b4037")}
             <button on:click={handleEnableModule}>enable AA</button>
-        {/if}
+        {/if} -->
     
     </div>
 </article>

@@ -1,23 +1,25 @@
 export const ssr = false;
 export const prerender = false;
 
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import Safe from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
-import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress } from "./factory/eth.factory";
+import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress, getBundlerUrl, getPaymasterOptions } from "./factory/eth.factory";
 import { tokenList, type IToken } from './factory/token.factory';
 import { fromStore } from './factory/store.factory';
-// import { Sdk } from '@circles-sdk/sdk';
 import { hubv2_abi } from './circles_hub_v2';
 import { CirclesData, CirclesRpc } from '@circles-sdk/data';
 import { ipfs_cat } from './factory/ipfs.factory';
 import { HUBV2ADDRESS } from './constants';
+import { addSafeAddress, formatSafeAddress } from './store/safe.store';
+import { tx, tx4337 } from './factory/aa.factory';
+import { updateCircleBalances } from './factory/circles.factory';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
 const migrationModuleAddress = "0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6";
-
+const welcomeNFTAddress = "0xe151Bf8B3D209cc84F0bdf7d13FD7Ebfe9beb6f4";
 
 export interface ISafeService {
 
@@ -50,7 +52,7 @@ export interface ISafeService {
 
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
 const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
-const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;
+
 
 export class SafeService implements ISafeService {
 
@@ -76,24 +78,30 @@ export class SafeService implements ISafeService {
 
     private constructor() {}
 
+    getDeployed() {
+        return get(this.deployed); // Access the current value of the store
+      }
+    
+      setDeployed(b: boolean) {
+        this.deployed.set(b); // Update the store's value
+      }
+
     static async create(chain: string, signer_key: string, safe_address: string) {
-        
+
+        chain = chain == "gno" ? "gnosis" : chain;
+        console.log('start creating srv for ', chain, safe_address);
         const instance = new SafeService();
         await instance.initialize(chain, signer_key, safe_address);
-        
-        if (isValidEthereumAddress(safe_address)) {
-            await instance.setup();
+        await instance.setup();
             
-        } else {
-            await instance.new();
-        }
+        console.log('finished creating srv for ', instance.chain, instance.safe_address);
 
         return instance;
     }
 
     private async initialize(chain: string, signer_key: string, safe_address: string) {
 
-        this.chain = chain;
+        this.chain = chain
         this.signer_key = signer_key;
         this.safe_address = safe_address;
         let signer = new ethers.Wallet(signer_key);
@@ -109,97 +117,60 @@ export class SafeService implements ISafeService {
    
     async setup () {
 
-        await this.initSafeWithRelay();
-        const d = await this.isDeployed();
+        this.setDeployed(
+            await this.isDeployed()
+        );
 
-        if (d) {
+        this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
+        addSafeAddress(formatSafeAddress(this.chain, this.safe_address));
+        
+        if (this.getDeployed()) {
+            
             await this.getVersion();
+
             await this.getSigners();
             if (this.chain == "gnosis") {
                 await this.checkAvatar();
-                if (this.hasAvatar) await this.getCircles();  
-            }        
+                if (this.hasAvatar) {
+                    await updateCircleBalances(this);
+                }
+            }     
+               
             await this.getModules();
+      
             this.getBalances();
+          
 
-            const hasEIP4337Module = (await fromStore(this.modules)).includes(eip4337ModuleAddress);
-
+            // const hasEIP4337Module = (await fromStore(this.modules)).includes(eip4337ModuleAddress);
             // version without paymaster
-            if (await fromStore(this.version) == "1.3.0" || !hasEIP4337Module) {
-                console.log("harry does not pay")
-                await this.initSafe();
-            }
-            // version with paymaster
-            if (await fromStore(this.version) == "1.4.1") {
-                await this.initSafeWithRelay();
-            }
+            // if (await fromStore(this.version) == "1.3.0" || !hasEIP4337Module) {
+            //     console.log("harry does not pay")
+            //     await this.initSafe();
+            // }
+            // // version with paymaster
+            // if (await fromStore(this.version) == "1.4.1") {
+            //     await this.initSafeWithRelay();
+            // }
 
-        } else {
-            this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
-            // console.log("predictedAddress",this.safe_address);
-        }
+        } 
     }
 
-    async new() {
-
-        this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
-        
-    }
 
     async checkAvatar() {
         
         try {
             const avatar = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"avatars",[this.safe_address]);
-            // console.log("avatar",avatar);
+            console.log("avatar", avatar, this.safe_address);
             this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
             return this.hasAvatar;
 
         } catch (error) {
+            console.log("avatar", error);
             return false;
         }
     }
 
-    async getCircles() {
-
-        try {
-
-            const balances = await this.circles_data?.getTokenBalances(this.safe_address);
-            const issuance = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"calculateIssuance",[this.safe_address]);
-            const mintable = ethers.formatUnits(issuance.split(",")[0], 18);
-
-            function addressToUint256(address: string): string {
-                const addressHex = address.startsWith("0x") ? address.slice(2) : address;
-                const paddedHex = addressHex.padStart(64, '0');
-                return BigInt("0x" + paddedHex).toString();
-            }
-            
-            if(balances) {
-                this.circles.update((circles) => {
-                    for (let b of balances) {
-
-                        let t: IToken = {
-                            name: this.safe_address,
-                            symbol: "crc",
-                            decimals: 18,
-                            address: b.tokenId,
-                            balance: b.circles.toString(),
-                            mintable: "0"
-                        }
-
-                        if (mintable != undefined && b.tokenId === addressToUint256(this.safe_address)) {
-                            t.mintable = parseFloat(mintable.toString()).toFixed(0).toString();
-                        }
-
-                        circles.set(b.tokenId, t);
-                    }
-                    return circles
-                });
-            }
-
-        } catch (error) {
-            // console.log("no avatar")
-        }
-    }
+    
 
     async mintCircles() {
 
@@ -230,7 +201,6 @@ export class SafeService implements ISafeService {
             return undefined;
         }
 
-        
         if (cid != undefined) {
 
             let profile: any;
@@ -280,13 +250,13 @@ export class SafeService implements ISafeService {
         const saltNonce = ethers.toBeHex(ethers.keccak256(ethers.toUtf8Bytes('plg_safe_v002_' + this.signer_address)));
         let options: any = {};
         
-        if (isValidEthereumAddress(this.safe_address) && await fromStore(this.deployed)) {
-            console.log("init with existing safe");
+        if (isValidEthereumAddress(this.safe_address) && this.getDeployed()) {
+            console.log("init with existing safe", this.chain);
             options = {
                 safeAddress: this.safe_address
             } 
         } else {
-            console.log("init with new safe");
+            console.log("init with new safe", this.chain);
             options = {
                 owners: [await fromStore(this.signer_address)],
                 threshold: 1,
@@ -294,18 +264,12 @@ export class SafeService implements ISafeService {
             }
         }
         
-        // console.log("rpc", rpc);
         this.kit = await Safe4337Pack.init({    
             provider: rpc,
             signer: this.signer_key,
-            bundlerUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
+            bundlerUrl: getBundlerUrl(this.chain) || "",
             options: options,
-            paymasterOptions: { 
-               paymasterAddress: "0x7B3f21F0284b4dc08E01Fa7e16b9b47249985F88",
-               paymasterTokenAddress: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-            //    isSponsored: true,
-               // paymasterUrl: `https://api.pimlico.io/v2/100/rpc?apikey=${pimlico_key}`,
-            }
+            paymasterOptions: getPaymasterOptions(this.chain)
         }); 
 
         return this.kit.protocolKit.getAddress();
@@ -327,11 +291,11 @@ export class SafeService implements ISafeService {
             const transactions = [transaction1];
 
             if (this.kit instanceof Safe4337Pack) {
-                const r = await this._4337tx(transactions, includesDeploy);
+                const r = await tx4337(this,transactions, includesDeploy);
                 resolve(r);
 
-            } else {        
-                const r = await this._tx(transactions, includesDeploy);
+            } else {       
+                const r = await tx(this,transactions, includesDeploy);
                 resolve("ok");
             }  
         });
@@ -340,85 +304,8 @@ export class SafeService implements ISafeService {
     async genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string> {
 
         const contract = new ethers.Contract(contract_address, abi, this.provider);
-
         const response = await contract[method](...args);
-
         return response.toString();
-    }
-
-    async _tx(transactions: any, includesDeploy: boolean) {
-
-        if (this.kit instanceof Safe) {
-
-            const safeTransaction = await this.kit.createTransaction(transactions);
-
-            try {
-                const txHash = await this.kit.executeTransaction(safeTransaction);
-                console.log('Transaction executed with hash:', txHash);
-            } catch (error) {
-                console.error('Transaction failed:', error);
-            }
-        }
-
-    }
-
-    async _4337tx(transactions: any, includesDeploy: boolean) { 
-
-        if (this.kit instanceof Safe4337Pack) {
-
-            const safeOperation = await this.kit.createTransaction({ transactions });
-            const identifier = ethers.keccak256(ethers.toUtf8Bytes("plg_safe_tx"));
-
-            safeOperation.data.callData = ethers.concat([
-                safeOperation?.data.callData as `0x{string}`,
-                identifier
-            ]).toString()
-
-            console.log(safeOperation);
-                
-            const identifiedSafeOperation = await this.kit.getEstimateFee({
-                safeOperation
-            });
-
-            const signedSafeOperation = await this.kit.signSafeOperation(identifiedSafeOperation)
-
-            const userOperationHash = await this.kit.executeTransaction({
-                executable: signedSafeOperation
-            })
-            
-            let userOperationReceipt = null
-
-            while (!userOperationReceipt) {
-                // Wait 2 seconds before checking the status again
-                await new Promise((resolve) => setTimeout(resolve, 2000))
-                userOperationReceipt = await this.kit.getUserOperationReceipt(
-                    userOperationHash
-                )
-            }
-                
-            const userOperationPayload = await this.kit.getUserOperationByHash(
-                userOperationHash
-            );
-
-            console.log("receipt",userOperationReceipt);
-            console.log("txHash",userOperationPayload.transactionHash);
-
-            this.provider.waitForTransaction(userOperationPayload.transactionHash);
-
-            const txs = await getInternalTransactions(this.chain, userOperationPayload.transactionHash, gnosisscan_key);
-            console.log(txs)
-
-            // check for succes or failure and pass up ??? 
-    
-            if (includesDeploy) {
-                const tx = txs.find( (tx) => tx.contractAddress != "");
-                console.log(tx);
-                return tx.contractAddress;
-            } else {
-                return "finished";
-            }
-        }
-
     }
 
     async genericRead(address: string, abi: string, method: string, args: string[]) : Promise<any> {
@@ -429,11 +316,12 @@ export class SafeService implements ISafeService {
 
     async isDeployed() : Promise<boolean> {
 
-        const code = await this.provider.getCode(this.safe_address);
-        const b = (code !== '0x') ? true : false;
-        this.deployed.set(b);
-
-        return b;
+        if (this.safe_address != "0x") {
+            const code = await this.provider.getCode(this.safe_address);
+            return (code !== '0x') ? true : false;
+        } else {
+            return false
+        }
     }
 
 
@@ -454,8 +342,6 @@ export class SafeService implements ISafeService {
 
     async getVersion() {
 
-        
-
         const gnosisSafeAbi = [
             "function VERSION() view returns (string)"
         ];
@@ -475,18 +361,24 @@ export class SafeService implements ISafeService {
 
     async getBalances() : Promise<void> {
 
-        for (let token of JSON.parse(JSON.stringify(tokenList))) {
+        for (let token of JSON.parse(JSON.stringify(tokenList[this.chain]))) {
 
-            if (token.symbol === "xDAI") {
-                token.balance = await this.getNativeBalance(this.safe_address); 
-            } else {
-                token.balance = await this.getBalance(token.address);
+            try {
+
+                if (token.symbol === "xDAI") {
+                    token.balance = await this.getNativeBalance(this.safe_address); 
+                } else {
+                    token.balance = await this.getBalance(token.address);
+                }
+                
+                this.tokens.update((tokens) => {
+                    tokens.set(token.address, token);
+                    return tokens;
+                });
+
+            } catch (e) {
+                console.log(e);
             }
-            
-            this.tokens.update((tokens) => {
-                tokens.set(token.address, token);
-                return tokens;
-            });
         }
         // console.log(this.safe_address, this.tokens);
        
@@ -607,9 +499,9 @@ export class SafeService implements ISafeService {
         };
 
         if (this.kit instanceof Safe) {
-            this._tx([txData], false);
+            tx(this,[txData], false);
         } else  {
-            this._4337tx([txData], false);
+            tx4337(this,[txData], false);
         }
     }
 
@@ -626,11 +518,45 @@ export class SafeService implements ISafeService {
         };
 
         if (this.kit instanceof Safe) {
-            await this._tx([txData], false);
+            await tx(this,[txData], false);
         } else  {
-            await this._4337tx([txData], false);
+            await tx4337(this,[txData], false);
         }
 
+        return
+    }
+
+    async checkNFT() {
+
+        console.log("checking NFT", this.safe_address);
+
+        const abi = [
+            {
+                "constant": true,
+                "inputs": [{"name": "account", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"name": "", "type": "uint256"}],
+                "type": "function"
+              }
+        ];
+
+        // console.log(this.provider)
+        const balance = await this.genericCall(ethers.getAddress(welcomeNFTAddress),abi,"balanceOf",[ethers.getAddress(this.safe_address)]);
+      
+        return (Number(balance) > 0) ? true : false;
+
+    }
+
+    async mintNFT() {
+
+        console.log("minting NFT");
+
+        const abi = new ethers.Interface([
+            "function mint(address to) public"
+        ]);
+
+        console.log("safe address", this.safe_address)
+        await this.genericTx(welcomeNFTAddress,abi,"mint",[this.safe_address], false);
         return
     }
 }

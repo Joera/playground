@@ -4,6 +4,10 @@
   import { writable } from 'svelte/store';
 
   export let address: string;
+  export let chain: string;
+
+
+  const prefix = chain == "gnosis" ? "gno" : chain;
 
   const copied = writable(false);
 
@@ -16,7 +20,7 @@
 </script>
 
 <div class="address-container">
-  <span class="address">{@html displaySafeLink("gno",address)}</span>
+  <span class="address">{@html displaySafeLink(prefix,address)}</span>
   <button class="copy-button" on:click={copyToClipboard}>
     <svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 0 50 62.5" x="0px" y="0px"><path d="M36.71,9.57H21.15a3.85,3.85,0,0,0-3.85,3.85v3.75h-4A3.85,3.85,0,0,0,9.44,21V36.58a3.86,3.86,0,0,0,3.85,3.85H28.85a3.85,3.85,0,0,0,3.85-3.85V32.83h4A3.85,3.85,0,0,0,40.56,29V13.42A3.86,3.86,0,0,0,36.71,9.57Zm-7.09,27a.77.77,0,0,1-.77.77H13.29a.78.78,0,0,1-.77-.77V21a.77.77,0,0,1,.77-.77H28.85a.76.76,0,0,1,.77.77V36.58ZM37.48,29a.77.77,0,0,1-.77.77h-4V21a3.85,3.85,0,0,0-3.85-3.85H20.38V13.42a.77.77,0,0,1,.77-.77H36.71a.78.78,0,0,1,.77.77Z"/></svg>
   </button>

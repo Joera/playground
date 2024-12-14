@@ -7,7 +7,7 @@
     import SpinnerWave from '$lib/components/SpinnerWave.svelte';
     import { addressFromKey } from '$lib/factory/eth.factory';
     import { clearPK, hasKey, signer_key  } from '$lib/store/key.store';
-    import { circles_addresses, clearSafeStore, safe_addresses, safe_store } from '$lib/store/safe.store';
+    import { clearSafeStore, findSrvByChain, parseSafeAddress, safe_addresses, safe_store } from '$lib/store/safe.store';
     import { maintenance_state } from '$lib/store/state.store';
     import { onMount } from 'svelte';
     import CryptoJS from 'crypto-js';
@@ -16,18 +16,22 @@
     import { processImage } from '$lib/factory/qr.factory';
     import { writable, type Writable } from 'svelte/store';
     import CopyAddressAndLink from '$lib/components/CopyAddressAndLink.svelte';
+    import type { SafeService } from '$lib/safe.service';
 
     const encrypted_string: Writable<string> = writable('');
+
+    const active_srv: Writable<SafeService|undefined> = writable(undefined);
 
     const generateQRCode = async (import_url: string) => {
 
         try {
             const qrCodeUrl = await QRCode.toDataURL(import_url); // Generate QR code as Data URL
 
+            const { chain, address } = parseSafeAddress($safe_addresses[0]);
             // Automatically download the image
             const link = document.createElement("a");
             link.href = qrCodeUrl;
-            link.download = `plg_${$safe_addresses[0]}.png`;
+            link.download = `plg_${address}.png`;
             link.click(); // Trigger download
         } catch (err) {
             console.error("Error generating QR Code:", err);
@@ -85,19 +89,11 @@
         // popup
     }
 
-    const handleAddSigner = async (address: string) => {
+    const handleAddSigner = async (address: string, chain: string) => { 
 
         maintenance_state.set("spinner");
-
-        circles_addresses.subscribe(async (addresses) => {
-            safe_store.subscribe(async (store) => {
-                const safeService = (await store)[addresses[0]];
-                safeService.subscribe(async (srv) => {
-                    await srv.addSigner(address);
-                    maintenance_state.set("")
-                });
-            });
-        });
+        await $active_srv?.addSigner(address);
+        maintenance_state.set("")
     };
 
     const handleClear = async () => {
@@ -106,31 +102,53 @@
         goto('/welcome');
     }
 
+    const handleWallet = async () => {
+        
+        maintenance_state.set("wallet")
+    }
+
+    const handleChain = async (chain:string) => {
+        
+        maintenance_state.set("safe")
+        const srv = await findSrvByChain(chain);
+        if (srv) {
+            active_srv.set(srv);
+        }
+    }
+
 
     onMount( async() => {
-        
-        const input = document.getElementById('file_import') as HTMLInputElement;
-        input.addEventListener('change', async (event) => {
 
-            const file = (event.target as HTMLInputElement).files?.[0];
-            console.log(file);
-            if (!file) {
-                return;
-            }
-           
-            const url = await processImage(file);
-            const parsedUrl = new URL(url);
-            let keyValue = parsedUrl.searchParams.get("key");
-            if (keyValue) {
-                encrypted_string.set(keyValue);
-                maintenance_state.set("passwordForDecryption");
-            }
-        });
+        maintenance_state.set("wallet")
+
+        setTimeout(() => {
+            
+            const input = document.getElementById('file_import') as HTMLInputElement;
+            input.addEventListener('change', async (event) => {
+
+                const file = (event.target as HTMLInputElement).files?.[0];
+                console.log(file);
+                if (!file) {
+                    return;
+                }
+            
+                const url = await processImage(file);
+                const parsedUrl = new URL(url);
+                let keyValue = parsedUrl.searchParams.get("key");
+                if (keyValue) {
+                    encrypted_string.set(keyValue);
+                    maintenance_state.set("passwordForDecryption");
+                }
+            });
+
+        }, 500)
+        
+        
     })
 
 </script>
 
-<h2>Accounts</h2>
+<h2>Settings</h2>
 
 <section class="scrolltainer">
 
@@ -150,9 +168,9 @@
 
         {:else if $maintenance_state == "remotesigner"}
 
-            <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail)}></SignerForm>
+            <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail,"gnosis")}></SignerForm>
 
-        {:else}
+        {:else if $maintenance_state == "wallet"}
 
             <div>
                 <h3>Signer</h3>
@@ -162,13 +180,11 @@
             </div>
 
             <div>
-                <h3>Safes</h3>
-                <CopyAddressAndLink address={$safe_addresses[0]}></CopyAddressAndLink>
+                <button class="button" on:click={() => handleSave()}>Backup to device</button>
             </div>
 
             <div>
-                <h3>Backup to device</h3>
-                <button class="button" on:click={() => handleSave()}>save</button>
+                <button class="button" on:click={() => handleClear()}>Clear localstorage</button>
             </div>
 
             <div>
@@ -176,9 +192,16 @@
                 <input class="button" id="file_import" type="file" accept=".png">
             </div>
 
+            
+
+        {:else if $maintenance_state == "safe" && $active_srv != undefined}
+
+
+            
+
             <div>
-                <h3>Clear localstorage</h3>
-                <button class="button" on:click={() => handleClear()}>clear</button>
+                <h3>Safe on {$active_srv.chain}</h3>
+                <CopyAddressAndLink address={$active_srv.safe_address} chain={$active_srv.chain}></CopyAddressAndLink>
             </div>
 
             <div>
@@ -191,6 +214,12 @@
     </article>
 
 </section>
+
+<nav>
+    <button class="button" on:click="{handleWallet}">wallet</button>
+    <button class="button" on:click="{() => handleChain('base')}">base</button>
+    <button class="button" on:click="{() => handleChain('gnosis')}">gnosis</button>
+</nav>
 
 
 <style>

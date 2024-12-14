@@ -8,6 +8,7 @@
     import Transfer from "./Transfer.svelte";
     import SpinnerWave from "./SpinnerWave.svelte";
     import { ethers } from "ethers";
+    import { findSrvByChain } from "$lib/store/safe.store";
 
     const dispatch = createEventDispatcher();
     const to_address = writable("");
@@ -68,7 +69,11 @@
             return JSON.stringify(h)
         })
 
-        await updateContacts();
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+            await updateContacts(srv);
+        }
+        
         contacts_state.set("");
 
     }
@@ -93,9 +98,14 @@
     }
 
     onMount( async () => {
-        network.set(
-            await updateContacts()
-        );
+
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+            network.set(
+                await updateContacts(srv)
+            );
+        }
+        
     })
 
 </script>

@@ -1,77 +1,101 @@
-import type {CirclesConfig} from "@circles-sdk/sdk";
-import { circles_addresses, safe_store } from "../store/safe.store";
-import type { SafeService } from "../safe.service";
+import { findSrvByChain } from "../store/safe.store";
 import { getDefaultProvider, ethers } from "ethers";
 import { hexToAddress } from "../factory/eth.factory";
 import { events } from "../store/event.store";
+import type { SafeService } from "$lib/safe.service";
+import type { IToken } from "./token.factory";
+import { hubv2_abi } from "$lib/circles_hub_v2";
+import { HUBV2ADDRESS } from "$lib/constants";
 
-
-// export const GnosisChainConfig: CirclesConfig = {
-//     circlesRpcUrl: "https://rpc.aboutcircles.com/",
-//     pathfinderUrl: "https://pathfinder.aboutcircles.com",
-//     v1HubAddress: "0x29b9a7fbb8995b2423a71cc17cf9810798f6c543",
-//     v2HubAddress: "0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8",
-//     nameRegistryAddress: "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474",
-//     migrationAddress: "0xD44B8dcFBaDfC78EA64c55B705BFc68199B56376",
-//     profileServiceUrl: "https://rpc.aboutcircles.com/profiles/",
-// };
-
-export const setCirclesListener = () => {
+export const setCirclesListener = async () => {
 
     let listening = false;
 
-    circles_addresses.subscribe(async (addresses) => {
+    const srv = await findSrvByChain("gnosis");
 
-        if (!listening && addresses.length > 0 && addresses[0] != undefined) {
+    if (srv && !listening) {
 
-            console.log("circles_addresses", addresses);
+        const provider = getDefaultProvider('wss://rpc.gnosischain.com/wss');
+        const contractAddress = '0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8';
+        const contractABI = [
+            "event Trust(address indexed truster, address indexed trustee, uint256 expiryTime)"
+        ];
 
-            safe_store.subscribe(async (stores) => {
+        const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-                const safeService = (await stores)["gnosis"];
+        const filter = contract.filters.Trust(null, ethers.getAddress(srv.safe_address), null);
+       // const filter = contract.filters.Trust(null, null, null);
 
-                if (!safeService) return;
+        contract.on(filter, async (event: any, log: any) => {
 
-                safeService.subscribe(async (srv) => {
+            if (ethers.getAddress(event.log.address) != ethers.getAddress(contractAddress)) return;
+            
+            const truster = hexToAddress(event.log.topics[1])
+            console.log("trust detected from ", truster);
+            const name = await srv.getAvatarName(truster);
 
-                    const provider = getDefaultProvider('wss://rpc.gnosischain.com/wss');
-                    const contractAddress = '0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8';
-                    const contractABI = [
-                        "event Trust(address indexed truster, address indexed trustee, uint256 expiryTime)"
-                    ];
+            const e = {
+                msg : `${name} trusts you. Accept?`,
+                method: 'accept_invite',
+                address: truster
+            }
 
-                    const contract = new ethers.Contract(contractAddress, contractABI, provider);
-
-                    const filter = contract.filters.Trust(null, ethers.getAddress(addresses[0]), null);
-
-                    contract.on(filter, async (event: any, log: any) => {
-
-                        if (ethers.getAddress(event.log.address) != ethers.getAddress(contractAddress)) return;
+            events?.update((eventsString) => {
+                let events = eventsString != "" ? JSON.parse(eventsString) : [];
+                events = [...events, e]
+                return JSON.stringify(events);
+            });
                         
-                        const truster = hexToAddress(event.log.topics[1])
-                        console.log("trust detected from ", truster);
-                        const name = await srv.getAvatarName(truster);
+        });
 
-                        const e = {
-                            msg : `${name} trusts you. Accept?`,
-                            method: 'accept_invite',
-                            address: truster
+        listening = true;
+        console.log('listening to events on gnosis for ', srv.safe_address);
+    }
+}
+
+export const updateCircleBalances = async (srv: SafeService) => {
+
+        try {
+
+            const balances = await srv.circles_data?.getTokenBalances(srv.safe_address);
+            const issuance = await srv.genericCall(HUBV2ADDRESS,hubv2_abi,"calculateIssuance",[srv.safe_address]);
+            const mintable = ethers.formatUnits(issuance.split(",")[0], 18);
+
+            function addressToUint256(address: string): string {
+                const addressHex = address.startsWith("0x") ? address.slice(2) : address;
+                const paddedHex = addressHex.padStart(64, '0');
+                return BigInt("0x" + paddedHex).toString();
+            }
+            
+            if (balances) {
+                srv.circles.update((circles) => {
+                    for (let b of balances) {
+
+                        let t: IToken = {
+                            name: srv.safe_address,
+                            symbol: "crc",
+                            decimals: 18,
+                            address: b.tokenId,
+                            balance: b.circles.toString(),
+                            mintable: "0"
                         }
 
-                        events?.update((eventsString) => {
-                            let events = eventsString != "" ? JSON.parse(eventsString) : [];
-                            events = [...events, e]
-                            return JSON.stringify(events);
-                        });
-                        
-                    });
+                        if (mintable != undefined && b.tokenId === addressToUint256(srv.safe_address)) {
+                            t.mintable = parseFloat(mintable.toString()).toFixed(0).toString();
+                        }
 
-                    listening = true;
-                    console.log('listening to events for ', addresses[0]);
+                        circles.set(b.tokenId, t);
+                    }
+
+                    // console.log(circles);
+
+                    return circles
                 });
-            });
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-    });
 }
 
 

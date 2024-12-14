@@ -5,7 +5,7 @@
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { createEventDispatcher, onMount } from 'svelte';
     import { writable } from 'svelte/store';
-    import { circles_addresses, safe_store } from '$lib/store/safe.store';
+    import { findSrvByChain, safe_store } from '$lib/store/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
     import SpinnerWave  from './SpinnerWave.svelte';
     import { HUBV2ADDRESS } from '$lib/constants';
@@ -38,18 +38,14 @@
 
     const inviteHandler = async () => {
       
-        circles_addresses.subscribe( (addresses) => {
-            safe_store.subscribe(async (store) => {
-                
-                (await store)["gnosis"].subscribe(async (srv) => {
-                    spinner.set(true);
-                    const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
-                    console.log(r);  
-                    dispatch('invite_success_event');
-                    spinner.set(false);
-                })
-            })
-        });
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+          spinner.set(true);
+          const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
+          console.log(r);  
+          dispatch('invite_success_event');
+          spinner.set(false);
+        }
     }
 
 </script>

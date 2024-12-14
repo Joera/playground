@@ -29,7 +29,7 @@
         {#if $safe_addresses[0] == "0x" ||  $safe_addresses[0] == undefined}
             <span>0x</span>
          {:else}
-            <span>{displayShortAddress($safe_addresses[0])}</span>
+            <span>{displayShortAddress($safe_addresses[0].split(":")[1])}</span>
          {/if}
 
     </button>

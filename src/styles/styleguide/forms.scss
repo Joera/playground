@@ -4,14 +4,14 @@
     :global(input) {
         padding: .75rem;
         min-width: 240px;
-        width: 100%;
+        width: calc(100% - 1.5rem);
     }
 
     :global(textarea) {
         border: none;
         padding: .75rem;
         min-width: 240px;
-        width: 100%;
+        width: calc(100% - 1.5rem);
         line-height: 1.35;
     }
 }               

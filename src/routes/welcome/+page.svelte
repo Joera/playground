@@ -4,8 +4,8 @@
     import { addSafe, safe_addresses } from "$lib/store/safe.store";
     import { onMount } from "svelte";
 
-    import { welcome_state } from "$lib/store/state.store";
-    import { clearApp, initApp } from "$lib/factory/app.factory";
+    import { profile_state, welcome_state } from "$lib/store/state.store";
+    import { clearApp, initApp, initAppFromZero } from "$lib/factory/app.factory";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
     import { processImage } from "$lib/factory/qr.factory";
     import CryptoJS from 'crypto-js';
@@ -14,11 +14,10 @@
 
     // Function to handle button clicks
     const default_setup = async () => {
-        await initPK();
-        await initApp();
-        // await addSafe("gnosis");
-        // await addSafe("base");
         goto('/avatar');
+        await initAppFromZero();
+        profile_state.set("");
+        
     };
 
     const encrypted_string: Writable<string> = writable('');

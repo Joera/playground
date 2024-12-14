@@ -12,6 +12,9 @@ export function localStorageStore(key: string, initialValue: string) {
         });
 
         return store;
+    } else {
+        
+        return writable(initialValue);
     }
 }
 
