@@ -163,11 +163,11 @@
                 
                     {#if contact.relation == "trustedBy" && !$hasAvatar}
                         <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
-                            <IconTransfer></IconTransfer>
+                            accept
                         </button>
                     {:else}
                         <button class="icon" on:click={() => handleTransfer(fixSafeAddress(contact.objectAvatar))} aria-label="transfer">
-                           
+                            <IconTransfer></IconTransfer>
                         </button>   
                     {/if}
                 </div>
