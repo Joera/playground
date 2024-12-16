@@ -104,10 +104,11 @@ export class SafeService implements ISafeService {
         this.chain = chain
         this.signer_key = signer_key;
         this.safe_address = safe_address;
-        let signer = new ethers.Wallet(signer_key);
+        this.provider = getProvider(chain, alchemy_key);
+        let signer = new ethers.Wallet(signer_key, this.provider);
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));
-        this.provider = getProvider(chain, alchemy_key);
+        
 
         if (chain == "gnosis") {
             const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
@@ -275,7 +276,30 @@ export class SafeService implements ISafeService {
         return this.kit.protocolKit.getAddress();
     }
 
-    async genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string> {
+    async nativeTx (to_address: string, value: string) : Promise<string> {
+
+        return new Promise( async (resolve, reject) => {
+    
+            const transaction1 = { 
+                to: to_address,
+                data: "0x",
+                value
+            }
+    
+            const transactions = [transaction1];
+
+            if (this.kit instanceof Safe4337Pack) {
+                const r = await tx4337(this,transactions, false);
+                resolve(r);
+
+            } else {       
+                const r = await tx(this,transactions, false);
+                resolve("ok");
+            }  
+        });
+    }
+
+    async  genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string> {
 
         return new Promise( async (resolve, reject) => {
     
@@ -308,7 +332,7 @@ export class SafeService implements ISafeService {
         return response.toString();
     }
 
-    async genericRead(address: string, abi: string, method: string, args: string[]) : Promise<any> {
+    async genericRead(address: string, abi: any, method: string, args: any[]) : Promise<any> {
 
         const contract = new ethers.Contract(address, abi, this.signer);
         return await contract[method](...args);

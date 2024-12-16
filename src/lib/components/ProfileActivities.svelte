@@ -65,8 +65,9 @@
             activity_state.set("spinner");
         }
 
-        fetchActivities().then((activities) => {
-            activity.set(activities);
+        fetchActivities().then((_activities) => {
+            activities?.set(JSON.stringify(_activities));
+            activity.set(_activities);
             activity_state.set("");
         });
     })

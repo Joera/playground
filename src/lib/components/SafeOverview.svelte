@@ -10,6 +10,8 @@
     import { ethers } from 'ethers';
     import { oft_abi } from '$lib/oft_abi';
     import { oftBridgeTx } from '$lib/factory/oft.factory';
+    import TokenErc20 from './TokenERC20.svelte';
+    import TokenCircle from './TokenCircle.svelte';
    
     export let safeSrv: Writable<SafeService>;
 
@@ -28,8 +30,8 @@
 
     const tokenId = writable("");
     const tokenBalance = writable(0);
-    const mintable = writable(0);
-
+    
+    
     // Optionally, fetch initial data on mount if needed
    
 
@@ -46,68 +48,31 @@
         })
     }
 
-    const handleMint = async () => {
-        safeSrv.subscribe( async (srv: SafeService) => {
-            state.set("spinner");
-            await srv.mintCircles();
-            // display link to tx on scan? (txs page?? )
-         //   await srv.getCircles();
-            state.set("");
-            
-        })
-    }
+    
 
-    const handleTansfer = async () => {
-        safeSrv.subscribe( async (srv: SafeService) => {
-            await srv.mintCircles();
+    // const handleCirclesInfo = async (id: string, token: IToken) => {
+    //     tokenId.set(id);
+    //     tokenBalance.set(parseFloat(token.balance));
+    //     if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
+    //         mintable.set(parseFloat(token.mintable));
+    //     }
+    //     state.set("token");
+    // }
 
-            const to = "0x0000000000000000000000000000000000000000";
-            const id = "0x0000000000000000000000000000000000000000";
-            const value = 1;
-            srv.transferCircles(to,id,value);
-        })
-    }
-
-    const handleCirclesInfo = async (id: string, token: IToken) => {
-        tokenId.set(id);
-        tokenBalance.set(parseFloat(token.balance));
-        if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
-            mintable.set(parseFloat(token.mintable));
-        }
-        state.set("token");
-    }
-
-    const handleTokenInfo = async (address: string, token: IToken) => {
-        tokenId.set(address);
-        tokenBalance.set(parseFloat(token.balance));
+    // const handleTokenInfo = async (address: string, token: IToken) => {
+    //     tokenId.set(address);
+    //     tokenBalance.set(parseFloat(token.balance));
        
-        state.set("token");
-    }
+    //     state.set("token");
+    // }
 
-    const handleBack = async () => {
-        state.set("");
-    } 
+    // const handleBack = async () => {
+    //     state.set("");
+    // } 
 
     const handleMintBaseNFT = async () => {
         state.set("spinner");
         $safeSrv.mintNFT();
-        state.set("");
-    }
-
-    const handleOFTBridge = async () => {
-        state.set("spinner");
-
-        const amount = 10;
-        const toAddress = "0x0000000000000000000000000000000000000000";
-        const destination_chain = 100;
-
-        let token = tokenList[$safeSrv.chain].find((token: IToken) => token.symbol === "LLL");
-        if (token) {
-            const oftContract = new ethers.Contract(token.address || "", oft_abi, $safeSrv.signer);
-            const args = await oftBridgeTx(oftContract, $safeSrv.safe_address, toAddress, destination_chain, amount);
-            await $safeSrv.genericTx(token.address || "", oft_abi, "sendFrom", args, false);
-        }
-
         state.set("");
     }
 
@@ -116,7 +81,6 @@
     })
     
     onMount(async () => {
-
         state.set("spinner");
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
         state.set("");
@@ -131,40 +95,14 @@
 
             <SpinnerWave></SpinnerWave>
 
-        {:else if $state == "token"} 
-
-            <label>Balance: <span>{$tokenBalance.toFixed(2)}</span></label>  
-            
-            <button class="button">transfer</button>
-
-            <button class="button" on:click={handleOFTBridge}>bridge</button>
-
-            {#if $mintable > 0}
-                <label>Mintable: <span>{$mintable.toFixed(2)}</span></label>   
-                <button class="button" on:click={handleMint}>mint</button>
-            {/if}
-            
-            <button class="button" on:click={handleBack}>back</button>
-
         {:else}
-
-            <!-- <h3>{chain}</h3> -->
 
             <div class="tokens">
                 {#each $tokens.entries() as [address,token]}
-                    <button class="token" on:click={() => handleTokenInfo(address, token)}>
-                        <span>{token.symbol}</span>
-                        <span>{roundBalance(token.balance)}</span>
-                    </button>
+                    <TokenErc20 safeSrv={safeSrv} token={token}></TokenErc20>   
                 {/each}
                 {#each $circles.entries() as [address,token]}
-                    <button class="token" on:click={() => handleCirclesInfo(address, token)}>
-                    
-                            <span>CRC</span>
-                            <span>{parseFloat(token.balance).toFixed(0)}{#if token.mintable > 1}+{parseFloat(token.mintable).toFixed(0)}{/if}
-                        </span>
-                       
-                    </button>
+                    <TokenCircle safeSrv={safeSrv} token={token} address={address}></TokenCircle>
                 {/each}
             </div>
             {#if $deployed}
@@ -202,12 +140,14 @@
 
 <style>
     article {
+
+            position: relative;
             display: flex;
-            
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
             margin: 1.5rem 0;
+            width: 100%;
 
             > div  {
                 display: flex;
@@ -228,15 +168,10 @@
 
             .tokens {
                 margin: 1.5rem 0;
+                width: 100%;
             }
 
-            .token {
-                display: flex;
-                flex-direction: row;
-                justify-content: space-between;
-                min-width: 240px;
-                margin: .75rem 0;
-            }
+      
 
             .signers {
                 display: flex;

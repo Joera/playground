@@ -16,6 +16,9 @@
     const availableGNO: Writable<Record<string, number>> = writable({});
     // let safesWithAvatars: string[] = [];
 
+    $: gnosis_address = "";
+
+
     const regentonContract = "0x05456E26dF26ef77f6A2DA6f14E8cCbd96b10c3E";
 
     const getStake = async (safe_address: string, srv: SafeService) => {
@@ -36,15 +39,19 @@
 
     async function init() {
 
+        const prefixed_address =(await findAddressByChain("gnosis"));
+        if(prefixed_address) {
+            const { chain, address}  = parseSafeAddress(prefixed_address);
+            gnosis_address = prefixed_address;
+        }
+
         regenton.set(
             await fetchMetrics()
         );
 
 
         let balance = 0;
-        // let gnosis_address = await hasGnosisSafeAddress();
-        // for (let [safe_address, srv] of Object.entries($safe_store)) {
-
+    
         const srv = await findSrvByChain("gnosis");
 
         if (srv) {
@@ -99,20 +106,24 @@
     })
 
 
-    const handleStake = async (safe_address: string) => {
+    const handleStake = async () => {
+
+        const a = await findAddressByChain("gnosis");
+        if (!a) return;
+        const { chain, address } = parseSafeAddress(a);
         
         const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
 
-        const srv = $safe_store["gnosis"];
+        const srv = await findSrvByChain("gnosis");
 
-        srv.subscribe( async (srv: SafeService) => {
+        if(srv) {
             state.set("spinner");
-            await srv.genericTx(TOKENADDRESS, regenton_abi, "approve", [safe_address,1], false);
+            await srv.genericTx(TOKENADDRESS, regenton_abi, "approve", [address,1], false);
             await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false);
             init();
             state.set("");
-        });
+        }
     }
 
 </script>
@@ -124,7 +135,6 @@
     <h2>Regenton</h2>
 
     <div>
-        <!-- <h3>Community:</h3> -->
         <label>TVL</label>
         <div class="number">{@html $regenton.tvl}</div>
         <label>Rewards</label>
@@ -139,10 +149,10 @@
     {:else}
         <div class="centered">  
             <span>Your current stake is {$currentStake} GNO</span>
-            <span>Available to stake: {$availableGNO[$safe_addresses[0]]}GNO</span>
+            <span>Available to stake: {$availableGNO[gnosis_address]}GNO</span>
             <!-- {#each Object.entries($availableGNO) as [safe_address, balance]}
                 <div>{balance} GNO</div> -->
-            <button class="button" on:click={() => handleStake($safe_addresses[0])}>Stake 1 GNO</button>
+            <button class="button" on:click={() => handleStake()}>Stake 1 GNO</button>
             <!-- {/each} -->
         </div>
     {/if}
