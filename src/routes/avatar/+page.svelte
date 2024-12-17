@@ -120,10 +120,10 @@
     
 
     <nav class="sub">
-        <button class="button" on:click="{handleProfile}">profile</button>
-        <button class="button" on:click="{handleScanner}">scan</button>
-        <button class="button" on:click="{handleContacts}">contacts</button>
-        <button class="button" on:click="{handleActivities}">activity</button>
+        <button class="pill narrow" on:click="{handleProfile}">profile</button>
+        <button class="pill narrow" on:click="{handleScanner}">scan</button>
+        <button class="pill narrow" on:click="{handleContacts}">contacts</button>
+        <button class="pill narrow" on:click="{handleActivities}">activity</button>
     </nav>
 
 </article>

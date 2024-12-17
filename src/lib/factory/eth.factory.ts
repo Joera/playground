@@ -145,7 +145,7 @@ export const displayShortAddress = (address: string) => {
 
     let a = "0x";
     try {
-        a = address.substring(0, 4) + "..." + address.substring(38, 42);
+        a = address.substring(0, 6) + "..." + address.substring(36, 42);
     }
     catch (error) {
         console.log(error)

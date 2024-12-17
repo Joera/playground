@@ -38,11 +38,17 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
             safeOperation
         });
 
+        console.log(1);
+
         const signedSafeOperation = await srv.kit.signSafeOperation(identifiedSafeOperation)
+
+        console.log(2);
 
         const userOperationHash = await srv.kit.executeTransaction({
             executable: signedSafeOperation
         })
+
+        console.log(3);
         
         let userOperationReceipt = null
 
@@ -53,6 +59,8 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
                 userOperationHash
             )
         }
+
+    
             
         const userOperationPayload = await srv.kit.getUserOperationByHash(
             userOperationHash

@@ -42,8 +42,8 @@ main {
     overflow-y: scroll;
     width: 100%;
     max-width: 420px;
-    margin: 2rem 0 0 0;
-    min-height: calc(100% - 6rem);
+    margin: 0rem 0 0 0;
+    height: calc(100% - 8rem);
 }
 
 .container {

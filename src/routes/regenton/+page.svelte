@@ -14,6 +14,7 @@
     const regenton: any = writable({});
     const currentStake = writable(0);
     const availableGNO: Writable<Record<string, number>> = writable({});
+    const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
     // let safesWithAvatars: string[] = [];
 
     $: gnosis_address = "";
@@ -60,8 +61,10 @@
 
          
                 srv.tokens.subscribe((tokens) => {
-                    // console.log(tokens)
-                    for (let [address, token] of tokens) {
+                   
+                    for (let [address, token] of tokens)  {
+                    
+                        console.log("token", token);
                 
                         if (token.name == "GNO") {
                             if (token && parseFloat(token.balance) > 0) {
@@ -112,7 +115,7 @@
         if (!a) return;
         const { chain, address } = parseSafeAddress(a);
         
-        const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
+        
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
 
         const srv = await findSrvByChain("gnosis");
@@ -130,71 +133,87 @@
 
 
 
-<article>
+
 
     <h2>Regenton</h2>
 
-    <div>
-        <label>TVL</label>
-        <div class="number">{@html $regenton.tvl}</div>
-        <label>Rewards</label>
-        <div class="number">{@html $regenton.rewards}</div>
+    <section class="scrolltainer">
 
-    </div>
+        <p class="centered">De regenton is our community staking pool on Gnosis chain. All rewards go to the playground.</p>
+
+        <div id="tvl" class="block">
+            <label>TVL</label>
+            <div class="number">{@html $regenton.tvl}</div>
+        </div>
+        <div id="rewards" class="block">
+            <label>Rewards</label>
+            <div class="number">{@html $regenton.rewards}</div>
+
+        </div>
 
    
 
-    {#if $state == "spinner"}
-        <SpinnerWave></SpinnerWave>
-    {:else}
-        <div class="centered">  
-            <span>Your current stake is {$currentStake} GNO</span>
-            <span>Available to stake: {$availableGNO[gnosis_address]}GNO</span>
-            <!-- {#each Object.entries($availableGNO) as [safe_address, balance]}
-                <div>{balance} GNO</div> -->
-            <button class="button" on:click={() => handleStake()}>Stake 1 GNO</button>
-            <!-- {/each} -->
-        </div>
-    {/if}
+        {#if $state == "spinner"}
+            <SpinnerWave></SpinnerWave>
+        {:else}
+            <div id="mystake"class="centered block">  
+                <span>Your current stake is {$currentStake} GNO</span>
+                <span>Available to stake: {$availableGNO[TOKENADDRESS]} GNO</span>
+             
+            </div>
 
+            <button class="pill" on:click={() => handleStake()}>Stake 1 GNO</button>
+        {/if}
 
-    
-
-</article>
+    </section>
 
 
 <style>
 
-    article {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
+    p.centered {
+        margin: 0 1.5rem 1.5rem 1.5rem; 
     }
 
-    article > div {
-        margin: 1.5rem 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-
-        > button {
-            margin: .75rem 0;
-        }
-    }
 
     .number {
         font-size: 3rem;
         font-weight: 700;
         font-family: 'Gotham A', 'GOTHAM B';
+        line-height: 1;
     }
 
     .centered {
         display: flex;
         flex-direction: column;
         align-items: center;
+        text-align: center
     }
+
+    .block {
+
+        background: white;
+        padding: 1rem 1.5rem;
+     
+        border-radius: 24px;
+    }
+
+    #tvl {
+        margin-top: 1rem;
+        transform: rotate(3deg);
+        margin-bottom: 1.5rem;
+    }
+
+    #rewards {
+        transform: rotate(-5deg);
+        margin-bottom: 1.5rem;
+    }
+
+    #mystake {
+        transform: rotate(1deg);
+        margin-bottom: 1.5rem;
+    }
+
+    
 
 
 </style>

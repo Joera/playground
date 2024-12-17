@@ -1,10 +1,18 @@
 :global(.token) {
 
-    width: 100%;
+    width: calc(100% - 2rem);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    // margin: 0 1.5rem;
+    height: 2.4rem;
+    background: white;
+    margin-bottom: .4rem;
+    padding: 0 1rem;
+    font-size: 1.275rem;
+    border-radius: 20px;
+
 
 }
 

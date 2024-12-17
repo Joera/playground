@@ -12,11 +12,7 @@
 
     const handleChain = async (c: string) => {
 
-        console.log("---------------")
-
         const srv = await findSrvByChain(c);
-
-        console.log(srv);
 
         if(srv) {   
             safeSrv.set(srv);
@@ -31,9 +27,11 @@
 
 </script>
 
+    <h2>{$chain} wallet</h2>
+
     <section class="scrolltainer">
 
-        <h2>{$chain}</h2>
+        
         {#if $safeSrv}
             <SafeOverview {safeSrv} />
         {:else}
@@ -44,7 +42,7 @@
 
     <nav class="sub">
         {#each $chains as chain}
-        <button class="button" on:click="{() => handleChain(chain)}">{chain}</button>
+        <button class="pill" on:click="{() => handleChain(chain)}">{chain}</button>
         {/each}        
     </nav>
   
@@ -66,8 +64,4 @@
             }
         }
 
- 
-
-    
-    
     </style>

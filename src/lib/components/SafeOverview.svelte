@@ -150,7 +150,7 @@
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
-            margin: 1.5rem 0;
+            /* margin: 1.5rem 0; */
             width: 100%;
 
             > div  {
@@ -163,15 +163,10 @@
             }
            
 
-            /* > div.safe_container {
-                min-height: 240px;
-                border: 1px solid #000000;
-                margin: 0 1.5rem;
-                padding: 1.5rem .75rem;
-            } */
+        
 
             .tokens {
-                margin: 1.5rem 0;
+                margin: 0rem 0;
                 width: 100%;
             }
 

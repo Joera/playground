@@ -180,16 +180,16 @@
             </div>
 
             <div>
-                <button class="button" on:click={() => handleSave()}>Backup to device</button>
+                <button class="pill white" on:click={() => handleSave()}>Backup to device</button>
             </div>
 
             <div>
-                <button class="button" on:click={() => handleClear()}>Clear localstorage</button>
+                <button class="pill white" on:click={() => handleClear()}>Clear localstorage</button>
             </div>
 
             <div>
                 <h3>Restore from backup</h3>
-                <input class="button" id="file_import" type="file" accept=".png">
+                <input class="pill white" id="file_import" type="file" accept=".png">
             </div>
 
             
@@ -205,8 +205,8 @@
             </div>
 
             <div>
-                <h3>Remote signer</h3>
-                <button class="button"on:click={handleRemoteSigner}>add</button>
+               
+                <button class="pill white"on:click={handleRemoteSigner}>add remote signer</button>
             </div>
 
         {/if}
@@ -216,9 +216,9 @@
 </section>
 
 <nav class="sub">
-    <button class="button" on:click="{handleWallet}">wallet</button>
-    <button class="button" on:click="{() => handleChain('base')}">base</button>
-    <button class="button" on:click="{() => handleChain('gnosis')}">gnosis</button>
+    <button class="pill" on:click="{handleWallet}">wallet</button>
+    <button class="pill" on:click="{() => handleChain('base')}">base</button>
+    <button class="pill" on:click="{() => handleChain('gnosis')}">gnosis</button>
 </nav>
 
 
