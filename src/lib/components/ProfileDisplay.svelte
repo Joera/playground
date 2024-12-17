@@ -152,8 +152,7 @@
                     <p>{$profile.description}</p>
                 </div>
 
-                <button class="icon edit" on:click={handleEdit} aria-label="edit">
-                    <svg version="1.1" x="0px" y="0px" viewBox="0 0 100 125"><g transform="translate(0,-952.36218)"><path style="text-indent:0;text-transform:none;direction:ltr;block-progression:tb;baseline-shift:baseline;color:#000000;enable-background:accumulate;" d="M 69 6 C 67.961908 6 66.948042 6.36436 66.15625 7.15625 L 12.59375 60.5625 A 2.0001999 2.0001999 0 0 0 12.03125 61.65625 L 7.03125 91.65625 A 2.0001999 2.0001999 0 0 0 9.34375 93.96875 L 37.34375 88.96875 A 2.0001999 2.0001999 0 0 0 38.4375 88.375 L 91.84375 33.625 L 91.84375 33.59375 C 92.318009 33.12067 93.000915 32.4995 93 31.28125 C 92.999075 30.0504 92.3477 29.47955 91.90625 29 L 71.875 7.21875 C 71.082071 6.35739 69.996801 6 69 6 z M 68.96875 10 C 68.96035 10.008 69.01575 10 69 10 L 88.5625 31.25 L 82.96875 37 L 63.3125 15.625 L 68.96875 10 z M 60.46875 18.46875 L 65.375 23.78125 L 21.71875 67.4375 L 16.78125 62.03125 L 60.46875 18.46875 z M 68.09375 26.71875 L 73.03125 32.125 L 29.40625 75.75 L 24.4375 70.375 L 68.09375 26.71875 z M 75.75 35.0625 L 80.15625 39.875 L 37.03125 84.09375 L 32.09375 78.71875 L 75.75 35.0625 z M 15.3125 66.34375 L 33.0625 85.6875 L 21.625 87.71875 L 13.28125 78.53125 L 15.3125 66.34375 z M 12.4375 83.53125 L 17 88.53125 L 11.4375 89.53125 L 12.4375 83.53125 z " transform="translate(0,952.36218)" fill="#000000" fill-opacity="1" stroke="none" visibility="visible" display="inline" overflow="visible"/></g></svg>
+                <button class="pill white edit" on:click={handleEdit} aria-label="edit">edit
                 </button>
                 
             {/if}
@@ -163,7 +162,9 @@
                     {#if $friend_address == "" && $profile.name == ""}
                         <p>You are not yet trusted by circles to be a human. Ask a (new) friend to scan this and invite you. </p>
                     {/if}
-                    <QRCode data="{$gnosis_address}" backgroundColor="transparent" />
+                    <div id="qr">
+                        <QRCode data="{$gnosis_address}" backgroundColor="transparent" />
+                    </div>
                 </div>
             {/if}
 
@@ -186,6 +187,7 @@
 
     #profile {
         min-height: 4rem;
+        margin-top: 1.5rem;
     }
 
     h3 {
@@ -229,6 +231,12 @@
 
     button.edit {
         margin: .5rem 0 1.5rem 0;
+    }
+
+    #qr {
+        background: white;
+        padding: .75rem;
+        border-radius: 24px;
     }
 
 </style>

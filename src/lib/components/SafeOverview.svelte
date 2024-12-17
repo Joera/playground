@@ -166,7 +166,7 @@
         
 
             .tokens {
-                margin: 0rem 0;
+                margin: 1.5rem 0;
                 width: 100%;
             }
 
