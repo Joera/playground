@@ -122,7 +122,7 @@
 
         if(srv) {
             state.set("spinner");
-            await srv.genericTx(TOKENADDRESS, regenton_abi, "approve", [regentonContract,1], false);
+            await srv.genericTx(TOKENADDRESS, tokenAbi, "approve", [regentonContract,1], false);
             await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false);
             init();
             state.set("");
