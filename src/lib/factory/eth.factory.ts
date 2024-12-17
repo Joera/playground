@@ -83,52 +83,36 @@ export const getProvider = (chain: string, alchemy_key: string) => {
     switch (chain) {
 
         case 'gnosis':
-            provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
-            break;
 
-        case 'eth':
-            provider = ethers.getDefaultProvider(
-                "https://eth-mainnet.g.alchemy.com/v2/" + alchemy_key ,
-                {
-                    alchemy: alchemy_key 
-                }
-            );
-            break;
-
-        case 'arbsep': 
-            provider = ethers.getDefaultProvider(
-                "https://arb-sepolia.g.alchemy.com/v2/" + alchemy_key ,
-                {
-                    alchemy: alchemy_key 
-                }
-            );
+            try {
+                provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
+            } catch (error) {
+                console.log("rpc error", error);
+            }
             break;
 
         case 'base':
-            provider = ethers.getDefaultProvider(
-                `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`,
-                {
-                    alchemy: alchemy_key   
-                }
-            );
-            break;
 
-        case 'basesep':
-            provider = ethers.getDefaultProvider(
-                "https://base-sepolia.g.alchemy.com/v2/" + alchemy_key ,       
-                {
-                    alchemy: alchemy_key
-                }
-            )
-            break;
+            try {
+                provider = ethers.getDefaultProvider(
+                    `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`,
+                    {
+                        alchemy: alchemy_key   
+                    }
+                );
+                break;
+            } catch (error) {
+                console.log("rpc error", error);
+            }
 
         default:
-            provider = ethers.getDefaultProvider(
-                "https://arb-sepolia.g.alchemy.com/v2/" + alchemy_key ,
-                {
-                    alchemy: alchemy_key 
-                }
-            )
+            
+            try {
+                provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
+            } catch (error) {
+                console.log("rpc error", error);
+            }
+            break;
     }
 
     return provider;
