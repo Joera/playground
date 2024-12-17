@@ -92,6 +92,7 @@ export class SafeService implements ISafeService {
         console.log('start creating srv for ', chain, safe_address);
         const instance = new SafeService();
         await instance.initialize(chain, signer_key, safe_address);
+        if (instance.provider == undefined) return;
         await instance.setup();
             
         console.log('finished creating srv for ', instance.chain, instance.safe_address);
@@ -104,7 +105,15 @@ export class SafeService implements ISafeService {
         this.chain = chain
         this.signer_key = signer_key;
         this.safe_address = safe_address;
-        this.provider = getProvider(chain, alchemy_key);
+
+        try {
+            this.provider = getProvider(chain, alchemy_key);
+        } catch (error) {
+            console.log("provider error", this.chain,error);
+        }
+
+        if (this.provider == undefined) return;
+
         let signer = new ethers.Wallet(signer_key, this.provider);
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));

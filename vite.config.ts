@@ -50,6 +50,11 @@ export default defineConfig({
 			target: 'https://rpc.aboutcircles.com',
 			changeOrigin: true,	
 			rewrite: (path) => path.replace(/^\/circles/, '')
+		},
+		'/baserpc': {
+			target: 'https://base-mainnet.g.alchemy.com',
+			changeOrigin: true,	
+			rewrite: (path) => path.replace(/^\/baserpc/, '')
 		}
 	  }
 	}	

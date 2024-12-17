@@ -48,28 +48,16 @@ export const getRPC = (chain: string, alchemy_key: string) => {
 
     switch (chain) {
 
-        case 'eth':
-            rpc = `https://eth-mainnet.g.alchemy.com/v2/${alchemy_key}`;
-            break;
-
-        case 'arbsep': 
-            rpc = `https://arb-sepolia.g.alchemy.com/v2/${alchemy_key}`;
-            break;
-
-        case 'basesep':
-            rpc = `https://base-sepolia.g.alchemy.com/v2/${alchemy_key}`;
-            break;
-
         case 'base':
-                rpc = `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`;
-                break;
+            rpc = `/baserpc/v2/${alchemy_key}`;
+            break;
 
         case 'gnosis':
             rpc = `https://rpc.gnosis.gateway.fm`;
             break;
 
         default:
-            rpc = `https://arb-sepolia.g.alchemy.com/v2/${alchemy_key}`;
+            rpc = `https://rpc.gnosis.gateway.fm`;
     
     }
 
@@ -84,34 +72,24 @@ export const getProvider = (chain: string, alchemy_key: string) => {
 
         case 'gnosis':
 
-            try {
-                provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
-            } catch (error) {
-                console.log("rpc error", error);
-            }
+            provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
             break;
 
         case 'base':
 
-            try {
-                provider = ethers.getDefaultProvider(
-                    `https://base-mainnet.g.alchemy.com/v2/${alchemy_key}`,
-                    {
-                        alchemy: alchemy_key   
-                    }
-                );
-                break;
-            } catch (error) {
-                console.log("rpc error", error);
-            }
+            provider = ethers.getDefaultProvider(
+                `/baserpc/v2/${alchemy_key}`,
+                {
+                    alchemy: alchemy_key   
+                }
+            );
+            break;
+            
 
         default:
             
-            try {
-                provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
-            } catch (error) {
-                console.log("rpc error", error);
-            }
+            provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
+         
             break;
     }
 
