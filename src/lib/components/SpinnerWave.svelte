@@ -16,7 +16,7 @@
     text-align: center;
 }
 .spinner-wave > div {
-    background-color: #333;
+    background-color: #000;
     height: 100%;
     width: 6px;
     display: inline-block;

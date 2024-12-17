@@ -136,7 +136,7 @@
 
     <section class="scrolltainer">
 
-        <p class="centered">De regenton is our community staking pool on Gnosis chain. All rewards go to the playground.</p>
+        <p class="centered">De regenton is a community staking pool on Gnosis chain. All rewards go to the playground.</p>
 
         <div id="tvl" class="block">
             <label>TVL</label>
@@ -168,7 +168,7 @@
 <style>
 
     p.centered {
-        margin: 0 1.5rem 1.5rem 1.5rem; 
+        margin: 1.5rem; 
     }
 
 
@@ -186,13 +186,7 @@
         text-align: center
     }
 
-    .block {
-
-        background: white;
-        padding: 1rem 1.5rem;
-     
-        border-radius: 24px;
-    }
+    
 
     #tvl {
         margin-top: 1rem;
