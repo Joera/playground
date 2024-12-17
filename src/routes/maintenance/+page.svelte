@@ -215,7 +215,7 @@
 
 </section>
 
-<nav>
+<nav class="sub">
     <button class="button" on:click="{handleWallet}">wallet</button>
     <button class="button" on:click="{() => handleChain('base')}">base</button>
     <button class="button" on:click="{() => handleChain('gnosis')}">gnosis</button>

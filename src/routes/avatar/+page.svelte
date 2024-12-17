@@ -119,7 +119,7 @@
     {/if}
     
 
-    <nav>
+    <nav class="sub">
         <button class="button" on:click="{handleProfile}">profile</button>
         <button class="button" on:click="{handleScanner}">scan</button>
         <button class="button" on:click="{handleContacts}">contacts</button>

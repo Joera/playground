@@ -40,7 +40,7 @@
 
     </section>
 
-    <nav>
+    <nav class="sub">
         {#each $chains as chain}
         <button class="button" on:click="{() => handleChain(chain)}">{chain}</button>
         {/each}        
@@ -64,22 +64,8 @@
             }
         }
 
-        nav {
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
+ 
 
-            > button {
-                margin: 0 .5rem;
-            }
-        }
-    
-        /* button {
-            border: none;
-            font-size: 6rem;
-            font-weight: 400;
-        } */
     
     
     </style>

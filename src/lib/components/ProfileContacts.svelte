@@ -121,6 +121,7 @@
         {:else if $contacts_state == "reciprocate"}
             <label>Do you wish to reciprocate trust {#if $activeContact?.objectName} to {displayShorterAddress($activeContact?.objectName)} {/if}</label>
             <button class="button"on:click={handleReciprocate}>Yes!</button>
+            <button class="button"on:click={handleHide}>Hide from contacts</button>
             <button class="button"on:click={handleBack}>Nope, that me back</button>
 
         {:else if $contacts_state == "revoke"}
@@ -155,8 +156,10 @@
                             <span class="name">
                                 {#if contact.objectName.length > 20}
                                     {contact.objectName.slice(0,6)} ... {contact.objectName.slice(-8)}
+                                    
                                 {:else}
                                     {contact.objectName}
+                                    <!-- {contact.objectAvatar.slice(-2)} -->
                                 {/if}
                             </span>
                     </div>
@@ -165,7 +168,7 @@
                         <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
                             accept
                         </button>
-                    {:else}
+                    {:else} 
                         <button class="icon" on:click={() => handleTransfer(fixSafeAddress(contact.objectAvatar))} aria-label="transfer">
                             <IconTransfer></IconTransfer>
                         </button>   
