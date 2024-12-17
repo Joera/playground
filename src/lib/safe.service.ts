@@ -92,7 +92,7 @@ export class SafeService implements ISafeService {
         console.log('start creating srv for ', chain, safe_address);
         const instance = new SafeService();
         await instance.initialize(chain, signer_key, safe_address);
-        if (instance.provider == undefined) return;
+        if (instance.provider == undefined) return instance;
         await instance.setup();
             
         console.log('finished creating srv for ', instance.chain, instance.safe_address);

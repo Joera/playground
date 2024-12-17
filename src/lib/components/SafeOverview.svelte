@@ -110,8 +110,12 @@
                     <div>read only</div>
                 {/if}
             {:else}
+                {#if $safeSrv.provider == undefined}
+                    <div>Provider unavailable</div>
+                {:else}
                 <div>not yet deployed</div>
-                {#if $safeSrv.chain == "base"}
+                {/if}
+                {#if $safeSrv.chain == "base" && $safeSrv.provider != undefined}
                     <button class="button" on:click={handleMintBaseNFT}>deploy</button>
                 {/if}
             {/if}

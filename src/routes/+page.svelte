@@ -16,6 +16,8 @@
 
         const srv = await findSrvByChain(c);
 
+        console.log(srv);
+
         if(srv) {   
             safeSrv.set(srv);
             chain.set(c);
