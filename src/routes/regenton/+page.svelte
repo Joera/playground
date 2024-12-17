@@ -63,9 +63,7 @@
                 srv.tokens.subscribe((tokens) => {
                    
                     for (let [address, token] of tokens)  {
-                    
-                        console.log("token", token);
-                
+                                    
                         if (token.name == "GNO") {
                             if (token && parseFloat(token.balance) > 0) {
                             
@@ -114,7 +112,6 @@
         const a = await findAddressByChain("gnosis");
         if (!a) return;
         const { chain, address } = parseSafeAddress(a);
-        
         
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
 
