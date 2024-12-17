@@ -2,16 +2,20 @@
 :global(form) {
 
     :global(input) {
-        padding: .75rem;
-        min-width: 240px;
-        width: calc(100% - 1.5rem);
+        padding: .75rem 1.5rem;
+        min-width: 220px;
+        width: calc(100% - 3rem);
+        border-radius: 24px;
+        border: 1px white solid;
     }
 
     :global(textarea) {
         border: none;
-        padding: .75rem;
-        min-width: 240px;
-        width: calc(100% - 1.5rem);
+        border: 1px white solid;
+        padding: .75rem 1.5rem;
+        min-width: 220px;
+        width: calc(100% - 3rem);
         line-height: 1.35;
+        border-radius: 24px;
     }
 }               

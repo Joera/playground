@@ -128,20 +128,24 @@
 
             <form id="profile" on:submit={handleProfile}>
 
-                <label>
-                    What is your name?
-                    <input bind:value={$profile.name} type="text" name="name" id="name" placeholder="Name" />
-                </label>
-                <label>
-                    What do you do?
-                    <textarea bind:value={$profile.description} rows="3" name="description" id="name" placeholder="Description"></textarea> 
-                </label>    
+                <div id="name_container">
+                    <label>
+                        What is your name?
+                        <input bind:value={$profile.name} type="text" name="name" id="name" placeholder="Name" />
+                    </label>
+                </div>
+                <div id="description_container">
+                    <label>
+                        What do you do?
+                        <textarea bind:value={$profile.description} rows="3" name="description" id="name" placeholder="Description"></textarea> 
+                    </label>   
+                </div> 
                             <!-- <label>
                                 Image
                                 <input type="text" name="image" id="name" placeholder="Image" />
                             </label> -->
 
-                <button class="button" type="submit">submit</button>
+                <button class="pill white" type="submit">submit</button>
             </form>
 
         {:else}
@@ -213,12 +217,12 @@
             width: calc(100%);
         }
 
-        input {
-            border: 1px white solid;
+        /* input {
+            
             margin-top: .25rem;
             margin-bottom: .5rem;
             width: calc(100% - 1.5rem);
-        }
+        } */
 
         button {
             margin-top: .25rem;
@@ -237,6 +241,16 @@
         background: white;
         padding: .75rem;
         border-radius: 24px;
+    }
+
+    #name_container {
+        transform: rotate(-2deg);
+        margin: 3rem 0;
+    }
+
+    #description_container {
+        transform: rotate(2deg);
+        margin: 1.5rem 0;
     }
 
 </style>

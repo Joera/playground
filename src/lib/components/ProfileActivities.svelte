@@ -38,6 +38,7 @@
         value: string,
         version: number
         toName?: string
+        fromName?: string
     }
 
 
@@ -112,8 +113,8 @@
                         {/if}
                         <span> { '-' + a.circles.toFixed(2) }</span>
                     {:else if ethers.getAddress(a.to) == safe_address}
-                        {#if a.toName}
-                            <span>from: {a.toName}</span>
+                        {#if a.fromName}
+                            <span>from: {a.fromName}</span>
                         {:else}
                             <span>from: {'.' + a.to.slice(a.to.length - 5, a.to.length -1)}</span>
                         {/if}
@@ -146,6 +147,7 @@
         justify-content: flex-start;
         width: 100%;
         max-width: calc(100% - 4rem);
+        margin-top: 1.5rem;
         /* min-height: 100%; */
         
 

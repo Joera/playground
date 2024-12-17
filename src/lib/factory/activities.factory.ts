@@ -40,7 +40,9 @@ export const fetchActivities = async () => {
             }
 
             else if (ethers.getAddress(tx.to) == srv.safe_address) {
-                tx.toName = await srv.getAvatarName(tx.to)
+
+                console.log(tx);
+                tx.fromName = await srv.getAvatarName(tx.operator)
             }
         } 
     }
