@@ -20,8 +20,8 @@
     }
 
     const handleScanner = async () => {
-        avatar_state.set('scanner');
-        goto("/avatar");
+        // avatar_state.set('scanner');
+        goto("/scanner");
     }
 
 </script>
@@ -47,49 +47,41 @@
         <button class="icon" on:click="{handleScanner}">
             <IconScanner></IconScanner>
         </button>
-
-        
-
     </div>
-
 {/if}
 
 
 <style>
-
-#settings-bar {
-    position: relative;
-    background: black;
-    height: 2.8rem;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    box-shadow:  0 4px 10px 2px rgba(0, 0, 0, 0.2);
-
-    #signer {
-
+    #settings-bar {
+        position: relative;
+        background: black;
+        height: 2.8rem;
+        width: 100%;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        height: 100%;
+        box-shadow:  0 4px 10px 2px rgba(0, 0, 0, 0.2);
 
-        svg {
-        
-            margin-top: 9px;
-            fill: white;
-            margin-right: .75rem;
+        #signer {
 
-        }
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
 
-        span {
-            color: white
+            svg {
+            
+                margin-top: 9px;
+                fill: white;
+                margin-right: .75rem;
+
+            }
+
+            span {
+                color: white
+            }
         }
     }
-
-   
-}
-
 </style>

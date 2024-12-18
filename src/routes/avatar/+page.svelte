@@ -39,9 +39,9 @@
         profile_state.set("edit");
     }
 
-    const handleInviteApproved = async (event: any) => {
-        avatar_state.set('contacts');
-    }
+    // const handleInviteApproved = async (event: any) => {
+    //     avatar_state.set('contacts');
+    // }
 
     const handleActivities = async () => {
         avatar_state.set('activities');
@@ -91,11 +91,11 @@
 
         <ProfileDisplay profile={profile} friend_address={friend_address}></ProfileDisplay>
 
-    {:else if $avatar_state == 'scanner'}
+    <!-- {:else if $avatar_state == 'scanner'}
 
     <h2>circles scanner</h2>
 
-        <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner>
+        <ProfileScanner on:invite_success_event={handleInviteApproved}></ProfileScanner> -->
 
     {:else if $avatar_state == 'contacts'}
 
