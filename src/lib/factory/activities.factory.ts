@@ -40,8 +40,6 @@ export const fetchActivities = async () => {
             }
 
             else if (ethers.getAddress(tx.to) == srv.safe_address) {
-
-                console.log(tx);
                 tx.fromName = await srv.getAvatarName(tx.operator)
             }
         } 

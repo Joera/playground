@@ -1,14 +1,11 @@
 <script lang="ts">
 
-    import { fromStore, writable, type Writable } from "svelte/store";
-    import { safe_store, addSafe, waitForSafeStoreToBePopulated, safe_addresses, hasGnosisSafeAddress, parseSafeAddress, findAddressByChain, findSrvByChain } from '$lib/store/safe.store';
+    import { writable, type Writable } from "svelte/store";
+    import { safe_store, waitForSafeStoreToBePopulated, safe_addresses, parseSafeAddress, findAddressByChain, findSrvByChain } from '$lib/store/safe.store';
     import type { SafeService } from "$lib/safe.service";
     import { regenton_abi } from "$lib/regenton_abi";
     import { onMount } from "svelte";
-    import { displayAddress } from "$lib/factory/eth.factory";
-    import Spinner from "$lib/components/Spinner.svelte";
     import { validators_api } from "$lib/apis";
-    import SpinnerWave from "$lib/components/SpinnerWave.svelte";
     import SpinnerWaveHuge from "$lib/components/SpinnerWaveHuge.svelte";
 
     const state = writable("");
@@ -16,10 +13,6 @@
     const currentStake = writable(0);
     const availableGNO: Writable<Record<string, number>> = writable({});
     const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
-    // let safesWithAvatars: string[] = [];
-
-    $: gnosis_address = "";
-
 
     const regentonContract = "0x05456E26dF26ef77f6A2DA6f14E8cCbd96b10c3E";
 
@@ -30,12 +23,8 @@
     async function getInfo(safe_address: string, srv: SafeService) : Promise<number> {
 
         return new Promise(async (resolve) => {
-           
-                // if (await srv.getDeployed())) {
-                    const r = await getStake(safe_address, srv);
-                    resolve(parseFloat(r))
-                // }
-            
+            const r = await getStake(safe_address, srv);
+            resolve(parseFloat(r))
         })
     }
 
@@ -43,8 +32,7 @@
 
         const prefixed_address =(await findAddressByChain("gnosis"));
         if(prefixed_address) {
-            const { chain, address}  = parseSafeAddress(prefixed_address);
-            gnosis_address = prefixed_address;
+            const { chain, address} = parseSafeAddress(prefixed_address);
         }
 
         regenton.set(
@@ -60,24 +48,18 @@
             
             balance += await getInfo(srv.safe_address, srv);
 
-         
-                srv.tokens.subscribe((tokens) => {
-                   
-                    for (let [address, token] of tokens)  {
-                                    
-                        if (token.name == "GNO") {
-                            if (token && parseFloat(token.balance) > 0) {
-                            
-                                availableGNO.update((available) => {
-                                    available[address] = parseFloat(token.balance);
-                                    return available;
-                                });
-                            }
+            srv.tokens.subscribe((tokens) => {
+                for (let [address, token] of tokens)  {         
+                    if (token.name == "GNO") {
+                        if (token && parseFloat(token.balance) > 0) {
+                            availableGNO.update((available) => {
+                                available[address] = parseFloat(token.balance);
+                                return available;
+                            });
                         }
                     }
-                    
-                })
-            
+                }
+            })
         }  
      
         currentStake.set(balance);

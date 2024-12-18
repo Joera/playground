@@ -144,7 +144,13 @@
 
 </script>
 
-<h2>Settings</h2>
+<h2>
+    {#if $maintenance_state == "wallet"}
+        Signer
+    {:else if $maintenance_state == "safe"}
+        Safe on {$active_srv?.chain}
+    {/if}
+</h2>
 
 <section class="scrolltainer">
 
@@ -167,22 +173,19 @@
             <SignerForm on:signer_address_event={(event) => handleAddSigner(event.detail,"gnosis")}></SignerForm>
 
         {:else if $maintenance_state == "wallet"}
-
+            
+            <div class="address block">
+                {#if $signer_key}
+                    <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
+                {/if}
+            </div>
+            
             <div>
-                <h3>Signer</h3>
-                <div class="block">
-                    {#if $signer_key}
-                        <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
-                    {/if}
-                </div>
+                <button class="pill" on:click={() => handleSave()}>Backup to device</button>
             </div>
 
             <div>
-                <button class="pill white" on:click={() => handleSave()}>Backup to device</button>
-            </div>
-
-            <div>
-                <button class="pill white" on:click={() => handleClear()}>Clear localstorage</button>
+                <button class="pill" on:click={() => handleClear()}>Clear localstorage</button>
             </div>
 
             <div>
@@ -190,23 +193,14 @@
                 <input class="pill white" id="file_import" type="file" accept=".png">
             </div>
 
-            
-
         {:else if $maintenance_state == "safe" && $active_srv != undefined}
 
-
-            
-
-            <div>
-                <h3>Safe on {$active_srv.chain}</h3>
-                <div class="block">
-                    <CopyAddressAndLink address={$active_srv.safe_address} chain={$active_srv.chain}></CopyAddressAndLink>
-                </div>
-            </div>
+            <div class="address block">
+                <CopyAddressAndLink address={$active_srv.safe_address} chain={$active_srv.chain}></CopyAddressAndLink>
+            </div>            
 
             <div>
-               
-                <button class="pill white"on:click={handleRemoteSigner}>add remote signer</button>
+                <button class="pill"on:click={handleRemoteSigner}>add remote signer</button>
             </div>
 
         {/if}
@@ -223,6 +217,11 @@
 
 
 <style>
+
+    .address {
+        padding: 0 .75rem;
+        margin-top: 1.5rem;
+    }
 
     article {
 

@@ -60,8 +60,6 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
             )
         }
 
-    
-            
         const userOperationPayload = await srv.kit.getUserOperationByHash(
             userOperationHash
         );
