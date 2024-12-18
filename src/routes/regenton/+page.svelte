@@ -96,12 +96,12 @@
 
         const srv = await findSrvByChain("gnosis");
 
-        console.log(srv)
+        // console.log(srv)
 
         if(srv) {
             state.set("spinner");
             await srv.genericTx(TOKENADDRESS, tokenAbi, "approve", [regentonContract,1], false);
-            await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false);
+            await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false, 100);
             init();
             state.set("");
         }

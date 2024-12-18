@@ -23,7 +23,7 @@ export const getPaymasterOptions = (chain: string) => {
             }
     }
  }
-
+  
 export const getBundlerUrl = (chain: string) => {
 
     switch (chain) {
@@ -78,7 +78,7 @@ export const getProvider = (chain: string, alchemy_key: string) => {
         case 'base':
 
             provider = ethers.getDefaultProvider(
-                `/baserpc/v2/${alchemy_key}`,
+                `wss://base-mainnet.g.alchemy.com/v2/${alchemy_key}`,
                 {
                     alchemy: alchemy_key   
                 }

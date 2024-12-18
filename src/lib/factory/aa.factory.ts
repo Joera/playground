@@ -26,12 +26,6 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
 
         const safeOperation = await srv.kit.createTransaction({ transactions });
 
-        if (extraGas) {
-            safeOperation.data.callGasLimit = safeOperation.data.callGasLimit * BigInt(extraGas);
-        }
-
-        console.log("safeOperation", safeOperation);
-
         const identifier = ethers.keccak256(ethers.toUtf8Bytes("plg_safe_tx"));
 
         safeOperation.data.callData = ethers.concat([
@@ -39,24 +33,23 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
             identifier
         ]).toString()
 
-        
-            
         const identifiedSafeOperation = await srv.kit.getEstimateFee({
             safeOperation
         });
 
-        console.log(1);
+        // if (extraGas) {
+        //     identifiedSafeOperation.data.callGasLimit = identifiedSafeOperation.data.callGasLimit * BigInt(extraGas);
+        //     identifiedSafeOperation.data.verificationGasLimit = identifiedSafeOperation.data.verificationGasLimit * BigInt(extraGas);
+        // }
 
         const signedSafeOperation = await srv.kit.signSafeOperation(identifiedSafeOperation)
 
-        console.log(2);
+        console.log("safeOperation", signedSafeOperation);
 
         const userOperationHash = await srv.kit.executeTransaction({
             executable: signedSafeOperation
         })
 
-        console.log(3);
-        
         let userOperationReceipt = null
 
         while (!userOperationReceipt) {

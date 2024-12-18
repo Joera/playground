@@ -308,7 +308,7 @@ export class SafeService implements ISafeService {
         });
     }
 
-    async  genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean, extraGas?: number) : Promise<string> {
+    async genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean, extraGas?: number) : Promise<string> {
 
         return new Promise( async (resolve, reject) => {
     

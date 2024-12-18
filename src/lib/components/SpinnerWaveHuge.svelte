@@ -11,16 +11,17 @@
 
 .spinner-wave {
     margin: 10px auto;
-    width: 200px;
+    width: 320px;
     height: 100px;
     text-align: center;
     margin: 1.5rem 0;
 }
 .spinner-wave > div {
     background-color: #000;
-    height: 100%;
+    height: 100px;
     width: 12px;
     display: inline-block;
+    border-radius: 20px;
 
     -webkit-animation: wave 1.6s infinite ease-in-out;
     -moz-animation: wave 1.6s infinite ease-in-out;
