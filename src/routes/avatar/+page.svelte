@@ -121,7 +121,7 @@
 
     <nav class="sub">
         <button class="pill narrow" on:click="{handleProfile}">profile</button>
-        <button class="pill narrow" on:click="{handleScanner}">scan</button>
+      
         <button class="pill narrow" on:click="{handleContacts}">contacts</button>
         <button class="pill narrow" on:click="{handleActivities}">activity</button>
     </nav>

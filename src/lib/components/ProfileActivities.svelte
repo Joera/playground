@@ -147,7 +147,8 @@
         justify-content: flex-start;
         width: 100%;
         max-width: calc(100% - 4rem);
-        margin-top: .75rem;
+        margin-top: 3rem;
+        height: 100%;
         /* min-height: 100%; */
         
 

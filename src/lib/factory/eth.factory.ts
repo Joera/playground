@@ -52,7 +52,7 @@ export const getRPC = (chain: string, alchemy_key: string) => {
             rpc = `/baserpc/v2/${alchemy_key}`;
             break;
 
-        case 'gnosis':
+        case 'gnosis':      
             rpc = `https://rpc.gnosis.gateway.fm`;
             break;
 

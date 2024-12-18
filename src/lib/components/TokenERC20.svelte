@@ -7,8 +7,7 @@
     import { ethers } from "ethers";
     import { writable, type Writable } from "svelte/store";
     import IconTransfer from "./IconTransfer.svelte";
-    import IconBridge from "./IconBridge.svelte";
-    import SpinnerWave from "./SpinnerWave.svelte";
+    import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
 
     export let safeSrv: Writable<SafeService>;
     export let token: IToken;
@@ -46,7 +45,7 @@
 
             const { sendParam, fee } = await oftBridgeTx($safeSrv, token.address, formData);
             if (sendParam) {
-                await $safeSrv.genericTx(token.address || "", oft_abi, "send", [sendParam, fee, $safeSrv.safe_address], false);
+                await $safeSrv.genericTx(token.address || "", oft_abi, "send", [sendParam, fee, $safeSrv.safe_address], false, 3);
             }
 
         } else if (token.native) {
@@ -74,41 +73,47 @@
 
     {#if $token_state == "spinner"}
 
-        <SpinnerWave></SpinnerWave>
+        <SpinnerWaveHuge></SpinnerWaveHuge>
 
     {:else}
 
         <div class="token">
 
-            <span class="token_name">{token.symbol}</span>
-            <span class="token_balance">{parseFloat(token.balance).toFixed(2)}</span>
-            <div class="token_actions">
-                <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button>
-                <!-- {#if token.name == "LLL"}
-                    <button class="icon" on:click={handleOFTBridge}><IconBridge></IconBridge></button>
-                {/if} -->
+            <div class="token_top">
+
+                <span class="token_name">{token.symbol}</span>
+                <span class="token_balance">{parseFloat(token.balance).toFixed(2)}</span>
+                <div class="token_actions">
+                    <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button>
+                    <!-- {#if token.name == "LLL"}
+                        <button class="icon" on:click={handleOFTBridge}><IconBridge></IconBridge></button>
+                    {/if} -->
+                </div>
+
             </div>
+
+            {#if $token_state == "transfer"}
+
+            <form class="token_form" on:submit={transfer}>
+            
+                {#if token.name == "LLL"}
+                    <select id="chain" name="chain">
+                        <option value="base">base</option>
+                        <option value="gnosis">gnosis</option>
+                        <option value="linea">linea</option>
+                    </select>
+                {/if}
+        
+                <input id="to" name="to" type="text" placeholder="recipient address" />
+                <input id="amount" name="amount" type="number" step="0.00001" min="0" placeholder="amount"/>
+                <button class="pill" type="submit">Transfer</button>
+            </form>
+
+            {/if}
 
         </div>
 
-        {#if $token_state == "transfer"}
-
-        <form class="token_form" on:submit={transfer}>
-         
-            {#if token.name == "LLL"}
-                <select id="chain" name="chain">
-                    <option value="base">base</option>
-                    <option value="gnosis">gnosis</option>
-                    <option value="linea">linea</option>
-                </select>
-            {/if}
-    
-            <input id="to" name="to" type="text" placeholder="recipient address" />
-            <input id="amount" name="amount" type="number" step="0.00001" min="0" placeholder="amount"/>
-            <button class="button" type="submit">Transfer</button>
-        </form>
-
-        {/if}
+        
 
     {/if}
     

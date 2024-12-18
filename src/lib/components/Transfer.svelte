@@ -5,8 +5,7 @@
     import { findSrvByChain, safe_store } from "$lib/store/safe.store";
     import { avatar_state, transfer_state } from "$lib/store/state.store";
     import { ethers } from "ethers";
-    import Spinner from "./Spinner.svelte";
-    import SpinnerWave from "./SpinnerWave.svelte";
+    import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
 
     export let toAddress;
 
@@ -56,7 +55,7 @@
         />
 
         {#if $transfer_state == "spinner"}
-            <SpinnerWave></SpinnerWave>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
         {:else}
             <button class="button"type="submit">Transfer</button>
         {/if}

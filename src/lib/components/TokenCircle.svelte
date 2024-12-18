@@ -40,13 +40,17 @@
 
 <article class="token">
 
-    <span class="token_name">CRC</span>
-    <span class="token_balance">{parseFloat(token.balance).toFixed(0)}</span>
+    <div class="token_top">
 
-    <div class="token_actions">
-    {#if $mintable > 0}
-        <button class="link" on:click={handleMint}>+{$mintable.toFixed(0)}</button>
-    {/if}
-    <button class="icon"><IconTransfer></IconTransfer></button>
+        <span class="token_name">CRC</span>
+        <span class="token_balance">{parseFloat(token.balance).toFixed(0)}</span>
+
+        <div class="token_actions">
+        {#if $mintable > 0}
+            <button class="link" on:click={handleMint}>+{$mintable.toFixed(0)}</button>
+        {/if}
+        <button class="icon"><IconTransfer></IconTransfer></button>
+    
+    </div>
 
 </article>

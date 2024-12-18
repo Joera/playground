@@ -14,7 +14,7 @@
     width: 320px;
     height: 100px;
     text-align: center;
-    margin: 1.5rem 0;
+    margin: 3rem 0;
 }
 .spinner-wave > div {
     background-color: #000;

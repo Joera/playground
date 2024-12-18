@@ -37,10 +37,10 @@ export const tx4337 = async (srv: SafeService, transactions: any, includesDeploy
             safeOperation
         });
 
-        // if (extraGas) {
-        //     identifiedSafeOperation.data.callGasLimit = identifiedSafeOperation.data.callGasLimit * BigInt(extraGas);
-        //     identifiedSafeOperation.data.verificationGasLimit = identifiedSafeOperation.data.verificationGasLimit * BigInt(extraGas);
-        // }
+        if (extraGas) {
+            identifiedSafeOperation.data.callGasLimit = identifiedSafeOperation.data.callGasLimit * BigInt(extraGas);
+            identifiedSafeOperation.data.verificationGasLimit = identifiedSafeOperation.data.verificationGasLimit * BigInt(extraGas);
+        }
 
         const signedSafeOperation = await srv.kit.signSafeOperation(identifiedSafeOperation)
 

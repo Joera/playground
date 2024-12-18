@@ -2,16 +2,30 @@
 
     width: calc(100% - 2rem);
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
     // margin: 0 1.5rem;
-    height: 2.4rem;
+
     background: white;
     margin-bottom: .4rem;
     padding: 0 1rem;
     font-size: 1.275rem;
     border-radius: 20px;
+
+
+}
+
+:global(.token_top) {
+
+    width: calc(100% - 2rem);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    // margin: 0 1.5rem;
+    height: 2.4rem;
+    font-size: 1.275rem;
 
 
 }
@@ -39,6 +53,7 @@
     justify-content: space-between;
     align-items: flex-start;
     margin: .75rem 0;
+    width: 240px;
 
     :global(select) {    
         width: 100%;
@@ -60,12 +75,13 @@
         background: none;
         border: none;
         border-bottom: 2px solid black;
+        border-radius: 0px;
 
     }   
 
     :global(button) {    
         // width: 100%;
-        margin: .25rem 0 0 0;
+        margin: .5rem 0 .5rem 0;
         // background: none;
         // border: none;
         

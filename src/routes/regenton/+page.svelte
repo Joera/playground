@@ -93,15 +93,12 @@
     const handleStake = async () => {
 
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
-
         const srv = await findSrvByChain("gnosis");
-
-        // console.log(srv)
 
         if(srv) {
             state.set("spinner");
             await srv.genericTx(TOKENADDRESS, tokenAbi, "approve", [regentonContract,1], false);
-            await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false, 100);
+            await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false, 3);
             init();
             state.set("");
         }
@@ -117,33 +114,47 @@
 
     <section class="scrolltainer">
 
-        <p class="centered">De regenton is a community staking pool on Gnosis chain. All rewards go to the playground.</p>
+        <article>
 
-        <div id="tvl" class="block">
-            <label>TVL</label>
-            <div class="number">{@html $regenton.tvl}</div>
-        </div>
-        <div id="rewards" class="block">
-            <label>Rewards</label>
-            <div class="number">{@html $regenton.rewards}</div>
-        </div>
+            <p class="centered">De regenton is a community staking pool on Gnosis chain. All rewards go to the playground.</p>
 
-        {#if $state == "spinner"}
-            <SpinnerWaveHuge></SpinnerWaveHuge>
-        {:else}
-            <div id="mystake"class="centered block">  
-                <span>Your current stake is {$currentStake} GNO</span>
-                <span>Available to stake: {$availableGNO[TOKENADDRESS]} GNO</span>
-             
+            <div id="tvl" class="block">
+                <label>TVL</label>
+                <div class="number">{@html $regenton.tvl}</div>
+            </div>
+            <div id="rewards" class="block">
+                <label>Rewards</label>
+                <div class="number">{@html $regenton.rewards}</div>
             </div>
 
-            <button class="pill" on:click={() => handleStake()}>Stake 1 GNO</button>
-        {/if}
+            {#if $state == "spinner"}
+                <SpinnerWaveHuge></SpinnerWaveHuge>
+            {:else}
+                <div id="mystake"class="centered block">  
+                    <span>Your current stake is {$currentStake} GNO</span>
+                    <span>Available to stake: {$availableGNO[TOKENADDRESS]} GNO</span>
+                
+                </div>
+
+                <button id="stake" class="pill" on:click={() => handleStake()}>Stake 1 GNO</button>
+            {/if}
+
+        </article>
 
     </section>
 
 
 <style>
+
+    article {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 1.5rem 0;
+        width: 100%;
+        height: 100%;
+    }
 
     p.centered {
         margin: 1.5rem; 
@@ -179,6 +190,10 @@
 
     #mystake {
         transform: rotate(1deg);
+        margin-bottom: 1.5rem;
+    }
+
+    #stake {
         margin-bottom: 1.5rem;
     }
 

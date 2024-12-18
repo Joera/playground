@@ -184,7 +184,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         width: calc(100% - 4rem);
         height: 100%;
     }
