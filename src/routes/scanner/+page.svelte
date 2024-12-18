@@ -1,0 +1,111 @@
+<script lang="ts">
+ 
+    import { displayAddress, expiryTimeHex } from '$lib/factory/eth.factory';
+
+    import { BrowserMultiFormatReader } from '@zxing/library';
+    import { createEventDispatcher, onMount } from 'svelte';
+    import { writable } from 'svelte/store';
+    import { findSrvByChain } from '$lib/store/safe.store';
+    import { hubv2_abi } from '$lib/circles_hub_v2';
+    import SpinnerWaveHuge  from '$lib/components/SpinnerWaveHuge.svelte';
+    import { HUBV2ADDRESS } from '$lib/constants';
+    import { goto } from '$app/navigation';
+
+    let videoElement: any;
+    let logMessage = '';
+    const newby_address = writable("");
+    const spinner = writable(false);
+    const dispatch = createEventDispatcher();
+    const scanner_state = writable("");
+
+    let codeReader = new BrowserMultiFormatReader();
+
+    onMount(() => {
+      codeReader
+        .decodeFromInputVideoDevice(undefined, videoElement)
+        .then((result) => {
+
+          console.log(result.getText())
+
+          scanner_state.set("invite");
+
+          newby_address.update((n) => {
+            n = result.getText()
+            return n
+          })
+        })
+        .catch((err: any) => {
+          alert('Error occurred while scanning QR code' + err);
+        });
+
+      return () => {
+        codeReader.reset();
+      };
+    });
+
+    const inviteHandler = async () => {
+
+        const srv = await findSrvByChain("gnosis");
+
+        if (srv) {
+          spinner.set(true);
+          const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
+          console.log(r);  
+          dispatch('invite_success_event');
+          spinner.set(false);
+          goto("/avatar");
+        }
+    }
+
+</script>
+ 
+<article>
+
+
+  {#if $spinner}
+
+    <SpinnerWaveHuge></SpinnerWaveHuge>
+
+  {:else}
+
+    {#if $scanner_state == "invite"}
+ 
+      <div>
+        <h3>do you trust?</h3>
+        { displayAddress("gno", $newby_address)}</div>
+
+        <!--check crc balance - shoud be > 96 --> 
+        <button class="button" on:click={inviteHandler}>yes!</button>
+
+    {:else} 
+        
+        <video bind:this={videoElement} autoplay></video>
+
+    {/if}
+
+  {/if}
+
+</article>
+
+<style>
+
+  video {
+    width: 100%;
+    max-width: 600px;
+    max-height: calc(100vw - 4rem);
+  }
+
+  article, article div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;  
+    min-height: calc(100% - 4rem);
+   
+  }
+
+  button {
+    margin-top: 3rem;
+  }
+</style>
