@@ -96,6 +96,8 @@
 
         const srv = await findSrvByChain("gnosis");
 
+        console.log(srv)
+
         if(srv) {
             state.set("spinner");
             await srv.genericTx(TOKENADDRESS, tokenAbi, "approve", [regentonContract,1], false);

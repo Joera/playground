@@ -308,7 +308,7 @@ export class SafeService implements ISafeService {
         });
     }
 
-    async  genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string> {
+    async  genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean, extraGas?: number) : Promise<string> {
 
         return new Promise( async (resolve, reject) => {
     
@@ -324,7 +324,7 @@ export class SafeService implements ISafeService {
             const transactions = [transaction1];
 
             if (this.kit instanceof Safe4337Pack) {
-                const r = await tx4337(this,transactions, includesDeploy);
+                const r = await tx4337(this,transactions, includesDeploy, extraGas);
                 resolve(r);
 
             } else {       
