@@ -49,7 +49,7 @@ export const getRPC = (chain: string, alchemy_key: string) => {
     switch (chain) {
 
         case 'base':
-            rpc = `wss://base-mainnet.g.alchemy.com/v2/${alchemy_key}`;
+            rpc = `/baserpc/v2/${alchemy_key}`;
             break;
 
         case 'gnosis':
