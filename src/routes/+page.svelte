@@ -1,6 +1,6 @@
 <script lang="ts">
     import SafeOverview from '$lib/components/SafeOverview.svelte';
-    import SpinnerWave from '$lib/components/SpinnerWave.svelte';
+    import SpinnerWaveHuge from '$lib/components/SpinnerWaveHuge.svelte';
     import type { SafeService } from '$lib/safe.service';
     import { safe_store, safe_addresses, waitForSafeStoreToBePopulated, chain_array, findAddressByChain, findSrvByChain} from '$lib/store/safe.store';
     import { onMount } from 'svelte';
@@ -35,7 +35,7 @@
         {#if $safeSrv}
             <SafeOverview {safeSrv} />
         {:else}
-            <SpinnerWave></SpinnerWave>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
         {/if}
 
     </section>

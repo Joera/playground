@@ -11,7 +11,7 @@ import { hasKey, signer_key } from '$lib/store/key.store';
 export const load = async () => {
 
     if(await hasKey()) {
-        await initApp();
+         initApp();
     }   
 }   
 
