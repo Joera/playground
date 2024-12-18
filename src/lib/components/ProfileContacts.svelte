@@ -10,6 +10,7 @@
     import { ethers } from "ethers";
     import { findSrvByChain } from "$lib/store/safe.store";
     import IconTransfer from "./IconTransfer.svelte";
+    import IconCopy from "./IconCopy.svelte";
 
     const dispatch = createEventDispatcher();
     const to_address = writable("");
@@ -77,6 +78,10 @@
         
         contacts_state.set("");
 
+    }
+
+    const handleCopy = async (address: string) => {
+        navigator.clipboard.writeText(address);
     }
 
     const runTrustChange = async (contact: Contact) => {
@@ -163,16 +168,24 @@
                                 {/if}
                             </span>
                     </div>
+
+                    <div class="contact-right">
                 
-                    {#if contact.relation == "trustedBy" && !$hasAvatar}
-                        <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
-                            accept
+                        {#if contact.relation == "trustedBy" && !$hasAvatar}
+                            <button class="icon" on:click={() => handleInvite(fixSafeAddress(contact.objectAvatar))} aria-label="register">
+                                accept
+                            </button>
+                        {:else} 
+                            <button class="icon" on:click={() => handleTransfer(fixSafeAddress(contact.objectAvatar))} aria-label="transfer">
+                                <IconTransfer></IconTransfer>
+                            </button>   
+                        {/if}
+
+                        <button class="icon" on:click={() => handleCopy(fixSafeAddress(contact.objectAvatar))} aria-label="copy">
+                            <IconCopy></IconCopy>
                         </button>
-                    {:else} 
-                        <button class="icon" on:click={() => handleTransfer(fixSafeAddress(contact.objectAvatar))} aria-label="transfer">
-                            <IconTransfer></IconTransfer>
-                        </button>   
-                    {/if}
+
+                    </div>
                 </div>
             {/each}
         {/if}
@@ -211,6 +224,13 @@
     .contact-left {
         display: flex;
         flex-direction: row;
+        align-items: center;
+    }
+
+    .contact-right {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
         align-items: center;
     }
 
