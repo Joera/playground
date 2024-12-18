@@ -73,11 +73,7 @@
         const password = event.detail;
         const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
         const url = `https://app.playground.amsterdam/import?key=${encodeURIComponent(encrypted)}`;
-
-        console.log(url);
         let qrcode = await generateQRCode(url);
-
-
     }
 
     const handleSave = () => {
@@ -174,9 +170,11 @@
 
             <div>
                 <h3>Signer</h3>
-                {#if $signer_key}
-                    <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
-                {/if}
+                <div class="block">
+                    {#if $signer_key}
+                        <CopyAddress address={addressFromKey($signer_key)}></CopyAddress>
+                    {/if}
+                </div>
             </div>
 
             <div>
@@ -201,7 +199,9 @@
 
             <div>
                 <h3>Safe on {$active_srv.chain}</h3>
-                <CopyAddressAndLink address={$active_srv.safe_address} chain={$active_srv.chain}></CopyAddressAndLink>
+                <div class="block">
+                    <CopyAddressAndLink address={$active_srv.safe_address} chain={$active_srv.chain}></CopyAddressAndLink>
+                </div>
             </div>
 
             <div>
@@ -229,6 +229,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
 
         > div {
             display: flex;

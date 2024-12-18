@@ -9,6 +9,7 @@
     import Spinner from "$lib/components/Spinner.svelte";
     import { validators_api } from "$lib/apis";
     import SpinnerWave from "$lib/components/SpinnerWave.svelte";
+    import SpinnerWaveHuge from "$lib/components/SpinnerWaveHuge.svelte";
 
     const state = writable("");
     const regenton: any = writable({});
@@ -109,10 +110,6 @@
 
     const handleStake = async () => {
 
-        const a = await findAddressByChain("gnosis");
-        if (!a) return;
-        const { chain, address } = parseSafeAddress(a);
-        
         const tokenAbi = ["function approve(address spender, uint256 amount) public returns (bool)"];
 
         const srv = await findSrvByChain("gnosis");
@@ -145,13 +142,10 @@
         <div id="rewards" class="block">
             <label>Rewards</label>
             <div class="number">{@html $regenton.rewards}</div>
-
         </div>
 
-   
-
         {#if $state == "spinner"}
-            <SpinnerWave></SpinnerWave>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
         {:else}
             <div id="mystake"class="centered block">  
                 <span>Your current stake is {$currentStake} GNO</span>
