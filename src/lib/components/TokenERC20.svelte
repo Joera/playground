@@ -71,28 +71,22 @@
 
 <article>
 
-    {#if $token_state == "spinner"}
+    <div class="token">
 
-        <SpinnerWaveHuge></SpinnerWaveHuge>
+        <div class="token_top">
 
-    {:else}
-
-        <div class="token">
-
-            <div class="token_top">
-
-                <span class="token_name">{token.symbol}</span>
-                <span class="token_balance">{parseFloat(token.balance).toFixed(2)}</span>
-                <div class="token_actions">
-                    <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button>
-                    <!-- {#if token.name == "LLL"}
-                        <button class="icon" on:click={handleOFTBridge}><IconBridge></IconBridge></button>
-                    {/if} -->
-                </div>
-
+            <span class="token_name">{token.symbol}</span>
+            <span class="token_balance">{parseFloat(token.balance).toFixed(2)}</span>
+            <div class="token_actions">
+                <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button>
+                <!-- {#if token.name == "LLL"}
+                    <button class="icon" on:click={handleOFTBridge}><IconBridge></IconBridge></button>
+                {/if} -->
             </div>
 
-            {#if $token_state == "transfer"}
+        </div>
+
+        {#if $token_state == "transfer"}
 
             <form class="token_form" on:submit={transfer}>
             
@@ -109,13 +103,14 @@
                 <button class="pill" type="submit">Transfer</button>
             </form>
 
-            {/if}
+        {:else if $token_state == "spinner"}
 
-        </div>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
 
-        
+        {/if}
 
-    {/if}
+
+    </div>
     
 </article>
 

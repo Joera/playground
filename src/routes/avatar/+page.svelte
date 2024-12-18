@@ -1,7 +1,6 @@
 <script lang="ts">
 
     import { findSrvByChain, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
-    import { SafeService } from '$lib/safe.service';
     import { writable, type Writable } from 'svelte/store';
     import { onMount } from 'svelte';
     import ProfileDisplay from '$lib/components/ProfileDisplay.svelte';
@@ -13,8 +12,6 @@
     import { friend_address } from '$lib/store/contacts.store';
     import { avatar_state, contacts_state, profile_state } from '$lib/store/state.store';
     import { profile_store } from '$lib/store/profile.store';
-
-    // let safesWithAvatars: string[] = [];
 
     avatar_state.set("profile");
     let profile : Writable<any> = writable({
