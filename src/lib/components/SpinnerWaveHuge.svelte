@@ -11,7 +11,7 @@
 
 .spinner-wave {
     margin: 10px auto;
-    width: 320px;
+    width: 300px;
     height: 100px;
     text-align: center;
     margin: 3rem 0;

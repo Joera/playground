@@ -15,6 +15,7 @@ import { HUBV2ADDRESS } from './constants';
 import { addSafeAddress, formatSafeAddress } from './store/safe.store';
 import { tx, tx4337 } from './factory/aa.factory';
 import { updateCircleBalances } from './factory/circles.factory';
+import { updateContacts } from './factory/contact.factory';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
@@ -36,7 +37,7 @@ export interface ISafeService {
     tokens: Writable<Map<string, IToken>>;
     circles: Writable<Map<string, any>>;
     modules: Writable<string[]>;
-    hasAvatar: boolean;
+    // hasAvatar: boolean;
 
     upgrade: () => Promise<void>;
     getBalances: () => Promise<void>;
@@ -47,7 +48,7 @@ export interface ISafeService {
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
     genericTx(address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string>;
     genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string>;
-
+    getContacts: () => Promise<any>;
 }
 
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
@@ -56,7 +57,7 @@ const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
 
 export class SafeService implements ISafeService {
 
-    avatar?: any;
+    // avatar?: any;
     chain!: string;
     safe_address: string = "";
     signer_key: string = "";
@@ -68,13 +69,15 @@ export class SafeService implements ISafeService {
     tokens: Writable<Map<string, IToken>> = writable(new Map());
     circles: Writable<Map<string, any>> = writable(new Map());
     modules: Writable<string[]> = writable([]);
+    contacts: Writable<any[]> = writable([]);
 
     provider!: Provider;
 
     signer?: Signer;
-    kit?: Safe4337Pack | Safe;
+    kit?: Safe4337Pack;
+    legacy_kit?: Safe;
     circles_data?: any;
-    hasAvatar: boolean = false;
+  //  hasAvatar: boolean = false;
 
     private constructor() {}
 
@@ -118,7 +121,6 @@ export class SafeService implements ISafeService {
         this.signer = signer.connect(this.provider);
         this.signer_address = writable(addressFromKey(signer_key));
         
-
         if (chain == "gnosis") {
             const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
             this.circles_data = new CirclesData(circlesRpc);
@@ -131,6 +133,7 @@ export class SafeService implements ISafeService {
             await this.isDeployed()
         );
 
+        await this.initSafe();
         this.safe_address = fixSafeAddress(await this.initSafeWithRelay());
         addSafeAddress(formatSafeAddress(this.chain, this.safe_address));
         
@@ -139,16 +142,16 @@ export class SafeService implements ISafeService {
             await this.getVersion();
 
             await this.getSigners();
-            if (this.chain == "gnosis") {
-                await this.checkAvatar();
-                if (this.hasAvatar) {
-                    await updateCircleBalances(this);
-                }
-            }     
+            // if (this.chain == "gnosis") {
+            //     await this.checkAvatar();
+            //     if (this.hasAvatar) {
+            //         await updateCircleBalances(this);
+            //     }
+            // }     
                
             await this.getModules();
       
-            this.getBalances();
+          //  this.getBalances();
           
 
             // const hasEIP4337Module = (await fromStore(this.modules)).includes(eip4337ModuleAddress);
@@ -165,28 +168,31 @@ export class SafeService implements ISafeService {
         } 
     }
 
+    async getCircles() {
 
-    async checkAvatar() {
-        
-        try {
-            const avatar = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"avatars",[this.safe_address]);
-            console.log("avatar", avatar, this.safe_address);
-            this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
-            return this.hasAvatar;
-
-        } catch (error) {
-            console.log("avatar", error);
-            return false;
-        }
+        return await updateCircleBalances(this);
     }
+
+
+    // async checkAvatar() {
+        
+    //     try {
+    //         const avatar = await this.genericCall(HUBV2ADDRESS,hubv2_abi,"avatars",[this.safe_address]);
+    //         console.log("avatar", avatar, this.safe_address);
+    //         this.hasAvatar = (avatar != "0x0000000000000000000000000000000000000000") ? true : false;
+    //         return this.hasAvatar;
+
+    //     } catch (error) {
+    //         console.log("avatar", error);
+    //         return false;
+    //     }
+    //}
 
     
 
     async mintCircles() {
 
-        await this.genericTx(HUBV2ADDRESS, hubv2_abi, "personalMint",[], false);
-
-        return
+        return await this.genericTx(HUBV2ADDRESS, hubv2_abi, "personalMint",[], false);
 
     }
 
@@ -247,7 +253,7 @@ export class SafeService implements ISafeService {
 
     async initSafe() {
 
-        this.kit = await Safe.init({
+        this.legacy_kit = await Safe.init({
             provider: getRPC(this.chain, alchemy_key),
             signer : this.signer_key,
             safeAddress : this.safe_address
@@ -308,7 +314,7 @@ export class SafeService implements ISafeService {
         });
     }
 
-    async genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean, extraGas?: number) : Promise<string> {
+    async genericTx (contract_address: string, abi: any, method: string, args: any[], includesDeploy: boolean, extraGas?: number, legacy: boolean = false) : Promise<string> {
 
         return new Promise( async (resolve, reject) => {
     
@@ -323,11 +329,12 @@ export class SafeService implements ISafeService {
     
             const transactions = [transaction1];
 
-            if (this.kit instanceof Safe4337Pack) {
+            if (this.kit instanceof Safe4337Pack && !legacy) {
                 const r = await tx4337(this,transactions, includesDeploy, extraGas);
                 resolve(r);
 
             } else {       
+                console.log("legacy txs", transactions);
                 const r = await tx(this,transactions, includesDeploy);
                 resolve("ok");
             }  
@@ -460,12 +467,14 @@ export class SafeService implements ISafeService {
             operation: 1, 
         };
 
-        if(this.kit instanceof Safe) {
+        // if(this.kit instanceof Safe) {
 
-            const safeTransaction = await this.kit.createTransaction({ transactions :[txData] });
+        const safeTransaction = await this.legacy_kit?.createTransaction({ transactions :[txData] });
+
+        if (safeTransaction) {
 
             try {
-                const txHash = await this.kit.executeTransaction(safeTransaction);
+                const txHash = await this.legacy_kit?.executeTransaction(safeTransaction);
                 console.log('Transaction executed with hash:', txHash);
             } catch (error) {
                 console.error('Transaction failed:', error);
@@ -503,12 +512,12 @@ export class SafeService implements ISafeService {
                 value: '0'  
             };
 
-            if (this.kit instanceof Safe) {
+            const safeTransaction = await this.legacy_kit?.createTransaction({ transactions :[txData1, txData2] });
 
-                const safeTransaction = await this.kit.createTransaction({ transactions :[txData1, txData2] });
+            if (safeTransaction) {
     
                 try {
-                    const txHash = await this.kit.executeTransaction(safeTransaction);
+                    const txHash = await this.legacy_kit?.executeTransaction(safeTransaction);
                     console.log('Transaction executed with hash:', txHash);
                 } catch (error) {
                     console.error('Transaction failed:', error);
@@ -591,5 +600,12 @@ export class SafeService implements ISafeService {
         console.log("safe address", this.safe_address)
         await this.genericTx(welcomeNFTAddress,abi,"mint",[this.safe_address], false);
         return
+    }
+
+    async getContacts() {
+
+        this.contacts.set(
+            await updateContacts(this)
+        )
     }
 }

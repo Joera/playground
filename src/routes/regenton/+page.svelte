@@ -7,17 +7,15 @@
     import { onMount } from "svelte";
     import { validators_api } from "$lib/apis";
     import SpinnerWaveHuge from "$lib/components/SpinnerWaveHuge.svelte";
+    import { GNOTOKENADDRESS, REGENPIJP } from "$lib/constants";
 
     const state = writable("");
     const regenton: any = writable({});
     const currentStake = writable(0);
     const availableGNO: Writable<Record<string, number>> = writable({});
-    const TOKENADDRESS = '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb';
-
-    const regentonContract = "0x05456E26dF26ef77f6A2DA6f14E8cCbd96b10c3E";
 
     const getStake = async (safe_address: string, srv: SafeService) => {
-        return await srv.genericCall(regentonContract, regenton_abi, "balanceOf", [safe_address]);
+        return await srv.genericCall(REGENPIJP, regenton_abi, "balanceOf", [safe_address]);
     }
 
     async function getInfo(safe_address: string, srv: SafeService) : Promise<number> {
@@ -54,6 +52,7 @@
                         if (token && parseFloat(token.balance) > 0) {
                             availableGNO.update((available) => {
                                 available[address] = parseFloat(token.balance);
+                                console.log(available);
                                 return available;
                             });
                         }
@@ -85,7 +84,6 @@
     onMount(async () => {
 
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
-        // await waitForSubscriptions($safe_store, safesWithAvatars);
         init();
     })
 
@@ -97,18 +95,14 @@
 
         if(srv) {
             state.set("spinner");
-            await srv.genericTx(TOKENADDRESS, tokenAbi, "approve", [regentonContract,1], false);
-            await srv.genericTx(regentonContract, regenton_abi, "mintPlgGNO", [], false, 3);
+            await srv.genericTx(GNOTOKENADDRESS, tokenAbi, "approve", [REGENPIJP,BigInt(1 * 10 ** 18)], false, undefined, false);
+            await srv.genericTx(REGENPIJP, regenton_abi, "mintPlgGNO", [], false, undefined, false);
             init();
             state.set("");
         }
     }
 
 </script> 
-
-
-
-
 
     <h2>Regenton</h2>
 
@@ -131,8 +125,8 @@
                 <SpinnerWaveHuge></SpinnerWaveHuge>
             {:else}
                 <div id="mystake"class="centered block">  
-                    <span>Your current stake is {$currentStake} GNO</span>
-                    <span>Available to stake: {$availableGNO[TOKENADDRESS]} GNO</span>
+                    <span>Your stake is {$currentStake} GNO</span>
+                    <span>Available to stake: {$availableGNO[GNOTOKENADDRESS]} GNO</span>
                 
                 </div>
 
@@ -158,6 +152,7 @@
 
     p.centered {
         margin: 1.5rem; 
+        line-height: 1.33;
     }
 
 
@@ -191,13 +186,12 @@
     #mystake {
         transform: rotate(1deg);
         margin-bottom: 1.5rem;
+        width: calc(100% - 4rem);
     }
 
     #stake {
         margin-bottom: 1.5rem;
+        
     }
-
-    
-
 
 </style>

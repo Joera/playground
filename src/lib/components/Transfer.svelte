@@ -57,7 +57,7 @@
         {#if $transfer_state == "spinner"}
             <SpinnerWaveHuge></SpinnerWaveHuge>
         {:else}
-            <button class="button"type="submit">Transfer</button>
+            <button class="pill" type="submit">Transfer</button>
         {/if}
 
     </form>

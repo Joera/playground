@@ -10,13 +10,13 @@
     import SpinnerWaveHuge  from '$lib/components/SpinnerWaveHuge.svelte';
     import { HUBV2ADDRESS } from '$lib/constants';
     import { goto } from '$app/navigation';
+    import { avatar_state } from '$lib/store/state.store';
 
     let videoElement: any;
     let logMessage = '';
     const newby_address = writable("");
-    const spinner = writable(false);
-    const dispatch = createEventDispatcher();
     const scanner_state = writable("");
+    const tx = writable({});
 
     let codeReader = new BrowserMultiFormatReader();
 
@@ -27,12 +27,17 @@
 
           console.log(result.getText())
 
-          scanner_state.set("invite");
+          if (result.getText().startsWith("0x")) {
+            scanner_state.set("invite");
+            newby_address.update((n) => {
+              n = result.getText()
+              return n
+            })
+          } else {
 
-          newby_address.update((n) => {
-            n = result.getText()
-            return n
-          })
+            // ethereum:0xb794f5ea0ba39494ce839613fffba74279579268?amount=1.123
+            scanner_state.set("pay");
+          }
         })
         .catch((err: any) => {
           alert('Error occurred while scanning QR code' + err);
@@ -43,16 +48,24 @@
       };
     });
 
+    const handlePay = (event: any) => {
+        
+        let formData: any = {};      
+        event.preventDefault(); 
+        const data = new FormData(event.target);
+        formData = Object.fromEntries(data.entries());
+    }
+
     const inviteHandler = async () => {
 
         const srv = await findSrvByChain("gnosis");
 
         if (srv) {
-          spinner.set(true);
+          scanner_state.set("spinner");
           const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
           console.log(r);  
-          dispatch('invite_success_event');
-          spinner.set(false);
+          scanner_state.set("");
+          avatar_state.set("contacts");
           goto("/avatar");
         }
     }
@@ -62,13 +75,11 @@
 <article>
 
 
-  {#if $spinner}
+    {#if $scanner_state ==  "spinner"}
 
-    <SpinnerWaveHuge></SpinnerWaveHuge>
+      <SpinnerWaveHuge></SpinnerWaveHuge>
 
-  {:else}
-
-    {#if $scanner_state == "invite"}
+    {:else if $scanner_state == "invite"}
  
       <div>
         <h3>do you trust?</h3>
@@ -77,13 +88,37 @@
         <!--check crc balance - shoud be > 96 --> 
         <button class="button" on:click={inviteHandler}>yes!</button>
 
+    {:else if $scanner_state == "pay"} 
+
+      Tip + times X 
+    
+      <form id="profile" on:submit={handlePay}>
+
+          <!-- <div id="name_container">
+              <label>
+                  Amount?
+              <input bind:value={$tx.amount} type="text" name="name" id="name" placeholder="Name" />
+              </label>
+          </div>
+          <div id="description_container">
+              <label> 
+                To?
+                <input bind:value={$tx.to} type="text" name="name" id="name" placeholder="Name" />
+              </label>   
+          </div>  -->
+                      <!-- <label>
+                          Image
+                          <input type="text" name="image" id="name" placeholder="Image" />
+                      </label> -->
+
+          <button class="pill white" type="submit">submit</button>
+      </form>}
+
     {:else} 
         
         <video bind:this={videoElement} autoplay></video>
 
     {/if}
-
-  {/if}
 
 </article>
 

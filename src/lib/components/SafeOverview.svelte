@@ -1,17 +1,17 @@
 <!-- src/components/SafeOverview.svelte -->
 <script lang="ts">
-    import { roundBalance } from '$lib/factory/eth.factory.js';
+    import { roundBalance} from '$lib/factory/eth.factory.js';
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
-    import { writable, type Writable } from 'svelte/store';
+    import { derived, writable, type Writable } from 'svelte/store';
     import { tokenList, type IToken } from '$lib/factory/token.factory';
     import SpinnerWave from './SpinnerWave.svelte';
-    import { safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
-    import { ethers } from 'ethers';
-    import { oft_abi } from '$lib/oft_abi';
-    import { oftBridgeTx } from '$lib/factory/oft.factory';
     import TokenErc20 from './TokenERC20.svelte';
     import TokenCircle from './TokenCircle.svelte';
+    import Circles from './Circles.svelte';
+    import { findSrvByChain } from '$lib/store/safe.store';
+    import { ethers } from 'ethers';
+    import { uint256ToAddress } from "@circles-sdk/utils";
    
     export let safeSrv: Writable<SafeService>;
 
@@ -19,18 +19,84 @@
     $: chain = $safeSrv.chain
     $: signer_address = $safeSrv.signer_address;
     $: version = $safeSrv.version;
-    $: tokens = $safeSrv.tokens;
+    // $: tokens = $safeSrv.tokens;
     $: circles = $safeSrv.circles;
     $: signers = $safeSrv.signers;
     $: modules = $safeSrv.modules;
+    $: tokens = JSON.parse(JSON.stringify(tokenList[$safeSrv.chain]))
+    $: contacts = $safeSrv.contacts;
+    $: mergedStore = derived(
+        [circles, contacts],
+        ([$circles, $contacts]) => {
 
+            // console.log($circles);
 
-    const state = writable("");
+            const circlesValues = Array.from($circles.values());
+            
+            // const contactEntries = Array.from($contacts.entries());
+            // console.log(contactEntries);
+            // return contactEntries.map(([address, contactData]) => {
+
+            return $contacts.map((contact) => {
+
+                const matchingCircle = circlesValues.find((circle) => {
+                    
+                    // console.log(circle.issuerAddress, contact.objectAvatar);
+                    return circle.issuerAddress == contact.objectAvatar
+                });
+
+                if (matchingCircle != undefined) {
+                    
+                    return {
+                        ...contact,
+                        ...matchingCircle,
+                        address: contact.objectAvatar
+                    }
+                } else {
+                    return {
+                        ...contact,
+                        address: contact.objectAvatar,
+                        balance: 0
+                    }
+                }
+                
+            }).sort((a, b) => {
+                if (a.balance > b.balance) return -1;
+                if (a.balance < b.balance) return 1;
+                return 0;
+            })
+                // const contact_address = uint256ToAddress(address);
+
+                // console.log("ca",contact_address)
+                // const matchingCircle = $circles.find((circle) => circle.objectAvatar === contact_address);
+                // console.log(matchingCircle, contact_address);
+                // return matchingCircle != undefined
+                //     ? { ...contactData, ...matchingCircle, address: contact_address }
+                //     : { ...contactData, address: contact_address };
+        }
+    );
+         
+        // ([$circles, $contacts]) => {
+             
+        //     const circleEntries = Array.from($circles.entries());
+
+        //     return circleEntries.map(([address, circleData]) => {
+        //     const matchingContact = $contacts.find((contact) => contact.address === address);
+        //     return matchingContact
+        //         ? { ...circleData, ...matchingContact, address }
+        //         : { ...circleData, address };
+        //     });
+        // }
+    // );
+
+    const state = writable("pre");
     const deployed = writable(false);
 
     const tokenId = writable("");
     const tokenBalance = writable(0);
-    
+
+
+
     
     // Optionally, fetch initial data on mount if needed
    
@@ -79,11 +145,29 @@
     safeSrv.subscribe( async (srv: SafeService) => {
         deployed.set(await srv.getDeployed());
     })
+
+    
+
+
+   
     
     onMount(async () => {
-        state.set("spinner");
-        await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
+    //    state.set("spinner");
+      //  await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
         state.set("");
+
+        
+        
+
+        if ($safeSrv.chain == "gnosis") {
+            await $safeSrv.getContacts();
+            await $safeSrv.getCircles();
+            // console.log($circles)
+            // console.log($contacts)
+            console.log($mergedStore)
+            
+        }
+          
     });
 
 </script>
@@ -98,11 +182,14 @@
         {:else}
 
             <div class="tokens">
-                {#each $tokens.entries() as [address,token]}
+                {#each tokens as token}
                     <TokenErc20 safeSrv={safeSrv} token={token}></TokenErc20>   
                 {/each}
-                {#each $circles.entries() as [address,token]}
-                    <TokenCircle safeSrv={safeSrv} token={token} address={address}></TokenCircle>
+                {#if $safeSrv.chain == "gnosis" && $state == ""}
+                    <Circles circles={circles} srv={safeSrv}></Circles>
+                {/if}
+                {#each $mergedStore as contact}
+                    <TokenCircle safeSrv={safeSrv} contact={contact} ></TokenCircle>
                 {/each}
             </div>
             {#if $deployed}
@@ -161,16 +248,11 @@
                 /* width: 320px; */
                 
             }
-           
-
-        
-
+    
             .tokens {
                 margin: 1.5rem 0;
                 width: 100%;
             }
-
-      
 
             .signers {
                 display: flex;

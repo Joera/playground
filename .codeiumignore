@@ -1,0 +1,7 @@
+# Approach 1: Specific file patterns
+!node_modules/@circles-sdk/utils/**/*
+!node_modules/@circles-sdk/utils/*
+!node_modules/*.js
+!node_modules/**/*.js
+!node_modules/**/*.ts
+!node_modules/**/*.json

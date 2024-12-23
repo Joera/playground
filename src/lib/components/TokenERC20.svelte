@@ -8,9 +8,12 @@
     import { writable, type Writable } from "svelte/store";
     import IconTransfer from "./IconTransfer.svelte";
     import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
+    import { onMount } from "svelte";
 
     export let safeSrv: Writable<SafeService>;
     export let token: IToken;
+
+    const tokenBalance = writable("---");
 
     // token Class ? 
 
@@ -54,34 +57,46 @@
             await $safeSrv.genericTx(token.address, abi, "transfer", [formData.to, amountInWei], false);
         }
 
-
-        await $safeSrv.getBalances();
+        updateBalance();
         token_state.set("");
     }
 
     const handleTansfer = async () => {
-
-            token_state.set("transfer");
+        token_state.set("transfer");
     }
+
+    const updateBalance  = async () => {
+
+        let b = "---";
+
+        if(token.native) {  
+            b = await $safeSrv.getNativeBalance($safeSrv.safe_address);
+            b = parseFloat(b).toFixed(2).toString();
+        } else {
+            b = await $safeSrv.getBalance(token.address);
+            b = parseFloat(b).toFixed(2).toString();
+        }
+
+        tokenBalance.set(b);
+    }
+
+    onMount( async () => {
+        await updateBalance();
+    })
   
-
-
 </script>
 
 
 <article>
 
     <div class="token">
-
+  
         <div class="token_top">
 
             <span class="token_name">{token.symbol}</span>
-            <span class="token_balance">{parseFloat(token.balance).toFixed(2)}</span>
+            <span class="token_balance">{$tokenBalance}</span>
             <div class="token_actions">
-                <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button>
-                <!-- {#if token.name == "LLL"}
-                    <button class="icon" on:click={handleOFTBridge}><IconBridge></IconBridge></button>
-                {/if} -->
+                <button class="icon" on:click={handleTansfer}><IconTransfer></IconTransfer></button> 
             </div>
 
         </div>
@@ -108,10 +123,7 @@
             <SpinnerWaveHuge></SpinnerWaveHuge>
 
         {/if}
-
-
     </div>
-    
 </article>
 
 

@@ -1,19 +1,53 @@
 import type { SafeService } from "$lib/safe.service";
 import { Safe4337Pack } from "@safe-global/relay-kit";
-import Safe from "@safe-global/protocol-kit";
-import { ethers } from "ethers";
+// import { SigningMethod } from '@safe-global/api-kit';
+import SafeApiKit from '@safe-global/api-kit'
+import { ethers, TransactionResponse } from "ethers";
 import { getInternalTransactions } from "./eth.factory";
+import { get } from "svelte/store";
 const gnosisscan_key = import.meta.env.VITE_GNOSISSCAN_KEY;
 
-export const tx = async (srv: SafeService, transactions: any, includesDeploy: boolean) => {
+export const tx = async (srv: SafeService, _transactions: any, includesDeploy: boolean) => {
 
-    if (srv.kit instanceof Safe) {
+    const apiKit = new SafeApiKit({
+        chainId: 100n
+    })
+      
 
-        const safeTransaction = await srv.kit.createTransaction(transactions);
+    console.log(srv, _transactions);
+    const safeTransaction = await srv.legacy_kit?.createTransaction({ transactions: _transactions});
+    if(safeTransaction === undefined) return;
+
+    // const safeTxHash = await srv.legacy_kit?.getTransactionHash(safeTransaction);
+    // if(safeTxHash === undefined) return;
+    // const senderSignature = await srv.legacy_kit?.signHash(safeTxHash);
+    // if(senderSignature === undefined) return;
+    // safeTransaction.signatures = [senderSignature.data];
+    const signedSafeTransaction = await srv.legacy_kit?.signTransaction(
+        safeTransaction
+    //    SigningMethod.ETH_SIGN
+      )
+
+    // await apiKit?.proposeTransaction({
+    //     safeAddress: srv.safe_address,
+    //     safeTransactionData: safeTransaction.data,
+    //     safeTxHash,
+    //     senderAddress: get(srv.signer_address),
+    //     senderSignature: senderSignature.data
+    //   })
+
+    // const response = await apiKit.confirmTransaction(safeTxHash, senderSignature.data);
+
+   // console.log('Transaction confirmed:', response);
+
+    if (signedSafeTransaction) {
 
         try {
-            const txHash = await srv.kit.executeTransaction(safeTransaction);
-            console.log('Transaction executed with hash:', txHash);
+            // const st = await apiKit.getTransaction(safeTxHash)
+            console.log(signedSafeTransaction);
+            const executeTxResponse = await srv.legacy_kit?.executeTransaction(signedSafeTransaction);
+            const receipt = await (executeTxResponse?.transactionResponse as TransactionResponse).wait()
+            console.log('Transaction executed with:', receipt);
         } catch (error) {
             console.error('Transaction failed:', error);
         }

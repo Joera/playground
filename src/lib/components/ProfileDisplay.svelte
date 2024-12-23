@@ -78,7 +78,6 @@
             if($friend_address != "" && friend_address != undefined) {
                 console.log("registering with friend", fixSafeAddress($friend_address));
                 const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "registerHuman", [fixSafeAddress($friend_address), _metadataDigest], false);
-                console.log(r);
                 const s = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress($friend_address), expiryTimeHex()], false);
                 console.log(s);
                 friend_address.set("");

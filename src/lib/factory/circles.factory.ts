@@ -1,11 +1,22 @@
 import { findSrvByChain } from "../store/safe.store";
 import { getDefaultProvider, ethers } from "ethers";
-import { hexToAddress } from "../factory/eth.factory";
+import { addressToUint256, hexToAddress } from "../factory/eth.factory";
 import { events } from "../store/event.store";
 import type { SafeService } from "$lib/safe.service";
 import type { IToken } from "./token.factory";
 import { hubv2_abi } from "$lib/circles_hub_v2";
 import { HUBV2ADDRESS } from "$lib/constants";
+import { uint256ToAddress } from "@circles-sdk/utils";
+
+export interface ICircle {
+    safe: string;
+    symbol: string;
+    decimals: number;
+    tokenId: string;
+    issuerAddress: string;
+    balance: string;
+    mintable?: string;
+}
 
 export const setCirclesListener = async () => {
 
@@ -24,7 +35,6 @@ export const setCirclesListener = async () => {
         const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
         const filter = contract.filters.Trust(null, ethers.getAddress(srv.safe_address), null);
-       // const filter = contract.filters.Trust(null, null, null);
 
         contract.on(filter, async (event: any, log: any) => {
 
@@ -61,21 +71,16 @@ export const updateCircleBalances = async (srv: SafeService) => {
             const issuance = await srv.genericCall(HUBV2ADDRESS,hubv2_abi,"calculateIssuance",[srv.safe_address]);
             const mintable = ethers.formatUnits(issuance.split(",")[0], 18);
 
-            function addressToUint256(address: string): string {
-                const addressHex = address.startsWith("0x") ? address.slice(2) : address;
-                const paddedHex = addressHex.padStart(64, '0');
-                return BigInt("0x" + paddedHex).toString();
-            }
-            
             if (balances) {
                 srv.circles.update((circles) => {
                     for (let b of balances) {
 
-                        let t: IToken = {
-                            name: srv.safe_address,
+                        let t: ICircle = {
+                            safe: srv.safe_address,
                             symbol: "crc",
                             decimals: 18,
-                            address: b.tokenId,
+                            tokenId: b.tokenId,
+                            issuerAddress: uint256ToAddress(BigInt(b.tokenId)),
                             balance: b.circles.toString(),
                             mintable: "0"
                         }

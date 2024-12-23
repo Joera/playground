@@ -1,6 +1,6 @@
 :global(.token) {
 
-    width: calc(100% - 2rem);
+    width: calc(100% - 1rem);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -9,7 +9,7 @@
 
     background: white;
     margin-bottom: .4rem;
-    padding: 0 1rem;
+    padding: 0 .5rem;
     font-size: 1.275rem;
     border-radius: 20px;
 
@@ -33,6 +33,12 @@
 :global(.token_name) {
 
     width: 60px;
+
+}
+
+:global(.token_name.crc) {
+
+    width: 160px;
 
 }
 

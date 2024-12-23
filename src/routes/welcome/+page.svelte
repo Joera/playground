@@ -27,7 +27,7 @@
         const password = event.detail;
         const bytes = CryptoJS.AES.decrypt($encrypted_string, password);
         const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
-        console.log(decryptedJsonString)
+        // console.log(decryptedJsonString)
         // Convert the decrypted string back to a JSON object
         let decryptedObject;
         try {

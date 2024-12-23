@@ -16,12 +16,10 @@
     const to_address = writable("");
     const activeContact: Writable<Contact|null> = writable(null);
 
-
     const handleBack = async () => {
         contacts_state.set("");
     }
 
-  
     const handleInvite = async (friend_adress:string) => {
        dispatch('friend_address_event', friend_adress);
     }
@@ -205,7 +203,7 @@
         align-items: center;            
         justify-content: flex-start;
         width: 100%;
-        max-width: calc(100% - 4rem);
+        max-width: calc(100% - 2rem);
         margin: auto;
         /* min-height: 100%; */
         

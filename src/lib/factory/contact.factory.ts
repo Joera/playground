@@ -143,6 +143,8 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
             contacts.set(JSON.stringify(fetched_contacts));
         }
 
+        // console.log("fc",fetched_contacts)
+
         resolve(fetched_contacts)
                 
     })

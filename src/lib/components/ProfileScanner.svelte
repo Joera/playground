@@ -37,6 +37,8 @@
     });
 
     const inviteHandler = async () => {
+
+ 
       
         const srv = await findSrvByChain("gnosis");
         if (srv) {

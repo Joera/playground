@@ -3,7 +3,6 @@ import { writable, type Writable } from "svelte/store";
 
 const pimlico_key = import.meta.env.VITE_PIMLICO_KEY;
 
-
 export const getPaymasterOptions = (chain: string) => {
 
     switch (chain) {
@@ -58,7 +57,6 @@ export const getRPC = (chain: string, alchemy_key: string) => {
 
         default:
             rpc = `https://rpc.gnosis.gateway.fm`;
-    
     }
 
     return rpc;
@@ -85,7 +83,6 @@ export const getProvider = (chain: string, alchemy_key: string) => {
             );
             break;
             
-
         default:
             
             provider = ethers.getDefaultProvider("https://rpc.gnosischain.com");
@@ -224,13 +221,19 @@ export const hexToAddress = (hexString: string) => {
 
 }  
 
-export const addressToUint256 = (address: string)  => {
+export const addressToUint256 = (address: string): string => {
+    const addressHex = address.startsWith("0x") ? address.slice(2) : address;
+    const paddedHex = addressHex.padStart(64, '0');
+    return BigInt("0x" + paddedHex).toString();
+}
 
-    return  ethers.toBigInt(
-        ethers.getAddress(
-            address
-        ))
-        .toString();
+export const uint256ToAddress = (uint256: string): string => {
+    // Convert the uint256 string to hex, remove '0x' prefix if present
+    let hex = BigInt(uint256).toString(16);
+    // Pad to 40 characters (20 bytes) if needed
+    hex = hex.padStart(40, '0');
+    // Add '0x' prefix and ensure proper checksum
+    return ethers.getAddress('0x' + hex);
 }
 
 export const expiryTimeHex = () => {
