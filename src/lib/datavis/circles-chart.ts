@@ -48,7 +48,7 @@ export class ChartCircles {
 //   </defs>
 
         this.group = this.ctrlr.svg.layers.data.selectAll('.group')
-            .data(data, (d:any) => slugify(d.name))
+            .data(data, (d:any) => slugify(d.profileName))
             .join("g")
             .attr("class","group");
 

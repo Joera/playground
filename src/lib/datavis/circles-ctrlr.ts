@@ -45,18 +45,12 @@ export class CirclesV1 extends GraphControllerX  {
 
         this.update(data,false);
 
-        // if (this.graphEl != null) {
-        //     let source = HTMLSource(this.graphEl as HTMLElement,this.page.main.params.language,"NL-EITI");
-        //     source.style.position = "absolute";
-        //     source.style.bottom = "0";
-        //  }
-
         return;
     }
 
     prepareData(data: any): any {
 
-        // console.log(data);
+        console.log(data);
 
         for (const token of data) {
 
@@ -75,7 +69,7 @@ export class CirclesV1 extends GraphControllerX  {
         //     values = values.concat(year.group.map( (p: any) => p.value))
         // }
 
-        // console.log(data);
+      //  console.log(data);
 
         this.scales.x.set(data.map( (d: any) => d['name']));
         this.scales.y.set(data.map( (d: any) => d['name']));

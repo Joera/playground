@@ -16,26 +16,28 @@ onMount(async () => {
         
         // let data: any[] = Array.from(circles.values());
  
-        console.log(circles);
+        let circlesArray: any[] = Array.from(circles.values());
+        if(circlesArray.length > 0) {
  
-         if(circles.length > 0) {
+             for (let token of circlesArray) {
+
+                //console.log(token);
  
-             for (let token of circles) {
- 
-                 const name = await $srv.getAvatarName(uint256ToAddress(BigInt(token.address)));
+                 const name = await $srv.getAvatarName(token.issuerAddress);
                  token.profileName = name;
                  token.profileSymbol = (name == undefined) 
                      ? "" 
-                     : (ethers.getAddress(uint256ToAddress(BigInt(token.address))) == $srv.safe_address)
+                     : (ethers.getAddress(token.issuerAddress) == $srv.safe_address)
                          ? "myCRC"
                          : name.split(' ')[0].slice(0,4);
              }
  
-             circles = circles.filter ((d: any) => d.profileName != undefined);
+             circlesArray = circlesArray.filter ((d: any) => d.balance > 0);
  
              const vis = new CirclesV1("d3-circles")
              vis.html();
-             vis.init(circles);
+             console.log(circlesArray); 
+             vis.init(circlesArray);
          }
      }) 
     
