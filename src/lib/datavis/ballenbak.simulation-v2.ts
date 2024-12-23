@@ -23,7 +23,7 @@ export class BallenbakSimulationV2 {
         this.s
          //   .force('charge', d3.forceManyBody().strength(forceStrength))
             .force("center", d3.forceCenter())
-            .force("collide", d3.forceCollide().strength(forceStrength))
+            .force("collide", d3.forceCollide().strength(forceStrength));
     }
 
     supply(data: any) {
@@ -35,19 +35,6 @@ export class BallenbakSimulationV2 {
 
         this.s 
             .on("tick", (d: any) => {
-
-                // let width = self.ctrlr.dimensions.width;
-                // let height = self.ctrlr.dimensions.height;
-        
-                // self.s.nodes().forEach((d: any) => {
-                //     let radius = self.ctrlr.scales.r.fn(d.radius);
-        
-                //     // Clamp the x position within the bounds
-                //     d.x = Math.max(radius, Math.min(width - radius, d.x));
-        
-                //     // Clamp the y position within the bounds
-                //     d.y = Math.max(radius, Math.min(height - radius, d.y));
-                // });
 
                 self.ctrlr.circleGroups.forceDirect()
             }); 

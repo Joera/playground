@@ -29,21 +29,11 @@
         [circles, contacts],
         ([$circles, $contacts]) => {
 
-            // console.log($circles);
-
             const circlesValues = Array.from($circles.values());
             
-            // const contactEntries = Array.from($contacts.entries());
-            // console.log(contactEntries);
-            // return contactEntries.map(([address, contactData]) => {
-
             return $contacts.map((contact) => {
 
-                const matchingCircle = circlesValues.find((circle) => {
-                    
-                    // console.log(circle.issuerAddress, contact.objectAvatar);
-                    return circle.issuerAddress == contact.objectAvatar
-                });
+                const matchingCircle = circlesValues.find((circle) => circle.issuerAddress == contact.objectAvatar);
 
                 if (matchingCircle != undefined) {
                     
@@ -65,41 +55,11 @@
                 if (a.balance < b.balance) return 1;
                 return 0;
             })
-                // const contact_address = uint256ToAddress(address);
-
-                // console.log("ca",contact_address)
-                // const matchingCircle = $circles.find((circle) => circle.objectAvatar === contact_address);
-                // console.log(matchingCircle, contact_address);
-                // return matchingCircle != undefined
-                //     ? { ...contactData, ...matchingCircle, address: contact_address }
-                //     : { ...contactData, address: contact_address };
         }
     );
-         
-        // ([$circles, $contacts]) => {
-             
-        //     const circleEntries = Array.from($circles.entries());
-
-        //     return circleEntries.map(([address, circleData]) => {
-        //     const matchingContact = $contacts.find((contact) => contact.address === address);
-        //     return matchingContact
-        //         ? { ...circleData, ...matchingContact, address }
-        //         : { ...circleData, address };
-        //     });
-        // }
-    // );
-
+        
     const state = writable("pre");
     const deployed = writable(false);
-
-    const tokenId = writable("");
-    const tokenBalance = writable(0);
-
-
-
-    
-    // Optionally, fetch initial data on mount if needed
-   
 
     const handleUpgrade = async () => {
         safeSrv.subscribe((srv: SafeService) => {
@@ -113,8 +73,6 @@
             srv.addAcountAbstractionModule();
         })
     }
-
-    
 
     // const handleCirclesInfo = async (id: string, token: IToken) => {
     //     tokenId.set(id);
@@ -146,28 +104,15 @@
         deployed.set(await srv.getDeployed());
     })
 
-    
-
-
-   
-    
     onMount(async () => {
-    //    state.set("spinner");
-      //  await waitForSafeStoreToBePopulated($safe_store, $safe_addresses);
-        state.set("");
 
-        
-        
+        state.set("");
 
         if ($safeSrv.chain == "gnosis") {
             await $safeSrv.getContacts();
             await $safeSrv.getCircles();
-            // console.log($circles)
-            // console.log($contacts)
-            console.log($mergedStore)
-            
+            console.log($mergedStore)            
         }
-          
     });
 
 </script>

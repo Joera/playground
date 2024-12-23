@@ -203,11 +203,14 @@ export class ChartCircles {
 
         this.group
             .attr("transform", (d: any) => {
-
                 if(d.x !== undefined) {
+                    // Apply bounding constraints
+                    let radius = self.ctrlr.scales.r.fn(d.radius);
+                    d.x = Math.max(radius, Math.min(self.ctrlr.dimensions.width - radius, d.x));
+                    d.y = Math.max(radius, Math.min(self.ctrlr.dimensions.height - radius, d.y));
+                    
                     return "translate(" + d.x + "," + (d.y + 0) + ")";
                 }
-            })
-        ;
+            });
     }
 }
