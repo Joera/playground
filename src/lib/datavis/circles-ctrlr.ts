@@ -36,8 +36,8 @@ export class CirclesV1 extends GraphControllerX  {
         await super._init();
         if (this.graphEl != null) super._svg(this.graphEl);
 
-        this.config.minRadius = 16;
-        this.config.radiusFactor = .75;
+        this.config.minRadius = 20;
+        this.config.radiusFactor = .66;
         this.config.paddingInner = 0;
         this.config.paddingOuter = 0;
 
