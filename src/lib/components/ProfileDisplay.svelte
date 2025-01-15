@@ -73,8 +73,6 @@
 
             const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
 
-            // console.log("mm", "0x" + uint8ArrayToHexString(_metadataDigest))
-
             if($friend_address != "" && friend_address != undefined) {
                 console.log("registering with friend", fixSafeAddress($friend_address));
                 const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "registerHuman", [fixSafeAddress($friend_address), _metadataDigest], false);
@@ -118,8 +116,6 @@
 <section class="scrolltainer">
 
     <article>
-
-        {JSON.stringify($profile)}
 
         {#if $profile_state == "spinner"} 
 
