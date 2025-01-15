@@ -26,7 +26,7 @@
         event.preventDefault(); 
         const data = new FormData(event.target);
         formData = Object.fromEntries(data.entries());
-        console.log(formData);
+        // console.log(formData);
 
         const abi = [
             {

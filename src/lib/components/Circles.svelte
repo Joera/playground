@@ -29,7 +29,7 @@ onMount(async () => {
                      ? "" 
                      : (ethers.getAddress(token.issuerAddress) == $srv.safe_address)
                          ? "myCRC"
-                         : name.split(' ')[0].slice(0,4);
+                         : name.split(' ')[0].slice(0,8);
              }
  
              circlesArray = circlesArray.filter ((d: any) => d.balance > 0);

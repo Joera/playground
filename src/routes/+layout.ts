@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { initApp } from '$lib/factory/app.factory';
 import { hasKey, signer_key } from '$lib/store/key.store';
+import { hasSafeAddresses } from '$lib/store/safe.store';
 
 
 /** @type {import('./$types').PageLoad} */
@@ -11,7 +12,8 @@ import { hasKey, signer_key } from '$lib/store/key.store';
 export const load = async () => {
 
     if(await hasKey()) {
-         initApp();
+
+        initApp();
     }   
 }   
 

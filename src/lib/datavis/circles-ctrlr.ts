@@ -43,8 +43,6 @@ export class CirclesV1 extends GraphControllerX  {
 
         this.circleGroups = new ChartCircles(this);
 
-        this.update(data,false);
-
         return;
     }
 

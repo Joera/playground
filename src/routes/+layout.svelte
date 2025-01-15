@@ -8,7 +8,7 @@
     import Ticker from '$lib/components/Ticker.svelte';
     import {reciprocateTrust, trustChange } from '$lib/factory/contact.factory.js';
     import {friend_address} from '$lib/store/contacts.store.js';
-    import {hasAvatar} from '$lib/store/safe.store.js';
+	// import {hasAvatar} from '$lib/store/safe.store.js';
     import { avatar_state, profile_state } from '$lib/store/state.store.js';
 	export let data;
 
@@ -17,15 +17,14 @@
 
 	const handleInviteRequested = async (event: any) => {
 
- 
-		if (!$hasAvatar) {
+	//	if (!$hasAvatar) {
 			friend_address.set(event.detail);
 			avatar_state.set('profile');
         	goto('/avatar')
-		} else {
-			// reciprocate 
-			await reciprocateTrust(event.detail);
-		}
+		// } else {
+		// 	// reciprocate 
+		// 	await reciprocateTrust(event.detail);
+		// }
 	}
 
 </script>

@@ -9,6 +9,7 @@
     import { hubv2_abi } from '$lib/circles_hub_v2';
     import SpinnerWave  from './SpinnerWave.svelte';
     import { HUBV2ADDRESS } from '$lib/constants';
+    import { goto } from '$app/navigation';
 
     let videoElement: any;
     let logMessage = '';
@@ -38,14 +39,12 @@
 
     const inviteHandler = async () => {
 
- 
-      
         const srv = await findSrvByChain("gnosis");
         if (srv) {
           spinner.set(true);
           const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
-          console.log(r);  
-          dispatch('invite_success_event');
+          // dispatch('invite_success_event');
+          goto("/profile");
           spinner.set(false);
         }
     }
@@ -67,7 +66,6 @@
       <div>
         <h3>do you trust?</h3>
         { displayAddress("gno", $newby_address)}</div>
-
         <!--check crc balance - shoud be > 96 --> 
         <button class="button" on:click={inviteHandler}>yes!</button>
     {/if}

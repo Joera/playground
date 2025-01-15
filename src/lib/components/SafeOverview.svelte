@@ -1,62 +1,81 @@
 <!-- src/components/SafeOverview.svelte -->
 <script lang="ts">
-    import { roundBalance} from '$lib/factory/eth.factory.js';
     import { onMount } from 'svelte';
     import type { SafeService } from '$lib/safe.service';
-    import { derived, writable, type Writable } from 'svelte/store';
+    import { derived, get, writable, type Writable } from 'svelte/store';
     import { tokenList, type IToken } from '$lib/factory/token.factory';
     import SpinnerWave from './SpinnerWave.svelte';
     import TokenErc20 from './TokenERC20.svelte';
-    import TokenCircle from './TokenCircle.svelte';
     import Circles from './Circles.svelte';
-    import { findSrvByChain } from '$lib/store/safe.store';
+    import TokenCircle from './TokenCircle.svelte';
+    import { mergedContacts } from '$lib/store/contacts.store';
     import { ethers } from 'ethers';
-    import { uint256ToAddress } from "@circles-sdk/utils";
+    import { circlesStore } from '$lib/store/contacts.store';
    
     export let safeSrv: Writable<SafeService>;
 
     // Reactive values
-    $: chain = $safeSrv.chain
     $: signer_address = $safeSrv.signer_address;
-    $: version = $safeSrv.version;
-    // $: tokens = $safeSrv.tokens;
-    $: circles = $safeSrv.circles;
+    
     $: signers = $safeSrv.signers;
-    $: modules = $safeSrv.modules;
     $: tokens = JSON.parse(JSON.stringify(tokenList[$safeSrv.chain]))
-    $: contacts = $safeSrv.contacts;
-    $: mergedStore = derived(
-        [circles, contacts],
-        ([$circles, $contacts]) => {
+    // $: contacts = $safeSrv.circles ? get($safeSrv.circles).contacts : [];
+    // $: circles = $safeSrv.circles ? get($safeSrv.circles).balances : [];
 
-            const circlesValues = Array.from($circles.values());
-            
-            return $contacts.map((contact) => {
+    // const myCircles: Writable<any> = writable({});
 
-                const matchingCircle = circlesValues.find((circle) => circle.issuerAddress == contact.objectAvatar);
+    // shouldnt we have a list of contacts 
+    // $: mergedStore = derived(
+    //     [circles, contacts],
+    //     ([$circles, $contacts]) => {
+    //         // Only process if we have either circles or contacts
+    //         if ($circles.size === 0 && $contacts.length === 0) {
+    //             return get(mergedContacts); // Return existing stored contacts
+    //         }
 
-                if (matchingCircle != undefined) {
-                    
-                    return {
-                        ...contact,
-                        ...matchingCircle,
-                        address: contact.objectAvatar
-                    }
-                } else {
-                    return {
-                        ...contact,
-                        address: contact.objectAvatar,
-                        balance: 0
-                    }
-                }
+    //         const circlesValues = Array.from($circles.values());
+
+    //         const foundCircle = circlesValues.find((circle) => ethers.getAddress(circle.issuerAddress) == $safeSrv.safe_address || circle.issuerAddress == $safeSrv.safe_address);
+    //         console.log("foundCircle", foundCircle);
+    //         if (foundCircle) {
+    //             myCircles.set({
+    //                 ...foundCircle, 
+    //                 objectName: "My Circles",              
+    //             });
+    //         }
+
+    //         const newMergedContacts = $contacts.map((contact) => {
+    //             const matchingCircle = circlesValues.find((circle) => circle.issuerAddress == contact.objectAvatar);
+
+    //             if (matchingCircle != undefined) {
+
+    //                 console.log("found match");
+    //                 return {
+    //                     ...contact,
+    //                     ...matchingCircle
+    //                 }
+    //             } else {
+
+    //                 contact.balance = 0;
+    //                 return contact;
+    //             }
+
                 
-            }).sort((a, b) => {
-                if (a.balance > b.balance) return -1;
-                if (a.balance < b.balance) return 1;
-                return 0;
-            })
-        }
-    );
+    //         }).sort((a, b) => {
+                
+    //             if (parseFloat(a.balance) > parseFloat(b.balance)) return -1;
+    //             if (parseFloat(a.balance) < parseFloat(b.balance)) return 1;
+    //             return 0;
+    //         })
+
+    //         if (newMergedContacts.length > 0) {  // Only update if we have data
+    //             mergedContacts.set(newMergedContacts);
+    //         }
+
+      
+    //         return newMergedContacts;
+    //     }
+    // );
         
     const state = writable("pre");
     const deployed = writable(false);
@@ -94,24 +113,28 @@
     //     state.set("");
     // } 
 
+ 
+
     const handleMintBaseNFT = async () => {
         state.set("spinner");
         $safeSrv.mintNFT();
         state.set("");
     }
 
+    
+
     safeSrv.subscribe( async (srv: SafeService) => {
         deployed.set(await srv.getDeployed());
     })
 
     onMount(async () => {
-
+        
         state.set("");
 
         if ($safeSrv.chain == "gnosis") {
-            await $safeSrv.getContacts();
-            await $safeSrv.getCircles();
-            console.log($mergedStore)            
+       
+            await get($safeSrv.circles)?.getContacts();
+            await get($safeSrv.circles)?.updateBalances();
         }
     });
 
@@ -130,13 +153,13 @@
                 {#each tokens as token}
                     <TokenErc20 safeSrv={safeSrv} token={token}></TokenErc20>   
                 {/each}
-                {#if $safeSrv.chain == "gnosis" && $state == ""}
-                    <Circles circles={circles} srv={safeSrv}></Circles>
-                {/if}
-                {#each $mergedStore as contact}
-                    <TokenCircle safeSrv={safeSrv} contact={contact} ></TokenCircle>
+            </div>
+            <div class="circles">
+                {#each Array.from($circlesStore.values()) as token}
+                    <TokenCircle safeSrv={safeSrv} token={token} ></TokenCircle>
                 {/each}
             </div>
+            
             {#if $deployed}
                 {#if !$signers.includes($signer_address)}
                     <div>read only</div>
@@ -195,6 +218,11 @@
             }
     
             .tokens {
+                margin: 1.5rem 0;
+                width: 100%;
+            }
+
+            .circles {
                 margin: 1.5rem 0;
                 width: 100%;
             }

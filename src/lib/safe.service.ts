@@ -5,17 +5,13 @@ import { get, writable, type Writable } from 'svelte/store';
 import Safe from "@safe-global/protocol-kit";
 import { Safe4337Pack  } from "@safe-global/relay-kit";
 import { type Signer, type Provider, type Contract, ethers } from "ethers";
-import { getRPC, addressFromKey, getProvider, getInternalTransactions, isValidEthereumAddress, fixSafeAddress, displayAddress, displayShorterAddress, getBundlerUrl, getPaymasterOptions } from "./factory/eth.factory";
+import { getRPC, getProvider, isValidEthereumAddress, fixSafeAddress, getBundlerUrl, getPaymasterOptions } from "./factory/eth.factory";
 import { tokenList, type IToken } from './factory/token.factory';
 import { fromStore } from './factory/store.factory';
-import { hubv2_abi } from './circles_hub_v2';
-import { CirclesData, CirclesRpc } from '@circles-sdk/data';
-import { ipfs_cat } from './factory/ipfs.factory';
-import { HUBV2ADDRESS } from './constants';
 import { addSafeAddress, formatSafeAddress } from './store/safe.store';
 import { tx, tx4337 } from './factory/aa.factory';
-import { updateCircleBalances } from './factory/circles.factory';
 import { updateContacts } from './factory/contact.factory';
+import { CirclesService } from './circles.service';
 
 // https://docs.safe.global/advanced/smart-account-supported-networks?service=Transaction+Service&version=v1.4.1&search=100&expand=100
 const eip4337ModuleAddress = "0xa581c4A4DB7175302464fF3C06380BC3270b4037" // v3: "0x75cf11467937ce3F2f357CE24ffc3DBF8fD5c226";
@@ -35,7 +31,7 @@ export interface ISafeService {
     version: Writable<string>;
     deployed: Writable<boolean>;
     tokens: Writable<Map<string, IToken>>;
-    circles: Writable<Map<string, any>>;
+ //   circles: Writable<Map<string, any>>;
     modules: Writable<string[]>;
     // hasAvatar: boolean;
 
@@ -48,7 +44,7 @@ export interface ISafeService {
     genericRead: (address: string, abi: string, method: string, args: string[]) => Promise<any>;
     genericTx(address: string, abi: any, method: string, args: any[], includesDeploy: boolean) : Promise<string>;
     genericCall(contract_address: string, abi: any, method: string, args: any[]) : Promise<string>;
-    getContacts: () => Promise<any>;
+  //  getContacts: () => Promise<any>;
 }
 
 const alchemy_key = import.meta.env.VITE_ALCHEMY_KEY;
@@ -67,31 +63,28 @@ export class SafeService implements ISafeService {
     version: Writable<string> = writable("");
     deployed: Writable<boolean> = writable(false);
     tokens: Writable<Map<string, IToken>> = writable(new Map());
-    circles: Writable<Map<string, any>> = writable(new Map());
+    circles: Writable<CirclesService> = writable();
     modules: Writable<string[]> = writable([]);
-    contacts: Writable<any[]> = writable([]);
 
     provider!: Provider;
 
     signer?: Signer;
     kit?: Safe4337Pack;
     legacy_kit?: Safe;
-    circles_data?: any;
-  //  hasAvatar: boolean = false;
 
     private constructor() {}
 
     getDeployed() {
         return get(this.deployed); // Access the current value of the store
-      }
+    }
     
-      setDeployed(b: boolean) {
+    setDeployed(b: boolean) {
         this.deployed.set(b); // Update the store's value
-      }
+    }
 
     static async create(chain: string, signer_key: string, safe_address: string) {
 
-        chain = chain == "gno" ? "gnosis" : chain;
+        chain = (chain == "gno" || chain == "crc") ? "gnosis" : chain;
         console.log('start creating srv for ', chain, safe_address);
         const instance = new SafeService();
         await instance.initialize(chain, signer_key, safe_address);
@@ -119,15 +112,15 @@ export class SafeService implements ISafeService {
 
         let signer = new ethers.Wallet(signer_key, this.provider);
         this.signer = signer.connect(this.provider);
-        this.signer_address = writable(addressFromKey(signer_key));
+        this.signer_address = writable(signer.address);
         
         if (chain == "gnosis") {
-            const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
-            this.circles_data = new CirclesData(circlesRpc);
+            this.circles.set(new CirclesService(this));
         }
     }
    
     async setup () {
+
 
         this.setDeployed(
             await this.isDeployed()
@@ -168,11 +161,6 @@ export class SafeService implements ISafeService {
         } 
     }
 
-    async getCircles() {
-
-        return await updateCircleBalances(this);
-    }
-
 
     // async checkAvatar() {
         
@@ -188,76 +176,17 @@ export class SafeService implements ISafeService {
     //     }
     //}
 
-    
-
-    async mintCircles() {
-
-        return await this.genericTx(HUBV2ADDRESS, hubv2_abi, "personalMint",[], false);
-
-    }
-
-    async transferCircles(to: string, id: string, value: number) {
-
-        const from = this.safe_address;
-        const data = "";
-
-        await this.genericTx(HUBV2ADDRESS, hubv2_abi, "safeTransferFrom",[from, to, id, value, data], false);
-
-        return
-
-    }
-
-    async getAvatarName(address: string) {
-        
-        let cid;
-
-        try {
-            cid = await this.circles_data.getMetadataCidForAddress(address);
-        } catch (error) {
-            return undefined;
-        }
-
-        if (cid != undefined) {
-
-            let profile: any;
-            try {
-                profile = await ipfs_cat(cid);
-            } catch (error) {
-                return displayShorterAddress(address);
-            }
-            if(profile && profile.name) {
-                return profile.name;
-            } else {
-                return displayShorterAddress(address);
-            }    
-        }  else {
-            undefined
-        }  
-    }
-
-    async getCircleTxs() {
-        return await this.circles_data.getTransactionHistory(this.safe_address,100);
-    }
-
-    async getCircleEvents() {
-        return await this.circles_data.getEvents(this.safe_address,10000000);
-    }
-
-    async getSponsor() {
-        return await this.circles_data.getAvatarInfo(this.safe_address);
-    }
-
-    async getNetwork() {
-        return await this.circles_data.getTrustRelations(this.safe_address);
-    }
 
     async initSafe() {
 
-        this.legacy_kit = await Safe.init({
-            provider: getRPC(this.chain, alchemy_key),
-            signer : this.signer_key,
-            safeAddress : this.safe_address
-        });
+        if (isValidEthereumAddress(this.safe_address) && this.getDeployed()) {
+
+            this.legacy_kit = await Safe.init({
+                provider: getRPC(this.chain, alchemy_key),
+                signer : this.signer_key,
+                safeAddress : this.safe_address
+            });
+        }
     }
 
     async initSafeWithRelay () {
@@ -355,6 +284,8 @@ export class SafeService implements ISafeService {
     }
 
     async isDeployed() : Promise<boolean> {
+
+        // console.log("safe address", this.safe_address);
 
         if (this.safe_address != "0x") {
             const code = await this.provider.getCode(this.safe_address);
@@ -602,10 +533,10 @@ export class SafeService implements ISafeService {
         return
     }
 
-    async getContacts() {
+    // async getContacts() {
 
-        this.contacts.set(
-            await updateContacts(this)
-        )
-    }
+    //     this.contacts.set(
+    //         await updateContacts(this)
+    //     )
+    // }
 }

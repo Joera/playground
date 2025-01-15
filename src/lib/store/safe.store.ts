@@ -1,12 +1,11 @@
 import { localStorageStore } from './localstorage.store';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import { SafeService } from '../safe.service';
 import { hasKey } from './key.store';
 
+export const chain_array = ['base','gnosis'];
 export const safe_addresses = localStorageStore('safe_addresses', '');
 export const safe_store = writable<Record<string, Writable<SafeService>>>({});
-export const hasAvatar = writable(false);
-export const chain_array = ['base','gnosis'];
 
 export const clearSafeStore = () => {
     safe_store.set({});
@@ -119,25 +118,16 @@ export const findAddressByChain = (chain: string) : Promise<string|false> => {
     })
 }
 
-export const findSrvByChain = (chain: string) : Promise<SafeService|false> => {
+export const findSrvByChain = async (chain: string): Promise<SafeService|false> => {
 
     let prefix = (chain == "gnosis") ? "gno" : chain;
 
     return new Promise((resolve, reject) => {
-        safe_store?.subscribe((store) => {
-            if (store) {
-                const a = Object.keys(store).find((a: string) => a.includes(prefix));
-                if (a) {
-                    store[a].subscribe((safeService) => {
-                      resolve(safeService);
-                    });
-                  }
-                resolve(false)
-            }
-        })
-    })
+        safe_store.subscribe(store => {
+            resolve(get(store[prefix]))  
+        });
+    });
 }
-
 
 export const waitForSafeStoreToBePopulated = async (safe_store: Record<string, Writable<SafeService>>, safe_addresses: string[]) : Promise<void> => {
     return new Promise(resolve => {

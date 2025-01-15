@@ -7,6 +7,8 @@
     $: query = $page.url
 
     onMount( async () => {
+
+      console.log("kom ik hier?")
      
       if ( query.pathname != "/import" && await(hasKey()) == false) {
           goto('/welcome');

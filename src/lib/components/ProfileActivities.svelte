@@ -17,8 +17,7 @@
 
     type Activity = {
         
-        // attoCircles: number,
-        // attoCrc: number,
+
         batchIndex: number,
         blockNumber:  number,
         circles: number,
@@ -27,7 +26,6 @@
         id: string,
         logIndex: number,
         operator: string,
-        // staticAttoCircles: number,
         staticCircles: number,
         timestamp: number,
         to: string,
@@ -35,20 +33,15 @@
         transactionHash: string,
         transactionIndex: number,
         type: string,
-        value: string,
-        version: number
+        value?: string,
+        version?: number
         toName?: string
         fromName?: string
     }
 
-
     const activity: Writable<Activity[]> = writable([])
 
     $: safe_address = "";
-
-    // prefill from local storage
-
-    // shouldnt we bind this straight to store and LS? 
 
     onMount(async () => {
 

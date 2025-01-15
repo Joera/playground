@@ -5,6 +5,8 @@ import { expiredTimeHex, expiryTimeHex, fixSafeAddress } from "./eth.factory";
 import { findSrvByChain } from "../store/safe.store";
 import { contacts, hidden_contacts } from "../store/contacts.store";
 import type { SafeService } from "$lib/safe.service";
+import type { CirclesService } from "$lib/circles.service";
+import { get } from "svelte/store";
 
 export type Contact = {
     objectAvatar: string;
@@ -19,24 +21,25 @@ export const reciprocateTrust = async (objectAddress: string) : Promise<void> =>
     if (srv) {
         const r = await srv?.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(objectAddress), expiryTimeHex()], false);
         console.log(r)
-        await updateContacts(srv);
+        await updateContacts(get(srv.circles));
     }    
 }
 
 export const trustChange = async (contact: Contact) : Promise<void> => {
 
     const srv = await findSrvByChain("gnosis");
+
     if (srv) {
         const expiryTime = 
         (contact.relation === "trusts" || contact.relation === "mutuallyTrusts") 
         ? expiredTimeHex() : expiryTimeHex();
         const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress(contact.objectAvatar), expiryTime], false);
         console.log(r)
-        await updateContacts(srv);
+        await updateContacts(get(srv.circles));
     }
 }
 
-export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
+export const updateContacts = async (srv: CirclesService) :Promise<Contact[]> => {
 
     let fetched_contacts: Contact[] = [];
 
@@ -51,8 +54,6 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
                  
              }
         });
-
-        // hasAvatar.set(await srv.checkAvatar());
 
         const trust_query = await srv.getNetwork();
 
@@ -69,13 +70,13 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
         const trustBucket : any = {};
         trustListRows.forEach( (row: any) => {
 
-            if (ethers.getAddress(row.truster) !== srv.safe_address) {
+            if (ethers.getAddress(row.truster) !== srv.safe.safe_address) {
                 trustBucket[row.truster] = trustBucket[row.truster] || [];
                 if (row.trustee !== row.truster) {
                     trustBucket[row.truster].push(row);
                 }
             }
-            if (ethers.getAddress(row.trustee) !== srv.safe_address) {
+            if (ethers.getAddress(row.trustee) !== srv.safe.safe_address) {
                 trustBucket[row.trustee] = trustBucket[row.trustee] || [];
                 if (row.trustee !== row.truster) {
                     trustBucket[row.trustee].push(row);
@@ -89,7 +90,7 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
             
             await Promise.all(
                 Object.entries(trustBucket)
-                .filter(([avatar]) => ethers.getAddress(avatar) !== srv.safe_address)
+                .filter(([avatar]) => ethers.getAddress(avatar) !== srv.safe.safe_address)
                 .filter(([avatar]) => ethers.isAddress(avatar))
                 .map( async ([avatar, rows]) => {
 
@@ -99,25 +100,20 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
                     if ((rows as any[]).length === 2) {
                         relation = 'mutuallyTrusts';
                     }
-                    else if (ethers.getAddress((rows as any[])[0].trustee) === srv.safe_address) {
+                    else if (ethers.getAddress((rows as any[])[0].trustee) === srv.safe.safe_address) {
                         relation = 'trustedBy';
                     }
-                    else if (ethers.getAddress((rows as any[])[0].truster) === srv.safe_address) {
+                    else if (ethers.getAddress((rows as any[])[0].truster) === srv.safe.safe_address) {
                         relation = 'trusts';
                     }
                     else {
-                        // console.log(avatar)
                         relation = null  //  throw new Error(`Unexpected trust list row. Couldn't determine trust relation.`);
                     }
-
-                    // console.log(avatar, relation);
 
                     let o;
                     if(relation != 'trusts') {
                         o = await srv.getAvatarName(avatar)
                     }
-
-                    // console.log(0, o);
 
                     if (relation != null) {
                         contacts.push({
@@ -142,8 +138,6 @@ export const updateContacts = async (srv: SafeService) :Promise<Contact[]> => {
         if (contacts != undefined) {
             contacts.set(JSON.stringify(fetched_contacts));
         }
-
-        // console.log("fc",fetched_contacts)
 
         resolve(fetched_contacts)
                 

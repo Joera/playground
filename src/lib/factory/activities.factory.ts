@@ -6,13 +6,13 @@ import { get } from "svelte/store";
 export const fetchActivities = async () => {
 
     const txs = [];
+    const formatted = [];
     await waitForSafeStoreToBePopulated(get(safe_store), get(safe_addresses));
-    
     const srv = await findSrvByChain("gnosis");
     
     if(srv) {
 
-        const txs_query = await srv.getCircleTxs();
+        const txs_query = await get(srv.circles).getTxs();
 
         while (await txs_query.queryNextPage()) {
             const resultRows = txs_query.currentPage?.results ?? [];
@@ -23,29 +23,56 @@ export const fetchActivities = async () => {
                 break;
         }
 
-        // console.log(txs);
-
         for (let tx of txs) {
 
-            delete tx.attoCircles;
-            delete tx.attoCrc;
-            delete tx.staticAttoCircles;
-            
+            let toName;
+
             if (tx.to != "0x0000000000000000000000000000000000000000" && ethers.getAddress(tx.to) != srv.safe_address){  
-                tx.toName = await srv.getAvatarName(tx.to)
+                toName = await get(srv.circles).getAvatarName(tx.to)
             }
 
             else if (ethers.getAddress(tx.from) == srv.safe_address && tx.to == "0x0000000000000000000000000000000000000000" && tx.circles == 96) {
-                tx.toName = await srv.getAvatarName(tx.operator)
+                toName = await get(srv.circles).getAvatarName(tx.operator)
+
+            } else {
+                await get(srv.circles).getAvatarName(tx.from)
             }
 
-            else if (ethers.getAddress(tx.to) == srv.safe_address) {
-                tx.fromName = await srv.getAvatarName(tx.operator)
+            let fromName;
+
+            if (ethers.getAddress(tx.to) == srv.safe_address) {
+                fromName = await get(srv.circles).getAvatarName(tx.operator)
+
+            } else {
+                await get(srv.circles).getAvatarName(tx.to)
             }
+
+            formatted.push({
+                timestamp: tx.timestamp,
+                fromName,
+                toName,
+                circles: tx.circles,
+                crc: tx.crc,
+                batchIndex: tx.batchIndex || 0,
+                blockNumber:  tx.blockNumber,
+                from: tx.from,
+                id: tx.id,
+                logIndex: tx.logIndex,
+                operator: tx.operator,
+                staticCircles: tx.staticCircles,
+                to: tx.to,
+                tokenType: tx.tokenType,
+                transactionHash: tx.transactionHash,
+                transactionIndex: tx.transactionIndex,
+                type: tx.type,
+                value: tx.value,
+                version: tx.version
+
+            }); 
         } 
     }
 
-    return txs;
+    return formatted;
         
 }
 

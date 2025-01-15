@@ -24,10 +24,11 @@ const _generatePK = () => {
     return w.privateKey;
 }
 
-export const    hasKey = (): Promise<string | boolean> => {
+export const hasKey = (): Promise<string | boolean> => {
     return new Promise((resolve, reject) => {
         if (signer_key) {
             signer_key.subscribe((value: string) => {
+                console.log(value);
                 const b = value != "" ? value : false;
                 resolve(b)
             });
