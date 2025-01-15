@@ -119,6 +119,8 @@
 
     <article>
 
+        {JSON.stringify($profile)}
+
         {#if $profile_state == "spinner"} 
 
             <SpinnerWave></SpinnerWave>
