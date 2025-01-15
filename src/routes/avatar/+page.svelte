@@ -69,8 +69,11 @@
         await waitForSafeStoreToBePopulated($safe_store, $safe_addresses); 
         const srv = await findSrvByChain("gnosis");
         if (srv) {
+            console.log(1);
             if (await srv.getDeployed()) {
+                console.log(2);
                 const p = await getProfile(srv);
+                console.log(3,p);
                 profile.set(p);
                 profile_store?.set(JSON.stringify(p));
                 profile_state.set("");

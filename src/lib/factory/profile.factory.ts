@@ -34,7 +34,7 @@ export const getProfile = async(srv: ISafeService) => {
         description: ""
     }
 
-    console.log(1);
+    console.log("b1");
 
     if (hex != "0x0000000000000000000000000000000000000000000000000000000000000000") {
 
@@ -43,8 +43,11 @@ export const getProfile = async(srv: ISafeService) => {
 
         let _profile = null;
 
+        console.log("b2", profile_cid);
+
         try {
             _profile = await ipfs_cat(profile_cid);
+            console.log("b3");
         } catch (error) {
             console.log(error)
         }
