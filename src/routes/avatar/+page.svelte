@@ -36,7 +36,13 @@
     const handleInviteRequested = async (event: any) => {
         friend_address.set(event.detail);
         avatar_state.set('profile');
-        profile_state.set("edit");
+
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+            if (await get(srv.circles).isHuman() != "false") {
+                profile_state.set("edit");
+            }
+        }
     }
 
     // const handleInviteApproved = async (event: any) => {
