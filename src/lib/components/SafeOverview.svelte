@@ -6,76 +6,15 @@
     import { tokenList, type IToken } from '$lib/factory/token.factory';
     import SpinnerWave from './SpinnerWave.svelte';
     import TokenErc20 from './TokenERC20.svelte';
-    import Circles from './Circles.svelte';
     import TokenCircle from './TokenCircle.svelte';
-    import { mergedContacts } from '$lib/store/contacts.store';
-    import { ethers } from 'ethers';
     import { circlesStore } from '$lib/store/contacts.store';
    
     export let safeSrv: Writable<SafeService>;
 
     // Reactive values
     $: signer_address = $safeSrv.signer_address;
-    
     $: signers = $safeSrv.signers;
     $: tokens = JSON.parse(JSON.stringify(tokenList[$safeSrv.chain]))
-    // $: contacts = $safeSrv.circles ? get($safeSrv.circles).contacts : [];
-    // $: circles = $safeSrv.circles ? get($safeSrv.circles).balances : [];
-
-    // const myCircles: Writable<any> = writable({});
-
-    // shouldnt we have a list of contacts 
-    // $: mergedStore = derived(
-    //     [circles, contacts],
-    //     ([$circles, $contacts]) => {
-    //         // Only process if we have either circles or contacts
-    //         if ($circles.size === 0 && $contacts.length === 0) {
-    //             return get(mergedContacts); // Return existing stored contacts
-    //         }
-
-    //         const circlesValues = Array.from($circles.values());
-
-    //         const foundCircle = circlesValues.find((circle) => ethers.getAddress(circle.issuerAddress) == $safeSrv.safe_address || circle.issuerAddress == $safeSrv.safe_address);
-    //         console.log("foundCircle", foundCircle);
-    //         if (foundCircle) {
-    //             myCircles.set({
-    //                 ...foundCircle, 
-    //                 objectName: "My Circles",              
-    //             });
-    //         }
-
-    //         const newMergedContacts = $contacts.map((contact) => {
-    //             const matchingCircle = circlesValues.find((circle) => circle.issuerAddress == contact.objectAvatar);
-
-    //             if (matchingCircle != undefined) {
-
-    //                 console.log("found match");
-    //                 return {
-    //                     ...contact,
-    //                     ...matchingCircle
-    //                 }
-    //             } else {
-
-    //                 contact.balance = 0;
-    //                 return contact;
-    //             }
-
-                
-    //         }).sort((a, b) => {
-                
-    //             if (parseFloat(a.balance) > parseFloat(b.balance)) return -1;
-    //             if (parseFloat(a.balance) < parseFloat(b.balance)) return 1;
-    //             return 0;
-    //         })
-
-    //         if (newMergedContacts.length > 0) {  // Only update if we have data
-    //             mergedContacts.set(newMergedContacts);
-    //         }
-
-      
-    //         return newMergedContacts;
-    //     }
-    // );
         
     const state = writable("pre");
     const deployed = writable(false);
@@ -86,42 +25,17 @@
         })
     };
 
-
     const handleEnableModule = async () => {
         safeSrv.subscribe((srv: SafeService) => {
             srv.addAcountAbstractionModule();
         })
     }
 
-    // const handleCirclesInfo = async (id: string, token: IToken) => {
-    //     tokenId.set(id);
-    //     tokenBalance.set(parseFloat(token.balance));
-    //     if (token.mintable != undefined && parseFloat(token.mintable) > 0) {
-    //         mintable.set(parseFloat(token.mintable));
-    //     }
-    //     state.set("token");
-    // }
-
-    // const handleTokenInfo = async (address: string, token: IToken) => {
-    //     tokenId.set(address);
-    //     tokenBalance.set(parseFloat(token.balance));
-       
-    //     state.set("token");
-    // }
-
-    // const handleBack = async () => {
-    //     state.set("");
-    // } 
-
- 
-
     const handleMintBaseNFT = async () => {
         state.set("spinner");
         $safeSrv.mintNFT();
         state.set("");
     }
-
-    
 
     safeSrv.subscribe( async (srv: SafeService) => {
         deployed.set(await srv.getDeployed());
@@ -132,7 +46,6 @@
         state.set("");
 
         if ($safeSrv.chain == "gnosis") {
-       
             await get($safeSrv.circles)?.getContacts();
             await get($safeSrv.circles)?.updateBalances();
         }

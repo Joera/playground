@@ -131,6 +131,8 @@ export class SafeService implements ISafeService {
         addSafeAddress(formatSafeAddress(this.chain, this.safe_address));
         
         if (this.getDeployed()) {
+
+            console.log("is_deployed")
             
             await this.getVersion();
 
@@ -378,6 +380,7 @@ export class SafeService implements ISafeService {
             "function getOwners() external view returns (address[] memory)"
         ];
 
+        console.log("getting signers", this.safe_address);
         const safeContract = new ethers.Contract(this.safe_address, gnosisSafeAbi, this.provider);
         const s = await safeContract.getOwners();
         this.signers.set(s)
@@ -498,6 +501,9 @@ export class SafeService implements ISafeService {
 
         return
     }
+
+
+    // dit naar een base service? 
 
     async checkNFT() {
 

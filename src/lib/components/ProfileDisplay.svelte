@@ -1,17 +1,15 @@
 <script lang="ts">
     import QRCode from "@castlenine/svelte-qrcode";
     import { onMount } from "svelte";
-    import { writable, type Writable } from "svelte/store";
-    import SpinnerWave from "./SpinnerWave.svelte";
+    import { get, writable, type Writable } from "svelte/store";
+    import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
     import type { Profile } from "@circles-sdk/profiles";
-    import { expiryTimeHex, fixSafeAddress } from "$lib/factory/eth.factory";
-    import { findSrvByChain, hasGnosisSafeAddress, parseSafeAddress, safe_addresses, safe_store } from "$lib/store/safe.store";
-    import { cidV0ToUint8Array, uint8ArrayToHexString } from "@circles-sdk/utils";
+    import { fixSafeAddress } from "$lib/factory/eth.factory";
+    import { findSrvByChain, hasGnosisSafeAddress, parseSafeAddress, safe_addresses } from "$lib/store/safe.store";
     import { ipfs_add } from "$lib/factory/ipfs.factory";
     import { profile_state } from "$lib/store/state.store";
-    import { HUBV2ADDRESS } from "$lib/constants";
-    import { hubv2_abi } from "$lib/circles_hub_v2";
     import { profile_store } from '$lib/store/profile.store';
+    import { goto } from "$app/navigation";
 
     export let profile: any;
     export let friend_address: Writable<string>;
@@ -34,63 +32,24 @@
         };
 
         const cid = await ipfs_add(newProfile);
-        // console.log(cid);
-        const hubv2Address = "0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8";
-        const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
-
-        const abi_hub = [
-            {
-                "inputs": [
-                    { "internalType": "address", "name": "_inviter", "type": "address" },
-                    { "internalType": "bytes32", "name": "_metadataDigest", "type": "bytes32" }
-                ],
-                "name": "registerHuman",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            }
-        ];
-
-        const abi_nameregistry = [
-            {
-                type: "function",
-                name: "updateMetadataDigest",
-                inputs: [
-                    {
-                        name: "_metadataDigest",
-                        type: "bytes32",
-                        internalType: "bytes32",
-                    },
-                ],
-                outputs: [],
-                stateMutability: "nonpayable",
-            }
-        ];
-
+        console.log(cid);
+     
         const srv = await findSrvByChain("gnosis");
 
         if (srv) {
 
-            const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
-
-            if($friend_address != "" && friend_address != undefined) {
-                console.log("registering with friend", fixSafeAddress($friend_address));
-                const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "registerHuman", [fixSafeAddress($friend_address), _metadataDigest], false);
-                const s = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [fixSafeAddress($friend_address), expiryTimeHex()], false);
-                console.log(s);
-                friend_address.set("");
-            } else {
-                console.log("updating profile");
-                const r = await srv.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
-                console.log(r);
-            }
+            await get(srv.circles).registerOrUpdateHuman(cid, fixSafeAddress($friend_address));
+            friend_address.set("");
 
             await srv.setDeployed(
                 await srv.isDeployed()
             );
 
+            await srv.getSigners();
+
             profile_store?.set(JSON.stringify(newProfile));
             profile_state.set("")
+            goto("/")
         }
     }
 
@@ -119,7 +78,7 @@
 
         {#if $profile_state == "spinner"} 
 
-            <SpinnerWave></SpinnerWave>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
 
         {:else if $profile_state == "edit" || $friend_address != ""}    
 

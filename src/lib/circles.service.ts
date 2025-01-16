@@ -1,11 +1,11 @@
-import { findSrvByChain } from "./store/safe.store";
+import { waitForSafesReady } from "./store/safe.store";
 import { getDefaultProvider, ethers } from "ethers";
-import { addressToUint256, displayShorterAddress, hexToAddress } from "./factory/eth.factory";
+import { addressToUint256, displayShorterAddress, expiryTimeHex, hexToAddress } from "./factory/eth.factory";
 import { events } from "./store/event.store";
 import type { SafeService } from "$lib/safe.service";
 import { hubv2_abi } from "$lib/circles_hub_v2";
 import { HUBV2ADDRESS } from "$lib/constants";
-import { uint256ToAddress } from "@circles-sdk/utils";
+import { cidV0ToUint8Array, uint256ToAddress } from "@circles-sdk/utils";
 import { circlesStore } from "$lib/store/contacts.store";
 import { ipfs_cat } from "./factory/ipfs.factory";
 
@@ -38,8 +38,23 @@ export class CirclesService {
 
         const circlesRpc = new CirclesRpc("https://rpc.aboutcircles.com");
         this.data_rpc = new CirclesData(circlesRpc);
+        this.init();
+    }
+
+    init = async () => {
+
+        await waitForSafesReady();
         this.setCirclesListener();
-        this.getContacts();
+
+        if(await this.isHuman() != "false") {
+            this.updateBalances();
+            this.getContacts();
+        }
+    }
+
+    isHuman = async () => {
+        // check if is registered
+        return await this.safe.genericCall(HUBV2ADDRESS,hubv2_abi,"isHuman",[this.safe.safe_address]);
     }
 
     correctChain = () => {
@@ -61,10 +76,14 @@ export class CirclesService {
             ];
     
             const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+            // console.log("sa",this.safe.safe_address)
     
-            const filter = contract.filters.Trust(null, ethers.getAddress(this.safe.safe_address), null);
+            const filter = contract.filters.Trust(null, ethers.getAddress(this.safe.safe_address), null);  // 
     
             contract.on(filter, async (event: any, log: any) => {
+
+                // console.log(event.log)
     
                 if (ethers.getAddress(event.log.address) != ethers.getAddress(contractAddress)) return;
                 
@@ -89,6 +108,11 @@ export class CirclesService {
             listening = true;
             console.log('listening to circles trust events on gnosis for ', this.safe.safe_address);
         }
+    }
+
+    trust = async (address: string) => {
+
+        const r = await this.safe.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [address, expiryTimeHex()], false);
     }
 
     updateBalances = async () => {
@@ -169,9 +193,44 @@ export class CirclesService {
 
     }
 
-    async mintCircles() {
+    async personalMint() {
 
         return await this.safe.genericTx(HUBV2ADDRESS, hubv2_abi, "personalMint",[], false);
+
+    }
+
+    async registerOrUpdateHuman(cid: string, friend_address: string) {
+
+        const nameRegistryAddress = "0xA27566fD89162cC3D40Cb59c87AAaA49B85F3474"
+
+        const abi_nameregistry = [
+            {
+                type: "function",
+                name: "updateMetadataDigest",
+                inputs: [
+                    {
+                        name: "_metadataDigest",
+                        type: "bytes32",
+                        internalType: "bytes32",
+                    },
+                ],
+                outputs: [],
+                stateMutability: "nonpayable",
+            }
+        ];
+
+        const _metadataDigest:  Uint8Array = cidV0ToUint8Array(cid);
+
+        if(friend_address != "" && friend_address != undefined) {
+            console.log("registering with friend", friend_address);
+            const r = await this.safe.genericTx(HUBV2ADDRESS, hubv2_abi, "registerHuman", [friend_address, _metadataDigest], false);
+            const s = await this.safe.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [friend_address, expiryTimeHex()], false);
+            console.log(s);
+        } else {
+            console.log("updating profile");
+            const r = await this.safe.genericTx(nameRegistryAddress, abi_nameregistry, "updateMetadataDigest", [_metadataDigest], false);
+            console.log(r);
+        }
 
     }
 
@@ -209,40 +268,3 @@ export class CirclesService {
     }
 }
 
-
-// export const hasSafeWithAvatar = async (address: string) => {
-
-//     let safesWithAvatars: string[] = [];
-    
-//     console.log("len: " + Object.keys(safe_store).length);
-//         for (const safe of Object.keys(safe_store)) {
-//             let b = await new Promise(resolve => {
-//                 safe_store[safe].subscribe(async (safeService: SafeService) => {
-//                     const hasAvatar = await safeService.hasAvatar();
-//                     resolve(hasAvatar);
-//                 });
-//             });
-//             console.log(b)
-//             if (b) {
-//                 safesWithAvatars.push(safe);
-//             }
-//         }
-// }
-
-// export const acceptInvite =  async (inviterAddress: string) => {
-
-//     const a = await avatar.acceptInvitation(inviterAddress,"Qm.....");
-//     console.log(a.avatar.avatarInfo);
-// }
-
-// export const getMintableAmount = async (tokenId: string) => {
-//     const a = await avatar.getMintableAmount();
-//     return a;
-// }
-
-// export const mint = async (sdk: S) => {
-
-//     const mintTransaction = await sdk.personalMint();
-//     console.log('Transaction successful, receipt:', mintTransaction);
-
-// }

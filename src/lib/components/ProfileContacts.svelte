@@ -1,12 +1,12 @@
 <script lang="ts">
     import { displayShortAddress, displayShorterAddress, fixSafeAddress } from "$lib/factory/eth.factory";
-    import { writable, type Writable } from "svelte/store";
+    import { get, writable, type Writable } from "svelte/store";
     import { contacts, hidden_contacts } from "$lib/store/contacts.store";
     import { createEventDispatcher, onMount } from "svelte";
     import { trustChange, updateContacts, type Contact } from "$lib/factory/contact.factory";
     import { contacts_state } from "$lib/store/state.store";
     import Transfer from "./Transfer.svelte";
-    import SpinnerWave from "./SpinnerWave.svelte";
+    import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
     import { ethers } from "ethers";
     import { findSrvByChain } from "$lib/store/safe.store";
     import IconTransfer from "./IconTransfer.svelte";
@@ -71,7 +71,7 @@
 
         const srv = await findSrvByChain("gnosis");
         if (srv) {
-            await updateContacts(srv);
+            await updateContacts(get(srv.circles));
         }
         
         contacts_state.set("");
@@ -106,7 +106,7 @@
         const srv = await findSrvByChain("gnosis");
         if (srv) {
             network.set(
-                await updateContacts(srv)
+                await updateContacts(get(srv.circles))
             );
         }
         
@@ -119,7 +119,7 @@
     <article>
 
         {#if $network.length == 0 || $contacts_state == "spinner"}
-            <SpinnerWave></SpinnerWave>
+            <SpinnerWaveHuge></SpinnerWaveHuge>
 
         {:else if $contacts_state == "reciprocate"}
             <label>Do you wish to reciprocate trust {#if $activeContact?.objectName} to {displayShorterAddress($activeContact?.objectName)} {/if}</label>

@@ -3,7 +3,7 @@
     import { displayAddress, fixSafeAddress } from "$lib/factory/eth.factory";
     import { writable, type Writable } from "svelte/store";
     import { createEventDispatcher, onMount } from 'svelte';
-    import { findAddressByChain, findSrvByChain, parseSafeAddress, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from "$lib/store/safe.store";
+    import { findAddressByChain, parseSafeAddress, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from "$lib/store/safe.store";
     import { activities } from "$lib/store/activities.store";
     import { ethers, EtherscanPlugin } from "ethers";
     import SpinnerWave from "./SpinnerWave.svelte";

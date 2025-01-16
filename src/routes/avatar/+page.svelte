@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { findSrvByChain, safe_addresses, safe_store, waitForSafeStoreToBePopulated } from '$lib/store/safe.store';
-    import { writable, type Writable } from 'svelte/store';
+    import { get, writable, type Writable } from 'svelte/store';
     import { onMount } from 'svelte';
     import ProfileDisplay from '$lib/components/ProfileDisplay.svelte';
     import ProfileScanner from '$lib/components/ProfileScanner.svelte';
@@ -49,7 +49,7 @@
 
     onMount(async () => {
 
-        profile_state.set("spinner");
+        // profile_state.set("spinner");
 
         profile_store?.subscribe(async (p) => {
 
@@ -74,7 +74,7 @@
                 profile.set(p);
                 profile_store?.set(JSON.stringify(p));
                 profile_state.set("");
-            } else {
+            } else if (await get(srv.circles).isHuman() != "false") {
                 profile_state.set("edit");
             }
         }

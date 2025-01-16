@@ -9,6 +9,7 @@
     import SpinnerWaveHuge from "./SpinnerWaveHuge.svelte";
     import { addressToUint256 } from "$lib/factory/eth.factory";
     import { HUBV2ADDRESS } from "$lib/constants";
+    import { findSrvByChain } from "$lib/store/safe.store";
 
     export let safeSrv: Writable<SafeService>;
     export let token: any;
@@ -21,6 +22,11 @@
 
     const handleTansfer = async () => {
         token_state.set("transfer");
+
+        const srv = await findSrvByChain("gnosis");
+        if (srv) {
+            get(srv.circles).personalMint();
+        }
     }
 
     const transfer = async (event: any) => { 

@@ -4,7 +4,7 @@
 
     import { BrowserMultiFormatReader } from '@zxing/library';
     import { createEventDispatcher, onMount } from 'svelte';
-    import { writable } from 'svelte/store';
+    import { get, writable } from 'svelte/store';
     import { findSrvByChain, safe_store } from '$lib/store/safe.store';
     import { hubv2_abi } from '$lib/circles_hub_v2';
     import SpinnerWave  from './SpinnerWave.svelte';
@@ -42,10 +42,12 @@
         const srv = await findSrvByChain("gnosis");
         if (srv) {
           spinner.set(true);
-          const r = await srv.genericTx(HUBV2ADDRESS, hubv2_abi, "trust", [$newby_address, expiryTimeHex()], false);
-          // dispatch('invite_success_event');
-          goto("/profile");
+          get(srv.circles).personalMint(); // do this non blocking 
+          await get(srv.circles).trust($newby_address);
+          
           spinner.set(false);
+          goto("/");
+          
         }
     }
 

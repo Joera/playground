@@ -14,9 +14,13 @@
 
     // Function to handle button clicks
     const default_setup = async () => {
-        goto('/avatar');
+        
+        welcome_state.set("spinner");
         await initAppFromZero();
+        console.log("duh")
+        welcome_state.set("");
         profile_state.set("");
+        goto('/avatar');
         
     };
 
@@ -102,6 +106,7 @@
 
     {#if $welcome_state == "spinner"}
 
+        <span>Please wait while you are setting up smart wallets on Gnosis and Base</span>
         <SpinnerWave></SpinnerWave>
 
     {:else if $welcome_state == "password"}

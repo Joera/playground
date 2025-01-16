@@ -37,7 +37,7 @@ export const addSafe = async (chain: string) : Promise<void> => {
         const prefixed_address = formatSafeAddress(chain, srv.safe_address);
 
         safe_store.update((safes) => { 
-            safes[prefixed_address] = writable(srv); 
+            safes[chain] = writable(srv); 
             return safes; 
         });
 
@@ -118,14 +118,31 @@ export const findAddressByChain = (chain: string) : Promise<string|false> => {
     })
 }
 
+// LET OP : add chain deed t anders dan in initapp route 
 export const findSrvByChain = async (chain: string): Promise<SafeService|false> => {
 
     let prefix = (chain == "gnosis") ? "gno" : chain;
 
     return new Promise((resolve, reject) => {
         safe_store.subscribe(store => {
-            resolve(get(store[prefix]))  
-        });
+            const keys = Object.keys(store);
+            const key = keys.find((k: string) => k.includes(prefix));
+            if (key) {
+                resolve(get(store[key]))  
+            } 
+        }); 
+    });
+}
+
+export const waitForSafesReady = async () : Promise<void> => {
+    return new Promise(resolve => {
+        const intervalId = setInterval(() => {
+            const safes = Object.keys(get(safe_store));
+            if (safes.length === chain_array.length) {
+                clearInterval(intervalId);
+                resolve();
+            }
+        }, 100);
     });
 }
 
